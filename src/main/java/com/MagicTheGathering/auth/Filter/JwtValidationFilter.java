@@ -1,11 +1,11 @@
 package com.MagicTheGathering.auth.Filter;
 
 
+import com.MagicTheGathering.auth.AuthServiceHelper;
 import com.MagicTheGathering.auth.SimpleGrantedAuthorityJsonCreator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
-import io.jsonwebtoken.Jwts;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -28,18 +28,15 @@ import java.util.Map;
 import static com.MagicTheGathering.auth.TokenJwtConfig.*;
 
 public class JwtValidationFilter extends BasicAuthenticationFilter {
+    private final AuthServiceHelper authServiceHelper;
 
-    public JwtValidationFilter(AuthenticationManager authenticationManager) {
-
-
+    public JwtValidationFilter(AuthenticationManager authenticationManager, AuthServiceHelper authServiceHelper) {
         super(authenticationManager);
-
+        this.authServiceHelper = authServiceHelper;
     }
-
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws IOException, ServletException {
-
         String header = request.getHeader(headerAuthorization);
 
         if (header == null || !header.startsWith(prefixToken)){
@@ -49,7 +46,7 @@ public class JwtValidationFilter extends BasicAuthenticationFilter {
 
         String token = header.replace(prefixToken, "");
         try {
-            Claims claims = Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload();
+            Claims claims = authServiceHelper.validateAccessToken(token);
 
             String username = claims.getSubject();
             Object authoritiesClaims = claims.get("authorities");
@@ -70,6 +67,5 @@ public class JwtValidationFilter extends BasicAuthenticationFilter {
             response.setStatus(HttpStatus.SC_UNAUTHORIZED);
             response.setContentType(contentType);
         }
-
     }
 }

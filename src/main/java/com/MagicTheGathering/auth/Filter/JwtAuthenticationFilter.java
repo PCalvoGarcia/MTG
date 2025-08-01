@@ -1,5 +1,6 @@
 package com.MagicTheGathering.auth.Filter;
 
+import com.MagicTheGathering.auth.AuthServiceHelper;
 import com.MagicTheGathering.user.User;
 import com.fasterxml.jackson.core.exc.StreamReadException;
 import com.fasterxml.jackson.databind.DatabindException;
@@ -19,26 +20,22 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 import java.io.IOException;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
 import static com.MagicTheGathering.auth.TokenJwtConfig.*;
 
 public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
-
     private AuthenticationManager authenticationManager;
+    private AuthServiceHelper authServiceHelper;
 
-
-    public JwtAuthenticationFilter(AuthenticationManager authenticationManager) {
+    public JwtAuthenticationFilter(AuthenticationManager authenticationManager, AuthServiceHelper authServiceHelper) {
         this.authenticationManager = authenticationManager;
-
+        this.authServiceHelper = authServiceHelper;
     }
-
 
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
-
         String username = null;
         String password = null;
         try {
@@ -52,7 +49,6 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         } catch (IOException e) {
             e.printStackTrace();
         }
-
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(username, password);
 
         return this.authenticationManager.authenticate(authenticationToken);
@@ -70,26 +66,21 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
                 .add("username", username)
                 .build();
 
-        String token = Jwts.builder()
-                .subject(username)
-                .claims(claims)
-                .signWith(secretKey)
-                .issuedAt(new Date())
-                .expiration(new Date(System.currentTimeMillis() + 3600000))
-                .compact();
+        String accessToken = authServiceHelper.generateAccessToken(username, claims);
 
-        response.addHeader(headerAuthorization, prefixToken + token);
+        String refreshToken = authServiceHelper.generateRefreshToken(username);
+
+        response.addHeader(headerAuthorization, prefixToken + accessToken);
 
         Map<String, String> body = new HashMap<>();
-        body.put("token", token);
+        body.put("token", accessToken);
         body.put("username", username);
         body.put("message", String.format("Session started successfully. Hello " + username));
-
+        body.put("refreshToken", refreshToken);
 
         response.getWriter().write(new ObjectMapper().writeValueAsString(body));
         response.setContentType(contentType);
         response.setStatus(200);
-
     }
 
     @Override
@@ -102,6 +93,4 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         response.setContentType(contentType);
         response.setStatus(401);
     }
-
-
 }
