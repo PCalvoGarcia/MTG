@@ -1,8 +1,10 @@
 package com.MagicTheGathering.user;
 
 import com.MagicTheGathering.role.Role;
+import com.MagicTheGathering.user.dto.ADMIN.UserRequestAdmin;
+import com.MagicTheGathering.user.dto.ADMIN.UserRequestUpdateAdmin;
 import com.MagicTheGathering.user.dto.UserMapperDto;
-import com.MagicTheGathering.user.dto.UserRequest;
+import com.MagicTheGathering.user.dto.USER.UserRequest;
 import com.MagicTheGathering.user.dto.UserResponse;
 import com.MagicTheGathering.user.utils.UserServiceHelper;
 import lombok.RequiredArgsConstructor;
