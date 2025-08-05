@@ -1,32 +1,52 @@
 package com.MagicTheGathering.config;
 
+import com.MagicTheGathering.auth.AuthServiceHelper;
+import com.MagicTheGathering.auth.filter.JwtAuthenticationFilter;
+import com.MagicTheGathering.auth.filter.JwtValidationFilter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-
-import static org.springframework.security.config.Customizer.withDefaults;
 
 @Configuration
 public class SecurityConfig {
+    @Autowired
+    private AuthenticationConfiguration authenticationConfiguration;
+
+    @Autowired
+    private AuthServiceHelper authServiceHelper;
+
+    @Bean
+    AuthenticationManager authenticationManager() throws Exception {
+        return authenticationConfiguration.getAuthenticationManager();
+    }
+
+    @Bean
+    PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+
 
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
-        http.authorizeHttpRequests((authHttp) -> authHttp
+        return http.authorizeHttpRequests((authHttp) -> authHttp
                         .requestMatchers("/.well-known/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/authorized").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/list").hasAnyAuthority("SCOPE_USER", "SCOPE_ADMIN")
-                        .requestMatchers(HttpMethod.POST, "/create").hasAuthority("SCOPE_ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/register").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/login").permitAll()
                         .anyRequest().authenticated())
-                .csrf(csrf -> csrf.disable())
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // manejar sesion en token
-                .oauth2Login(login -> login.loginPage("/oauth2/authorization/client-app"))
-                .oauth2Client(withDefaults())
-                .oauth2ResourceServer(resourceServer -> resourceServer.jwt(withDefaults()));
-
-        return http.build();
+                .addFilter(new JwtAuthenticationFilter(authenticationManager(), authServiceHelper))
+                .addFilter(new JwtValidationFilter(authenticationManager(), authServiceHelper))
+                .csrf(config -> config.disable())
+                .sessionManagement(management -> management.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .build();
     }
 }

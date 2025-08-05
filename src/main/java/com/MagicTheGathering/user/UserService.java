@@ -57,8 +57,8 @@ public class UserService implements UserDetailsService {
             throw new RuntimeException("Email already exist");
         }
         User user = UserMapperDto.toEntity(request);
-        user.setPassword( passwordEncoder.encode(request.password()));
-        user.setRoles(Set.of(Role.SCOPE_USER));
+        user.setPassword(passwordEncoder.encode(request.password()));
+        user.setRoles(Set.of(Role.USER));
 
         User savedUser = userRepository.save(user);
 
