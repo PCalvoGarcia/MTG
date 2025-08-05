@@ -34,7 +34,7 @@ public class UserService implements UserDetailsService {
         User user = optionalUser.orElseThrow();
         List<GrantedAuthority> authorities = user.getRoles()
                 .stream()
-                .map(role -> new SimpleGrantedAuthority("SCOPE_" + role.name()))
+                .map(role -> new SimpleGrantedAuthority("ROLE_" + role.name()))
                 .collect(Collectors.toList());
 
         return new org.springframework.security.core.userdetails.User(
