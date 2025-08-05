@@ -6,12 +6,12 @@ import com.MagicTheGathering.user.dto.ADMIN.UserRequestUpdateAdmin;
 import com.MagicTheGathering.user.dto.UserMapperDto;
 import com.MagicTheGathering.user.dto.USER.UserRequest;
 import com.MagicTheGathering.user.dto.UserResponse;
+import com.MagicTheGathering.user.utils.UserSecurityUtils;
 import com.MagicTheGathering.user.utils.UserServiceHelper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -22,7 +22,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -35,39 +34,29 @@ public class UserService implements UserDetailsService {
     @Transactional
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        Optional<User> optionalUser = userRepository.findByUsername(username);
+        Optional<User> optionalUser = userServiceHelper.getUserLogin(username);
         User user = optionalUser.orElseThrow();
-        List<GrantedAuthority> authorities = user.getRoles()
-                .stream()
-                .map(role -> new SimpleGrantedAuthority("ROLE_" + role.name()))
-                .collect(Collectors.toList());
+        List<GrantedAuthority> authorities = UserSecurityUtils.getAuthoritiesRole(user);
 
-        return new org.springframework.security.core.userdetails.User(
-                user.getUsername(),
-                user.getPassword(),
-                true,
-                true,
-                true,
-                true,
-                authorities);
+        return UserSecurityUtils.createUserByUserDetails(user, authorities);
     }
 
-    public UserResponse registerUser(UserRequest request){
-        Optional<User> isExistingUsername = userRepository.findByUsername(request.username());
-        if (isExistingUsername.isPresent()) {
-            throw new RuntimeException("Username already exist");
-        }
-        Optional<User> isExistingEmail = userRepository.findByEmail(request.email());
-        if (isExistingEmail.isPresent()) {
-            throw new RuntimeException("Email already exist");
-        }
-        User user = UserMapperDto.toEntity(request);
-        user.setPassword(passwordEncoder.encode(request.password()));
-        user.setRoles(Set.of(Role.USER));
+    public UserResponse registerUser(UserRequest request) {
+        try {
+            userServiceHelper.checkUsername(request.username());
+            userServiceHelper.checkEmail(request.email());
 
-        User savedUser = userRepository.save(user);
+            User user = UserMapperDto.toEntity(request);
+            user.setPassword(userServiceHelper.getEncodePassword(request.password()));
+            user.setRoles(Set.of(Role.USER));
 
-        return UserMapperDto.fromEntity(savedUser);
+            User savedUser = userRepository.save(user);
+
+            return UserMapperDto.fromEntity(savedUser);
+        } catch (DataIntegrityViolationException e) {
+            throw new DataIntegrityViolationException("Username or email already exists");
+        }
+
     }
 
     public User getAuthenticatedUser() {
