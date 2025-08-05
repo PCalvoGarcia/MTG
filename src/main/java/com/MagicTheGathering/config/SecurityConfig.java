@@ -5,12 +5,18 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
 import static org.springframework.security.config.Customizer.withDefaults;
 
 @Configuration
 public class SecurityConfig {
+    @Bean
+    PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
 
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -18,8 +24,8 @@ public class SecurityConfig {
         http.authorizeHttpRequests((authHttp) -> authHttp
                         .requestMatchers("/.well-known/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/authorized").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/list").hasAnyAuthority("SCOPE_USER", "SCOPE_ADMIN")
-                        .requestMatchers(HttpMethod.POST, "/create").hasAuthority("SCOPE_ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/register").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/login").permitAll()
                         .anyRequest().authenticated())
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // manejar sesion en token
