@@ -1,6 +1,6 @@
 package com.MagicTheGathering.user;
 
-import com.MagicTheGathering.user.dto.UserRequest;
+import com.MagicTheGathering.user.dto.USER.UserRequest;
 import com.MagicTheGathering.user.dto.UserResponse;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;

@@ -1,4 +1,4 @@
-package com.MagicTheGathering.user.dto;
+package com.MagicTheGathering.user.dto.USER;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
