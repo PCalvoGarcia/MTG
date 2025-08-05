@@ -1,8 +1,8 @@
 package com.MagicTheGathering.user.dto.ADMIN;
 
-import com.DreamFactory.DF.role.Role;
-import com.DreamFactory.DF.role.RoleDeserializer;
-import com.DreamFactory.DF.role.validations.ValidRole;
+import com.MagicTheGathering.role.Role;
+import com.MagicTheGathering.role.RoleDeserializer;
+import com.MagicTheGathering.role.validations.ValidRole;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;

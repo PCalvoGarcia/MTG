@@ -42,7 +42,7 @@ public class UserServiceHelper {
 
     public User checkUserId(Long id) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("exception");
+                .orElseThrow(() -> new RuntimeException("exception"));
         return user;
     }
 

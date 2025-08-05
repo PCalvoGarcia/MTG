@@ -38,10 +38,16 @@ public class SecurityConfig {
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
         return http.authorizeHttpRequests((authHttp) -> authHttp
-                        .requestMatchers("/.well-known/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/authorized").permitAll()
                         .requestMatchers(HttpMethod.POST, "/register").permitAll()
                         .requestMatchers(HttpMethod.POST, "/login").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/users", "/api/users/**")
+                        .hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/register/admin")
+                        .hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/users/**")
+                        .hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/users/**")
+                        .hasRole("ADMIN")
                         .anyRequest().authenticated())
                 .addFilter(new JwtAuthenticationFilter(authenticationManager(), authServiceHelper))
                 .addFilter(new JwtValidationFilter(authenticationManager(), authServiceHelper))
