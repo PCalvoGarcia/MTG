@@ -31,6 +31,7 @@ public class UserController {
         return ResponseEntity.ok(userService.getUserById(id));
     }
 
+
     @PostMapping("/auth/refresh")
     public ResponseEntity<Map<String, String>> refreshToken(@RequestBody Map<String, String> body) {
         return authServiceHelper.handleRefreshToken(body.get("refreshToken"));
@@ -48,10 +49,12 @@ public class UserController {
         return new ResponseEntity<>(registeredUser, HttpStatus.CREATED);
     }
 
+
     @PutMapping("/api/users/{id}")
     public ResponseEntity<UserResponse> updateUserRoleRole( @PathVariable Long id, @Valid @RequestBody UserRequestUpdateAdmin request) {
         return ResponseEntity.ok(userService.updateUser(id, request));
     }
+
 
     @DeleteMapping("/api/users/{id}")
     public ResponseEntity<String> deleteUserById(@PathVariable Long id) {
