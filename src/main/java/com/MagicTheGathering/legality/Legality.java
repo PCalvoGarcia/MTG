@@ -1,6 +1,6 @@
 package com.MagicTheGathering.legality;
 
-public enum legality {
+public enum Legality {
     STANDARD,
     MODERN,
     COMMANDER,
