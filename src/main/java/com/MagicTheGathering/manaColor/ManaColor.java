@@ -1,6 +1,6 @@
 package com.MagicTheGathering.manaColor;
 
-public enum manaColor {
+public enum ManaColor {
     WHITE,
     BLUE,
     BLACK,

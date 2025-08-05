@@ -1,6 +1,6 @@
 package com.MagicTheGathering.cardType;
 
-public enum cardType {
+public enum CardType {
     CREATURE,
     LAND,
     ENCHANTMENT,
