@@ -1,6 +1,6 @@
 package com.MagicTheGathering.role;
 
 public enum Role {
-    USER,
-    ADMIN
+    SCOPE_USER,
+    SCOPE_ADMIN
 }
