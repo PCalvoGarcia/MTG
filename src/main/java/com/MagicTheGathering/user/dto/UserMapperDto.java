@@ -8,6 +8,10 @@ import org.springframework.stereotype.Component;
 @Component
 public class UserMapperDto {
     public static UserResponse fromEntity(User user) {
+        if (user == null) {
+            return null;
+        }
+
         java.util.Set<String> roles = user.getRoles() == null ? java.util.Collections.emptySet()
                 : user.getRoles()
                 .stream()
@@ -23,6 +27,11 @@ public class UserMapperDto {
     }
 
     public static User toEntity(UserRequest userRequest) {
+
+        if (userRequest == null) {
+            return null;
+        }
+
         User user = User.builder()
                 .username(userRequest.username())
                 .email(userRequest.email())
@@ -31,6 +40,10 @@ public class UserMapperDto {
         return user;
     }
     public static User toEntityAdmin(UserRequestAdmin userRequest) {
+
+        if (userRequest == null) {
+            return null;
+        }
 
         User user = User.builder()
                 .username(userRequest.username())
