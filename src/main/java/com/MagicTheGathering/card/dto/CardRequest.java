@@ -50,8 +50,6 @@ public record CardRequest(
         Legality legality,
 
         @Positive
-        int quantity,
-
-        Long userId
+        int quantity
 ) {
 }

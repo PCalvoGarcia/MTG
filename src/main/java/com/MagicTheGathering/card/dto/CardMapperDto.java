@@ -57,7 +57,7 @@ public class CardMapperDto {
                 card.getUser().getId());
     }
 
-    public static Card toEntity(CardRequest cardRequest){
+    public static Card toEntity(CardRequest cardRequest, String imageUrl){
 
         if (cardRequest == null) {
             return null;
@@ -80,9 +80,6 @@ public class CardMapperDto {
         }
 
 
-        User user = new User();
-        user.setId(cardRequest.userId());
-
 
         return Card.builder()
                 .name(cardRequest.name())
@@ -98,9 +95,9 @@ public class CardMapperDto {
                 .cartNumber(cardRequest.cart_number())
                 .artist(cardRequest.artist())
                 .edition(cardRequest.edition())
+                .imageUrl(imageUrl)
                 .legalityFormat(legalities)
                 .quantity(cardRequest.quantity())
-                .user(user)
                 .build();
     }
 }
