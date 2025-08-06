@@ -56,6 +56,13 @@ public class CardController {
         return new ResponseEntity<>(updatedCard, HttpStatus.OK);
     }
 
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<Void> deleteCardById( @PathVariable Long id){
+        CARD_SERVICE.deleteCard(id);
+        return ResponseEntity.noContent().build();
+    }
+
     private int convertToZeroBasedPage(int page) {
         return page - 1;
     }
