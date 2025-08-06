@@ -86,6 +86,29 @@ public class CardService {
         return CardMapperDto.fromEntity(newCard);
     }
 
+    public void deleteCard(Long id){
+        User user = USER_SERVICE.getAuthenticatedUser();
+        Card cardIsExisting = CARD_REPOSITORY.findById(id)
+                .orElseThrow(() -> new RuntimeException("not found id"));
+
+        if (!USER_SECURITY_UTILS.isAuthorizedToModify(cardIsExisting)){
+            throw new RuntimeException("Unauthorized");
+        }
+
+        String imageUrl = cardIsExisting.getImageUrl();
+
+        String withoutPrefix = imageUrl.substring(imageUrl.indexOf("/upload/") + 8);
+        if (withoutPrefix.matches("v\\d+/.+")) {
+            withoutPrefix = withoutPrefix.substring(withoutPrefix.indexOf('/') + 1);
+        }
+        int dotIndex = withoutPrefix.lastIndexOf('.');
+        String publicId = (dotIndex != -1) ? withoutPrefix.substring(0, dotIndex) : withoutPrefix;
+
+        deleteImageCloudinary(publicId);
+        CARD_REPOSITORY.delete(cardIsExisting);
+    }
+
+
     private void postImageCloudinary(CardRequest request, Card card) {
         try {
             Map uploadResult = CLOUDINARY_SERVICE.uploadFile(request.image());
