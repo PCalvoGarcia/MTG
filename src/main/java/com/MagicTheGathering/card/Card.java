@@ -1,6 +1,7 @@
 package com.MagicTheGathering.card;
 
 import com.MagicTheGathering.cardType.CardType;
+import com.MagicTheGathering.legality.Legality;
 import com.MagicTheGathering.manaColor.ManaColor;
 import com.MagicTheGathering.role.Role;
 import com.MagicTheGathering.user.User;
@@ -41,7 +42,7 @@ public class Card {
     @Column(name = "mana_total_cost")
     private int manaTotalCost;
 
-    @ElementCollection(targetClass = CardType.class, fetch = FetchType.EAGER)
+    @ElementCollection(targetClass = ManaColor.class, fetch = FetchType.EAGER)
     @CollectionTable(name = "color_card", joinColumns = @JoinColumn(name = "card_id"))
     @Enumerated(EnumType.STRING)
     private Set<ManaColor> manaColors = new HashSet<>();
@@ -57,7 +58,8 @@ public class Card {
 
     private String collection;
 
-    private int cart_number;
+    @Column(name = "cart_number")
+    private int cartNumber;
 
     private String artist;
 
@@ -66,10 +68,10 @@ public class Card {
     @Column(name = "image_url")
     private String imageUrl;
 
-    @ElementCollection(targetClass = CardType.class, fetch = FetchType.EAGER)
+    @ElementCollection(targetClass = Legality.class, fetch = FetchType.EAGER)
     @CollectionTable(name = "legality_card", joinColumns = @JoinColumn(name = "card_id"))
     @Enumerated(EnumType.STRING)
-    private Set<ManaColor> legalityFormat = new HashSet<>();
+    private Set<Legality> legalityFormat = new HashSet<>();
 
     private int quantity;
 
