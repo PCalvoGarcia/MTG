@@ -57,58 +57,47 @@ public class CardMapperDto {
                 card.getUser().getId());
     }
 
-    public static Card toEntity(CardResponse cardResponse){
+    public static Card toEntity(CardRequest cardRequest, String imageUrl){
 
-        if (cardResponse == null) {
+        if (cardRequest == null) {
             return null;
         }
 
         Set<CardType> cardTypes = new HashSet<>();
-        if (cardResponse.cardType() != null) {
-            cardTypes = cardResponse.cardType().stream()
-                    .map(CardType::valueOf)
-                    .collect(Collectors.toSet());
+        if (cardRequest.cardType() != null) {
+            cardTypes.add(cardRequest.cardType());
         }
 
         Set<ManaColor> manaColors = new HashSet<>();
-        if (cardResponse.manaColor() != null) {
-            manaColors = cardResponse.manaColor().stream()
-                    .map(ManaColor::valueOf)
-                    .collect(Collectors.toSet());
+        if (cardRequest.manaColor() != null) {
+            manaColors.add(cardRequest.manaColor());
         }
 
 
         Set<Legality> legalities = new HashSet<>();
-        if (cardResponse.legality() != null) {
-            legalities = cardResponse.legality().stream()
-                    .map(Legality::valueOf)
-                    .collect(Collectors.toSet());
+        if (cardRequest.legality() != null) {
+            legalities.add(cardRequest.legality());
         }
 
-        User user = new User();
-        user.setId(cardResponse.userId());
 
 
         return Card.builder()
-                .id(cardResponse.id())
-                .createdAt(cardResponse.createdAt())
-                .name(cardResponse.name())
+                .name(cardRequest.name())
                 .types(cardTypes)
-                .specificType(cardResponse.specificType())
-                .manaTotalCost(cardResponse.manaTotalCost())
+                .specificType(cardRequest.specificType())
+                .manaTotalCost(cardRequest.manaTotalCost())
                 .manaColors(manaColors)
-                .textRules(cardResponse.textRules())
-                .power(cardResponse.power())
-                .endurance(cardResponse.endurance())
-                .loyalty(cardResponse.loyalty())
-                .collection(cardResponse.collection())
-                .cartNumber(cardResponse.cart_number())
-                .artist(cardResponse.artist())
-                .edition(cardResponse.edition())
-                .imageUrl(cardResponse.imageUrl())
+                .textRules(cardRequest.textRules())
+                .power(cardRequest.power())
+                .endurance(cardRequest.endurance())
+                .loyalty(cardRequest.loyalty())
+                .collection(cardRequest.collection())
+                .cartNumber(cardRequest.cart_number())
+                .artist(cardRequest.artist())
+                .edition(cardRequest.edition())
+                .imageUrl(imageUrl)
                 .legalityFormat(legalities)
-                .quantity(cardResponse.quantity())
-                .user(user)
+                .quantity(cardRequest.quantity())
                 .build();
     }
 }

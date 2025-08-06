@@ -1,6 +1,8 @@
 package com.MagicTheGathering.user.utils;
 
+import com.MagicTheGathering.card.Card;
 import com.MagicTheGathering.user.User;
+import com.MagicTheGathering.user.UserService;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
@@ -10,6 +12,13 @@ import java.util.stream.Collectors;
 
 @Component
 public class UserSecurityUtils {
+
+    private final UserService userService;
+
+    public UserSecurityUtils(UserService userService) {
+        this.userService = userService;
+    }
+
     public static org.springframework.security.core.userdetails.User createUserByUserDetails(User user, List<GrantedAuthority> authorities) {
         return new org.springframework.security.core.userdetails.User(
                 user.getUsername(),
@@ -28,6 +37,9 @@ public class UserSecurityUtils {
                 .collect(Collectors.toList());
     }
 
-
+    public boolean isAuthorizedToModify(Card card) {
+        User user = userService.getAuthenticatedUser();
+        return card.getUser().getId().equals(user.getId());
+    }
 
 }
