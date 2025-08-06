@@ -6,6 +6,7 @@ import com.MagicTheGathering.user.dto.UserMapperDto;
 import com.MagicTheGathering.user.dto.UserResponse;
 import com.MagicTheGathering.user.dto.ADMIN.UserRequestUpdateAdmin;
 import com.MagicTheGathering.user.User;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
@@ -17,14 +18,11 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Component
+@RequiredArgsConstructor
 public class UserServiceHelper {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public UserServiceHelper( UserRepository userRepository, PasswordEncoder passwordEncoder) {
-        this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
-    }
 
     public void checkEmail(String request) {
         Optional<User> isExistingEmail = userRepository.findByEmail(request);
