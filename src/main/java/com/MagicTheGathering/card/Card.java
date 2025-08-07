@@ -1,6 +1,7 @@
 package com.MagicTheGathering.card;
 
 import com.MagicTheGathering.cardType.CardType;
+import com.MagicTheGathering.deck.Deck;
 import com.MagicTheGathering.legality.Legality;
 import com.MagicTheGathering.manaColor.ManaColor;
 import com.MagicTheGathering.role.Role;
@@ -78,6 +79,9 @@ public class Card {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
+
+    @ManyToMany(mappedBy = "cards")
+    private Set<Deck> decks = new HashSet<>();
 
     @PrePersist
     protected void onCreate() {
