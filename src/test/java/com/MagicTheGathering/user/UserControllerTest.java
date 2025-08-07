@@ -6,8 +6,11 @@ import com.MagicTheGathering.role.Role;
 import com.MagicTheGathering.user.dto.ADMIN.UserRequestAdmin;
 import com.MagicTheGathering.user.dto.USER.UserRequest;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -24,10 +27,12 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Map;
 
 import static org.hamcrest.Matchers.hasSize;
+import static org.mockito.Mockito.doNothing;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+@ActiveProfiles("test")
 @SpringBootTest
 @AutoConfigureMockMvc
 @TestPropertySource(locations = "classpath:application-test.properties")
@@ -47,7 +52,7 @@ public class UserControllerTest {
     @WithMockUser(roles = {"ADMIN"})
     void should_getAllUsers() throws Exception {
         mockMvc.perform(get("/api/users")
-                .accept(MediaType.APPLICATION_JSON))
+                        .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(7)))
                 .andExpect(jsonPath("$.[0].username").value("admin"))
@@ -89,20 +94,20 @@ public class UserControllerTest {
         Map<String, String> requestBody = Map.of("refreshToken", "validToken");
 
         mockMvc.perform(post("/auth/refresh")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(objectMapper.writeValueAsString(requestBody)))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(requestBody)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.accessToken").value("newAccessToken123"));
     }
 
     @Test
     @Transactional
-    void should_registerUser_fromRequest() throws Exception{
+    void should_registerUser_fromRequest() throws Exception {
         UserRequest userRequest = new UserRequest("userTest", "usertest@test.com", "password123");
 
         mockMvc.perform(post("/register")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(userRequest)))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(userRequest)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.username").value("userTest"))
                 .andExpect(jsonPath("$.email").value("usertest@test.com"))
@@ -112,7 +117,7 @@ public class UserControllerTest {
     @Test
     @Transactional
     @WithMockUser(roles = {"ADMIN"})
-    void should_registerUserByAdmin_fromRequest() throws Exception{
+    void should_registerUserByAdmin_fromRequest() throws Exception {
         UserRequestAdmin userRequest = new UserRequestAdmin("userTest", "usertest@test.com", "password123", Role.ADMIN);
 
         mockMvc.perform(post("/register/admin")
@@ -127,13 +132,13 @@ public class UserControllerTest {
     @Test
     @Transactional
     @WithMockUser(roles = {"ADMIN"})
-    void should_updateUser_fromRequest() throws Exception{
+    void should_updateUser_fromRequest() throws Exception {
         Long userId = 1L;
         UserRequestAdmin userRequest = new UserRequestAdmin("updateTest", "updatetest@test.com", "password123", Role.USER);
 
         mockMvc.perform(put("/api/users/{id}", userId)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(userRequest)))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(userRequest)))
                 .andExpect(jsonPath("$.id").value(userId))
                 .andExpect(jsonPath("$.username").value("updateTest"))
                 .andExpect(jsonPath("$.email").value("updatetest@test.com"));
@@ -142,7 +147,7 @@ public class UserControllerTest {
     @Test
     @Transactional
     @WithMockUser(roles = {"ADMIN"})
-    void should_deleteUser ()throws Exception{
+    void should_deleteUser() throws Exception {
         Long userId = 1L;
 
         mockMvc.perform(delete("/api/users/{id}", userId))
