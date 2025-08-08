@@ -1,7 +1,5 @@
 package com.MagicTheGathering.deck;
 
-import com.MagicTheGathering.card.Card;
-import com.MagicTheGathering.cardType.CardType;
 import com.MagicTheGathering.deckCard.DeckCard;
 import com.MagicTheGathering.legality.Legality;
 import com.MagicTheGathering.user.User;
@@ -53,4 +51,6 @@ public class Deck {
         createdAt= LocalDateTime.now();
     }
 
+    public static record DeckRequest() {
+    }
 }
