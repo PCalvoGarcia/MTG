@@ -2,6 +2,7 @@ package com.MagicTheGathering.card;
 
 import com.MagicTheGathering.cardType.CardType;
 import com.MagicTheGathering.deck.Deck;
+import com.MagicTheGathering.deckCard.DeckCard;
 import com.MagicTheGathering.legality.Legality;
 import com.MagicTheGathering.manaColor.ManaColor;
 import com.MagicTheGathering.role.Role;
@@ -80,8 +81,8 @@ public class Card {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @ManyToMany(mappedBy = "cards")
-    private Set<Deck> decks = new HashSet<>();
+    @OneToMany(mappedBy = "card")
+    private Set<DeckCard> deckCards = new HashSet<>();
 
     @PrePersist
     protected void onCreate() {
