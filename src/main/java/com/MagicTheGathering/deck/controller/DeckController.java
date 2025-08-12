@@ -47,8 +47,6 @@ public class DeckController {
     @PostMapping
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<DeckResponse> createNewDeck(@Valid @RequestBody DeckRequest deckRequest) {
-        System.out.println("Recibido: " + deckRequest);
-
         DeckResponse newDeck = DECK_SERVICE.createDeck(deckRequest);
         return new ResponseEntity<>(newDeck, HttpStatus.CREATED);
     }
