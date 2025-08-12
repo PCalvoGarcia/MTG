@@ -4,15 +4,17 @@ import com.MagicTheGathering.card.Card;
 import com.MagicTheGathering.deck.Deck;
 import com.MagicTheGathering.deckCartId.DeckCardId;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+
+import java.util.Objects;
 
 @Entity
 @Table(name = "deck_card")
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class DeckCard {
 
     @EmbeddedId
@@ -29,4 +31,17 @@ public class DeckCard {
     private Card card;
 
     private int quantity;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof DeckCard)) return false;
+        DeckCard deckCard = (DeckCard) o;
+        return Objects.equals(id, deckCard.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
 }

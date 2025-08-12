@@ -8,11 +8,11 @@ import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 @Entity
 @Table(name = "decks")
-@Data
 @Getter
 @Setter
 @NoArgsConstructor
@@ -43,6 +43,7 @@ public class Deck {
     private User user;
 
     @OneToMany(mappedBy = "deck", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
     private Set<DeckCard> deckCards = new HashSet<>();
 
 
@@ -51,6 +52,16 @@ public class Deck {
         createdAt= LocalDateTime.now();
     }
 
-    public static record DeckRequest() {
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Deck)) return false;
+        Deck deck = (Deck) o;
+        return Objects.equals(id, deck.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 }

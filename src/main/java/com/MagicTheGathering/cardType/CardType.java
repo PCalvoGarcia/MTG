@@ -3,6 +3,7 @@ package com.MagicTheGathering.cardType;
 public enum CardType {
     CREATURE,
     LAND,
+    BASIC_LAND,
     ENCHANTMENT,
     SORCERY,
     INSTANT,
@@ -11,5 +12,6 @@ public enum CardType {
     BATTLE,
     CONSPIRACY,
     SCHEME,
-    TRIBAL
+    TRIBAL,
+    COMMANDER
 }

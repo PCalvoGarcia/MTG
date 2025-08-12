@@ -13,11 +13,11 @@ import lombok.*;
 import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 @Entity
 @Table(name = "cards")
-@Data
 @Getter
 @Setter
 @NoArgsConstructor
@@ -81,7 +81,7 @@ public class Card {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @OneToMany(mappedBy = "card")
+    @OneToMany(mappedBy = "card", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<DeckCard> deckCards = new HashSet<>();
 
     @PrePersist
@@ -89,4 +89,16 @@ public class Card {
         createdAt= LocalDateTime.now();
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Card)) return false;
+        Card card = (Card) o;
+        return Objects.equals(id, card.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
 }

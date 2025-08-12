@@ -1,6 +1,9 @@
 package com.MagicTheGathering.user.utils;
 
 import com.MagicTheGathering.card.Card;
+import com.MagicTheGathering.card.CardRepository;
+import com.MagicTheGathering.deck.Deck;
+import com.MagicTheGathering.deck.dto.AddCardDeckRequest;
 import com.MagicTheGathering.user.User;
 import com.MagicTheGathering.user.UserService;
 import org.springframework.security.core.GrantedAuthority;
@@ -14,8 +17,10 @@ import java.util.stream.Collectors;
 public class UserSecurityUtils {
 
     private final UserService userService;
+    private final CardRepository CARD_REPOSITORY;
 
-    public UserSecurityUtils(UserService userService) {
+    public UserSecurityUtils(CardRepository CARD_REPOSITORY, UserService userService) {
+        this.CARD_REPOSITORY = CARD_REPOSITORY;
         this.userService = userService;
     }
 
@@ -37,9 +42,19 @@ public class UserSecurityUtils {
                 .collect(Collectors.toList());
     }
 
-    public boolean isAuthorizedToModify(Card card) {
+    public boolean isAuthorizedToModifyCard(Card card) {
         User user = userService.getAuthenticatedUser();
         return card.getUser().getId().equals(user.getId());
+    }
+
+    public boolean isAuthorizedToModifyDeck(Deck deck) {
+        User user = userService.getAuthenticatedUser();
+        return deck.getUser().getId().equals(user.getId());
+    }
+
+    public Card findCardById(AddCardDeckRequest request) {
+        return CARD_REPOSITORY.findById(request.cardId())
+                .orElseThrow(() -> new RuntimeException("card not found"));
     }
 
 }
