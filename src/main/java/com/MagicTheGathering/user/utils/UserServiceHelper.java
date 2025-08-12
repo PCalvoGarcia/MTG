@@ -89,6 +89,4 @@ public class UserServiceHelper {
         roles.add(request.role());
         user.setRoles(roles);
     }
-
-
 }
