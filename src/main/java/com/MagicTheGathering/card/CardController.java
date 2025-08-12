@@ -41,8 +41,6 @@ public class CardController {
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<CardResponse> createNewCard(@Valid @ModelAttribute CardRequest cardRequest) throws IOException {
-        System.out.println("Recibido: " + cardRequest);
-
         CardResponse newCard = CARD_SERVICE.createCard(cardRequest);
         return new ResponseEntity<>(newCard, HttpStatus.CREATED);
 
