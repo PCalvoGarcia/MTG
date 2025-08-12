@@ -2,7 +2,11 @@ package com.MagicTheGathering.deck.utils;
 
 import com.MagicTheGathering.card.Card;
 import com.MagicTheGathering.deck.Deck;
+import com.MagicTheGathering.deck.exceptions.IllegalCardException;
+import com.MagicTheGathering.deck.exceptions.MaxCommanderException;
+import com.MagicTheGathering.deck.exceptions.MaxCopiesAllowedFormatException;
 import com.MagicTheGathering.deckCard.DeckCard;
+import com.MagicTheGathering.deckCard.exceptions.MaxCopiesAllowedException;
 import com.MagicTheGathering.legality.Legality;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -15,7 +19,7 @@ public class FormatValidationService {
         Legality format = deck.getType();
 
         if (!card.getLegalityFormat().contains(format)) {
-            throw new RuntimeException("Card '" + card.getName() + "' is not legal in " + format + " format");
+            throw new IllegalCardException(card.getName(), format);
         }
 
         validateCardLimits(deck, card, quantity, format);
@@ -54,7 +58,7 @@ public class FormatValidationService {
         boolean isBasicLand = isBasicLand(card);
 
         if (!isBasicLand && quantity > 4) {
-            throw new RuntimeException("Maximum 4 copies of '" + card.getName() + "' allowed in constructed formats");
+            throw new MaxCopiesAllowedException();
         }
     }
 
@@ -63,10 +67,10 @@ public class FormatValidationService {
         boolean isCommander = isCommander(card, format);
 
         if (!isBasicLand && !isCommander && quantity > 1) {
-            throw new RuntimeException("Only 1 copy of '" + card.getName() + "' allowed in " + format + " format (singleton)");
+            throw new MaxCopiesAllowedFormatException(card.getName(), format);
         }
         if (isCommander && quantity > 1) {
-            throw new RuntimeException("Only 1 commander allowed");
+            throw new MaxCommanderException();
         }
     }
 

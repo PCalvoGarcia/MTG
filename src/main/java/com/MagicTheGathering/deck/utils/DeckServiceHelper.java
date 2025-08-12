@@ -3,6 +3,7 @@ package com.MagicTheGathering.deck.utils;
 import com.MagicTheGathering.card.Card;
 import com.MagicTheGathering.deck.Deck;
 import com.MagicTheGathering.deckCard.DeckCard;
+import com.MagicTheGathering.deckCard.exceptions.MaxCopiesAllowedException;
 import com.MagicTheGathering.deckCartId.DeckCardId;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -24,7 +25,7 @@ public class DeckServiceHelper {
         boolean isBasicLand = card.getTypes().toString().contains("BASIC_LAND");
 
         if (!isBasicLand && totalQuantity > 4){
-            throw new RuntimeException("Maximum 4 copies of '" + card.getName() + "' allowed in deck");
+            throw new MaxCopiesAllowedException();
         }
     }
 

@@ -1,9 +1,15 @@
 package com.MagicTheGathering.deckCard;
 
+import com.MagicTheGathering.Exceptions.UnauthorizedAccessException;
+import com.MagicTheGathering.Exceptions.UnauthorizedModificationsException;
 import com.MagicTheGathering.deck.Deck;
 import com.MagicTheGathering.deck.DeckRepository;
 import com.MagicTheGathering.deckCard.dto.DeckCardMapperDto;
 import com.MagicTheGathering.deckCard.dto.DeckCardResponse;
+import com.MagicTheGathering.deckCard.exceptions.AccessDeniedPrivateDeckException;
+import com.MagicTheGathering.deckCard.exceptions.CardIdNotFoundInDeckException;
+import com.MagicTheGathering.deckCard.exceptions.DeckIdNotFoundException;
+import com.MagicTheGathering.deckCard.exceptions.MaxCopiesAllowedException;
 import com.MagicTheGathering.deckCartId.DeckCardId;
 import com.MagicTheGathering.user.User;
 import com.MagicTheGathering.user.UserService;
@@ -33,12 +39,12 @@ public class DeckCardService {
     @Transactional(readOnly = true)
     public List<DeckCardResponse> getCardsByDeckId(Long deckId) {
         Deck deck = DECK_REPOSITORY.findById(deckId)
-                .orElseThrow(() -> new RuntimeException("Deck not found with id: " + deckId));
+                .orElseThrow(() -> new DeckIdNotFoundException(deckId));
 
         User currentUser = USER_SERVICE.getAuthenticatedUser();
 
         if (!deck.getIsPublic() && !USER_SECURITY_UTILS.isAuthorizedToModifyDeck(deck)) {
-            throw new RuntimeException("Access denied to private deck");
+            throw new AccessDeniedPrivateDeckException();
         }
 
         List<DeckCard> deckCardsCopy = new ArrayList<>(deck.getDeckCards());
@@ -52,12 +58,12 @@ public class DeckCardService {
     public DeckCardResponse getDeckCard(Long deckId, Long cardId) {
         DeckCardId deckCardId = new DeckCardId(deckId, cardId);
         DeckCard deckCard = DECK_CARD_REPOSITORY.findById(deckCardId)
-                .orElseThrow(() -> new RuntimeException("Card not found in deck"));
+                .orElseThrow(() -> new CardIdNotFoundInDeckException());
 
         User currentUser = USER_SERVICE.getAuthenticatedUser();
 
         if (!deckCard.getDeck().getIsPublic() && !USER_SECURITY_UTILS.isAuthorizedToModifyDeck(deckCard.getDeck())) {
-            throw new RuntimeException("Access denied");
+            throw new UnauthorizedAccessException();
         }
 
         return DeckCardMapperDto.fromEntity(deckCard);
@@ -68,10 +74,10 @@ public class DeckCardService {
 
         DeckCardId deckCardId = new DeckCardId(deckId, cardId);
         DeckCard deckCard = DECK_CARD_REPOSITORY.findById(deckCardId)
-                .orElseThrow(() -> new RuntimeException("Card not found in deck"));
+                .orElseThrow(() -> new CardIdNotFoundInDeckException());
 
         if (!USER_SECURITY_UTILS.isAuthorizedToModifyDeck(deckCard.getDeck())) {
-            throw new RuntimeException("Unauthorized to modify this deck");
+            throw new UnauthorizedModificationsException();
         }
 
         if (newQuantity <= 0) {
@@ -80,7 +86,7 @@ public class DeckCardService {
         }
 
         if (newQuantity > 4) {
-            throw new RuntimeException("Maximum 4 copies of a card allowed");
+            throw new MaxCopiesAllowedException();
         }
 
         deckCard.setQuantity(newQuantity);
@@ -94,10 +100,10 @@ public class DeckCardService {
 
         DeckCardId deckCardId = new DeckCardId(deckId, cardId);
         DeckCard deckCard = DECK_CARD_REPOSITORY.findById(deckCardId)
-                .orElseThrow(() -> new RuntimeException("Card not found in deck"));
+                .orElseThrow(() -> new CardIdNotFoundInDeckException());
 
         if (!USER_SECURITY_UTILS.isAuthorizedToModifyDeck(deckCard.getDeck())) {
-            throw new RuntimeException("Unauthorized to modify this deck");
+            throw new UnauthorizedModificationsException();
         }
 
         DECK_CARD_REPOSITORY.delete(deckCard);
