@@ -6,6 +6,9 @@ import com.MagicTheGathering.user.dto.UserMapperDto;
 import com.MagicTheGathering.user.dto.UserResponse;
 import com.MagicTheGathering.user.dto.ADMIN.UserRequestUpdateAdmin;
 import com.MagicTheGathering.user.User;
+import com.MagicTheGathering.user.exceptions.EmailAlreadyExistException;
+import com.MagicTheGathering.user.exceptions.UserIdNotFoundException;
+import com.MagicTheGathering.user.exceptions.UsernameAlreadyExistException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -27,20 +30,20 @@ public class UserServiceHelper {
     public void checkEmail(String request) {
         Optional<User> isExistingEmail = userRepository.findByEmail(request);
         if (isExistingEmail.isPresent()) {
-            throw new RuntimeException("exception");
+            throw new EmailAlreadyExistException(request);
         }
     }
 
     public void checkUsername(String request) {
         Optional<User> isExistingUsername = userRepository.findByUsername(request);
         if (isExistingUsername.isPresent()) {
-            throw new RuntimeException("exception");
+            throw new UsernameAlreadyExistException(request);
         }
     }
 
     public User checkUserId(Long id) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("exception"));
+                .orElseThrow(() -> new UserIdNotFoundException(id));
         return user;
     }
 
@@ -86,6 +89,4 @@ public class UserServiceHelper {
         roles.add(request.role());
         user.setRoles(roles);
     }
-
-
 }

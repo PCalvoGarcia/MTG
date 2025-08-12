@@ -1,5 +1,6 @@
 package com.MagicTheGathering.deck;
 
+import com.MagicTheGathering.Exceptions.UnauthorizedModificationsException;
 import com.MagicTheGathering.card.Card;
 import com.MagicTheGathering.card.CardService;
 import com.MagicTheGathering.deck.dto.AddCardDeckRequest;
@@ -10,6 +11,8 @@ import com.MagicTheGathering.deck.utils.DeckServiceHelper;
 import com.MagicTheGathering.deckCard.DeckCard;
 import com.MagicTheGathering.deckCard.DeckCardRepository;
 import com.MagicTheGathering.deckCard.DeckCardService;
+import com.MagicTheGathering.deckCard.exceptions.CardIdNotFoundInDeckException;
+import com.MagicTheGathering.deckCard.exceptions.DeckIdNotFoundException;
 import com.MagicTheGathering.deckCartId.DeckCardId;
 import com.MagicTheGathering.user.User;
 import com.MagicTheGathering.user.UserService;
@@ -74,10 +77,10 @@ public class DeckService {
     public DeckResponse updateDeck(Long id, DeckRequest deckRequest){
         User user = USER_SERVICE.getAuthenticatedUser();
         Deck existingDeck = DECK_REPOSITORY.findById(id)
-                .orElseThrow(() -> new RuntimeException("deck not found"));
+                .orElseThrow(() -> new DeckIdNotFoundException(id));
 
         if (!USER_SECURITY_UTILS.isAuthorizedToModifyDeck(existingDeck)){
-            throw new RuntimeException("unauthorized");
+            throw new UnauthorizedModificationsException();
         }
 
         existingDeck.setDeckName(deckRequest.deckName());
@@ -91,10 +94,10 @@ public class DeckService {
     public void deleteDeck(Long id){
         User user = USER_SERVICE.getAuthenticatedUser();
         Deck existingDeck = DECK_REPOSITORY.findById(id)
-                .orElseThrow(() -> new RuntimeException("deck not found"));
+                .orElseThrow(() -> new DeckIdNotFoundException(id));
 
         if (!existingDeck.getIsPublic() && !USER_SECURITY_UTILS.isAuthorizedToModifyDeck(existingDeck)){
-            throw new RuntimeException("unauthorized");
+            throw new UnauthorizedModificationsException();
         }
 
         DECK_REPOSITORY.delete(existingDeck);
@@ -103,10 +106,10 @@ public class DeckService {
     public DeckResponse addCardToDeck(Long deckId, AddCardDeckRequest request){
         User user = USER_SERVICE.getAuthenticatedUser();
         Deck deck = DECK_REPOSITORY.findById(deckId)
-                .orElseThrow(() -> new RuntimeException("deck not found"));
+                .orElseThrow(() -> new DeckIdNotFoundException(deckId));
 
         if (!USER_SECURITY_UTILS.isAuthorizedToModifyDeck(deck)){
-            throw new RuntimeException("unauthorized");
+            throw new UnauthorizedModificationsException();
         }
 
         Card card = USER_SERVICE_UTILS.findCardById(request);
@@ -131,7 +134,7 @@ public class DeckService {
         }
 
         Deck updatedDeck = DECK_REPOSITORY.findById(deckId)
-                .orElseThrow(() -> new RuntimeException("deck not found"));
+                .orElseThrow(() -> new DeckIdNotFoundException(deckId));
 
         return DeckMapperDto.fromEntity(updatedDeck);
     }
@@ -139,15 +142,15 @@ public class DeckService {
     public DeckResponse removeCardFromDeck(Long deckId, Long cardId, int quantityToRemove) {
         User user = USER_SERVICE.getAuthenticatedUser();
         Deck deck = DECK_REPOSITORY.findById(deckId)
-                .orElseThrow(() -> new RuntimeException("deck not found"));
+                .orElseThrow(() -> new DeckIdNotFoundException(deckId));
 
         if (!USER_SECURITY_UTILS.isAuthorizedToModifyDeck(deck)){
-            throw new RuntimeException("unauthorized");
+            throw new UnauthorizedModificationsException();
         }
 
         DeckCardId deckCardId = new DeckCardId(deckId, cardId);
         DeckCard deckCard = DECK_CARD_REPOSITORY.findById(deckCardId)
-                .orElseThrow(() -> new RuntimeException("card not found in deck"));
+                .orElseThrow(() -> new CardIdNotFoundInDeckException());
 
         if (deckCard.getQuantity() <= quantityToRemove){
             DECK_CARD_REPOSITORY.delete(deckCard);
@@ -158,7 +161,7 @@ public class DeckService {
         }
 
         Deck updatedDeck = DECK_REPOSITORY.findById(deckId)
-                .orElseThrow(() -> new RuntimeException("deck not found"));
+                .orElseThrow(() -> new DeckIdNotFoundException(deckId));
 
         return DeckMapperDto.fromEntity(updatedDeck);
     }

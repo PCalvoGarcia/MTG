@@ -1,11 +1,15 @@
 package com.MagicTheGathering.card;
 
 import com.MagicTheGathering.Cloudinary.CloudinaryService;
+import com.MagicTheGathering.Exceptions.UnauthorizedModificationsException;
 import com.MagicTheGathering.card.dto.CardMapperDto;
 import com.MagicTheGathering.card.dto.CardRequest;
 import com.MagicTheGathering.card.dto.CardResponse;
+import com.MagicTheGathering.card.exceptions.CardIdNotFoundException;
+import com.MagicTheGathering.card.exceptions.DeleteCardNotAllowedException;
 import com.MagicTheGathering.card.utils.CardServiceHelper;
 import com.MagicTheGathering.deckCard.DeckCardRepository;
+import com.MagicTheGathering.deckCard.exceptions.CardIdNotFoundInDeckException;
 import com.MagicTheGathering.user.User;
 import com.MagicTheGathering.user.UserService;
 import com.MagicTheGathering.user.utils.UserSecurityUtils;
@@ -42,7 +46,7 @@ public class CardService {
     @Transactional(readOnly = true)
     public CardResponse getCardById(Long id) {
         Card card = CARD_REPOSITORY.findById(id)
-                .orElseThrow(() -> new RuntimeException("Error"));
+                .orElseThrow(() -> new CardIdNotFoundException(id));
         return CardMapperDto.fromEntity(card);
     }
 
@@ -67,10 +71,10 @@ public class CardService {
     public CardResponse updateCard(Long id, CardRequest cardRequest) {
         User user = USER_SERVICE.getAuthenticatedUser();
         Card cardIsExisting = CARD_REPOSITORY.findById(id)
-                .orElseThrow(() -> new RuntimeException("Error"));
+                .orElseThrow(() -> new CardIdNotFoundException(id));
 
         if (!USER_SECURITY_UTILS.isAuthorizedToModifyCard(cardIsExisting)){
-            throw new RuntimeException("Unauthorized");
+            throw new UnauthorizedModificationsException();
         }
 
         CARD_SERVICE_HELPER.cloudinaryManagement(cardRequest, cardIsExisting);
@@ -86,14 +90,14 @@ public class CardService {
     public void deleteCard(Long id){
         User user = USER_SERVICE.getAuthenticatedUser();
         Card cardIsExisting = CARD_REPOSITORY.findById(id)
-                .orElseThrow(() -> new RuntimeException("not found id"));
+                .orElseThrow(() -> new CardIdNotFoundException(id));
 
         if (!USER_SECURITY_UTILS.isAuthorizedToModifyCard(cardIsExisting)){
-            throw new RuntimeException("Unauthorized");
+            throw new UnauthorizedModificationsException();
         }
 
         if (DECK_CARD_REPOSITORY.existsByCard(cardIsExisting)) {
-            throw new RuntimeException("Cannot delete card: it is currently used in one or more decks");
+            throw new DeleteCardNotAllowedException();
         }
         String imageUrl = cardIsExisting.getImageUrl();
 
