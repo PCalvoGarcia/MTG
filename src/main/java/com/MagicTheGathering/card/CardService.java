@@ -5,6 +5,7 @@ import com.MagicTheGathering.card.dto.CardMapperDto;
 import com.MagicTheGathering.card.dto.CardRequest;
 import com.MagicTheGathering.card.dto.CardResponse;
 import com.MagicTheGathering.card.utils.CardServiceHelper;
+import com.MagicTheGathering.deckCard.DeckCardRepository;
 import com.MagicTheGathering.user.User;
 import com.MagicTheGathering.user.UserService;
 import com.MagicTheGathering.user.utils.UserSecurityUtils;
@@ -22,11 +23,13 @@ import java.util.Map;
 @Transactional
 @RequiredArgsConstructor
 public class CardService {
+
     private final CardRepository CARD_REPOSITORY;
     private final UserService USER_SERVICE;
     private final UserSecurityUtils USER_SECURITY_UTILS;
     private final CardServiceHelper CARD_SERVICE_HELPER;
     private final CloudinaryService CLOUDINARY_SERVICE;
+    private final DeckCardRepository DECK_CARD_REPOSITORY;
 
     @Transactional(readOnly = true)
     public Page<CardResponse> getAllCardsByUser(int page, int size) {
@@ -66,7 +69,7 @@ public class CardService {
         Card cardIsExisting = CARD_REPOSITORY.findById(id)
                 .orElseThrow(() -> new RuntimeException("Error"));
 
-        if (!USER_SECURITY_UTILS.isAuthorizedToModify(cardIsExisting)){
+        if (!USER_SECURITY_UTILS.isAuthorizedToModifyCard(cardIsExisting)){
             throw new RuntimeException("Unauthorized");
         }
 
@@ -85,10 +88,13 @@ public class CardService {
         Card cardIsExisting = CARD_REPOSITORY.findById(id)
                 .orElseThrow(() -> new RuntimeException("not found id"));
 
-        if (!USER_SECURITY_UTILS.isAuthorizedToModify(cardIsExisting)){
+        if (!USER_SECURITY_UTILS.isAuthorizedToModifyCard(cardIsExisting)){
             throw new RuntimeException("Unauthorized");
         }
 
+        if (DECK_CARD_REPOSITORY.existsByCard(cardIsExisting)) {
+            throw new RuntimeException("Cannot delete card: it is currently used in one or more decks");
+        }
         String imageUrl = cardIsExisting.getImageUrl();
 
         String publicId = CARD_SERVICE_HELPER.getPublicIdCloudinary(imageUrl);
