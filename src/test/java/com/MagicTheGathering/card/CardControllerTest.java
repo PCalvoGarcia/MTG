@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Page;
@@ -32,6 +33,7 @@ import java.util.Set;
 
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -55,9 +57,39 @@ public class CardControllerTest {
     private ObjectMapper objectMapper;
 
     private CardResponse mockCardResponse;
+    private MockMultipartFile imageFile;
+
 
     @BeforeEach
     void setUp() {
+        mockCardResponse = new CardResponse(
+                1L,
+                LocalDateTime.now(),
+                "Lightning Bolt",
+                Set.of("INSTANT"),
+                "Instant",
+                1,
+                Set.of("RED"),
+                "Lightning Bolt deals 3 damage to any target.",
+                0,
+                0,
+                0,
+                "Core Set 2021",
+                137,
+                "Christopher Rush",
+                "M21",
+                "https://example.com/lightning_bolt.jpg",
+                Set.of("STANDARD"),
+                4,
+                1L
+        );
+
+        imageFile = new MockMultipartFile(
+                "image",
+                "test.jpg",
+                "image/jpeg",
+                "test image content".getBytes()
+        );
 
         MockitoAnnotations.openMocks(this);
         Set<String> cardTypes = new HashSet<>();
@@ -68,7 +100,7 @@ public class CardControllerTest {
 
         Set<String> legalities = new HashSet<>();
         legalities.add(Legality.BRAWL.name());
-                // Setup mock card response
+
         mockCardResponse = new CardResponse(
                 1L,
                 LocalDateTime.now(),
@@ -141,91 +173,139 @@ public class CardControllerTest {
         verify(cardService, times(1)).getCardById(cardId);
     }
 
-//    @Test
-//    @WithMockUser(roles = {"USER"})
-//    void should_createCard_withValidRequest() throws Exception {
-//        MockMultipartFile mockImg = new MockMultipartFile(
-//                "image",
-//                "test-product.jpg",
-//                "image/jpeg",
-//                "fake-image-content".getBytes());
-//
-//        when(cloudinaryService.uploadFile(any()))
-//                .thenReturn(java.util.Map.of("secure_url", "http://example.com/test-image.jpg"));
-//
-//        when(cardService.createCard(any(CardRequest.class))).thenReturn(mockCardResponse);
-//
-//        mockMvc.perform(multipart("/api/cards")
-//                        .file(mockImg)
-//                        .param("name", "Lightning Bolt")
-//                        .param("types", "ARTIFACT")
-//                        .param("specificType", "Test card")
-//                        .param("manaTotalCost", "3")
-//                        .param("manaColors", "BLACK")
-//                        .param("textRules", "Lightning Bolt deals 3 damage to any target.")
-//                        .param("power", "15")
-//                        .param("endurance", "15")
-//                        .param("loyalty", "0")
-//                        .param("collection", "Core Set 2021")
-//                        .param("cartNumber", "137")
-//                        .param("artist", "Christopher Rush")
-//                        .param("edition", "M21")
-//                        .param("legalityFormat", "BRAWL")
-//                        .param("quantity", "4")
-//                        .with(request -> {
-//                            request.setMethod("POST");
-//                            return request;
-//                        })
-//                        .contentType(MediaType.MULTIPART_FORM_DATA))
-//                .andExpect(status().isCreated())
-//                .andExpect(jsonPath("$.name").value("Lightning Bolt"))
-//                .andExpect(jsonPath("$.id").value(1L));
-//
-//        verify(cardService, times(1)).createCard(any(CardRequest.class));
-//    }
-//
-//    @Test
-//    @WithMockUser(roles = {"USER"})
-//    void should_updateCard_whenAuthorized() throws Exception {
-//        Long cardId = 1L;
-//        MockMultipartFile mockFile = new MockMultipartFile(
-//                "image",
-//                "test_image.png",
-//                MediaType.IMAGE_PNG_VALUE,
-//                "Test image.".getBytes(StandardCharsets.UTF_8)
-//        );
-//
-//        when(cardService.updateCard(eq(cardId), any(CardRequest.class))).thenReturn(mockCardResponse);
-//
-//        mockMvc.perform(multipart("/api/cards/{id}", cardId)
-//                        .file(mockFile)
-//                        .param("name", "Lightning Bolt")
-//                        .param("cardType", CardType.ARTIFACT.name())
-//                        .param("specificType", "Test card")
-//                        .param("manaTotalCost", "3")
-//                        .param("manaColor", ManaColor.BLACK.name())
-//                        .param("textRules", "Lightning Bolt deals 3 damage to any target.")
-//                        .param("power", "15")
-//                        .param("endurance", "15")
-//                        .param("loyalty", "0")
-//                        .param("collection", "Core Set 2021")
-//                        .param("cartNumber", "137")
-//                        .param("artist", "Christopher Rush")
-//                        .param("edition", "M21")
-//                        .param("legality", Legality.BRAWL.name())
-//                        .param("quantity", "4")
-//                        .with(request -> {
-//                            request.setMethod("PUT");
-//                            return request;
-//                        })
-//                        .contentType(MediaType.MULTIPART_FORM_DATA))
-//                .andExpect(status().isOk())
-//                .andExpect(jsonPath("$.name").value("Lightning Bolt"))
-//                .andExpect(jsonPath("$.id").value(cardId));
-//
-//        verify(cardService, times(1)).updateCard(eq(cardId), any(CardRequest.class));
-//    }
+    @Test
+    @WithMockUser(roles = {"USER"})
+    void should_createCard_withValidRequest() throws Exception {
+        MockMultipartFile mockImg = new MockMultipartFile(
+                "image",
+                "test-product.jpg",
+                "image/jpeg",
+                "fake-image-content".getBytes());
 
+        when(cloudinaryService.uploadFile(any()))
+                .thenReturn(java.util.Map.of("secure_url", "http://example.com/test-image.jpg"));
+
+        when(cardService.createCard(any(CardRequest.class))).thenReturn(mockCardResponse);
+
+        mockMvc.perform(multipart("/api/cards")
+                        .file(mockImg)
+                        .param("name", "Lightning Bolt")
+                        .param("cardType", CardType.ARTIFACT.name())
+                        .param("specificType", "Test card")
+                        .param("manaTotalCost", "3")
+                        .param("manaColor", ManaColor.BLACK.name())
+                        .param("textRules", "Lightning Bolt deals 3 damage to any target.")
+                        .param("power", "15")
+                        .param("endurance", "15")
+                        .param("loyalty", "0")
+                        .param("collection", "Core Set 2021")
+                        .param("cart_number", "137")
+                        .param("artist", "Christopher Rush")
+                        .param("edition", "M21")
+                        .param("legality", Legality.BRAWL.name())
+                        .param("quantity", "4")
+                        .with(request -> {
+                            request.setMethod("POST");
+                            return request;
+                        })
+                        .contentType(MediaType.MULTIPART_FORM_DATA))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.name").value("Lightning Bolt"))
+                .andExpect(jsonPath("$.id").value(1L));
+
+        verify(cardService, times(1)).createCard(any(CardRequest.class));
+    }
+
+    @Test
+    @WithMockUser(roles = {"USER"}, username = "")
+    void should_updateCard_whenAuthorized() throws Exception {
+        Long cardId = 1L;
+        MockMultipartFile mockFile = new MockMultipartFile(
+                "image",
+                "test_image.png",
+                MediaType.IMAGE_PNG_VALUE,
+                "Test image.".getBytes(StandardCharsets.UTF_8)
+        );
+
+        when(cardService.updateCard(eq(cardId), any(CardRequest.class))).thenReturn(mockCardResponse);
+
+        mockMvc.perform(multipart("/api/cards/{id}", cardId)
+                        .file(mockFile)
+                        .param("name", "Lightning Bolt")
+                        .param("cardType", CardType.ARTIFACT.name())
+                        .param("specificType", "Test card")
+                        .param("manaTotalCost", "3")
+                        .param("manaColor", ManaColor.BLACK.name())
+                        .param("textRules", "Lightning Bolt deals 3 damage to any target.")
+                        .param("power", "15")
+                        .param("endurance", "15")
+                        .param("loyalty", "0")
+                        .param("collection", "Core Set 2021")
+                        .param("cart_number", "137")
+                        .param("artist", "Christopher Rush")
+                        .param("edition", "M21")
+                        .param("legality", Legality.BRAWL.name())
+                        .param("quantity", "4")
+                        .with(request -> {
+                            request.setMethod("PUT");
+                            return request;
+                        })
+                        .contentType(MediaType.MULTIPART_FORM_DATA))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name").value("Lightning Bolt"))
+                .andExpect(jsonPath("$.id").value(cardId));
+
+        verify(cardService, times(1)).updateCard(eq(cardId), any(CardRequest.class));
+    }
+
+
+    @Test
+    @WithMockUser(roles = "USER")
+    void deleteCardById_ShouldReturnNoContent() throws Exception {
+        // Given
+        doNothing().when(cardService).deleteCard(1L);
+
+        // When & Then
+        mockMvc.perform(delete("/api/cards/1")
+                        .with(csrf()))
+                .andExpect(status().isNoContent());
+
+        verify(cardService).deleteCard(1L);
+    }
+
+    @Test
+    @WithMockUser(roles = "USER")
+    void getMyCards_ShouldReturnPageOfCards() throws Exception {
+        // Given
+        Page<CardResponse> page = new PageImpl<>(Arrays.asList(mockCardResponse));
+        when(cardService.getAllCardsByUser(0, 4)).thenReturn(page);
+
+        // When & Then
+        mockMvc.perform(get("/api/cards/my-cards")
+                        .param("page", "1")
+                        .param("size", "4"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content[0].name").value("Lightning Bolt"))
+                .andExpect(jsonPath("$.content[0].id").value(1))
+                .andExpect(jsonPath("$.totalElements").value(1));
+
+        verify(cardService).getAllCardsByUser(0, 4);
+    }
+
+    @Test
+    @WithMockUser(roles = "USER")
+    void getMyCardById_ShouldReturnCard() throws Exception {
+        // Given
+        when(cardService.getCardById(1L)).thenReturn(mockCardResponse);
+
+        // When & Then
+        mockMvc.perform(get("/api/cards/1"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name").value("Lightning Bolt"))
+                .andExpect(jsonPath("$.id").value(1));
+
+        verify(cardService).getCardById(1L);
+    }
     @Test
     @WithMockUser(roles = {"USER"})
     void should_returnDefaultPaginationValues_whenNoParamsProvided() throws Exception {
