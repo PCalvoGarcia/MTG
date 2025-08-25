@@ -14,8 +14,6 @@ public record DeckRequest(
         Boolean isPublic,
 
         @NotNull(message = "Select the deck legality")
-        Legality legalityEnum,
-
-        Long userId
+        Legality legalityEnum
 ) {
 }

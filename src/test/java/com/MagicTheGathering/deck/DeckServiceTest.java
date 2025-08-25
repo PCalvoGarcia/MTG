@@ -33,6 +33,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
@@ -93,44 +94,41 @@ class DeckServiceTest {
         deckRequest = new DeckRequest(
                 "New Deck",
                 true,
-                Legality.STANDARD,
-                1L
+                Legality.STANDARD
         );
     }
 
     @Test
     void getAllDeckByUser_ShouldReturnUserDecks() {
-        Pageable pageable = PageRequest.of(0, 4);
-        Page<Deck> deckPage = new PageImpl<>(List.of(testDeck));
+        List<Deck> deckPage = List.of(testDeck);
 
         when(userService.getAuthenticatedUser()).thenReturn(testUser);
-        when(deckRepository.findByUser(testUser, pageable)).thenReturn(deckPage);
+        when(deckRepository.findByUser(testUser)).thenReturn(deckPage);
 
-        Page<DeckResponse> result = deckService.getAllDeckByUser(0, 4);
+        List<DeckResponse> result = deckService.getAllDeckByUser();
 
         assertThat(result).isNotNull();
-        assertThat(result.getContent()).hasSize(1);
-        assertThat(result.getContent().get(0).deckName()).isEqualTo("Test Deck");
+        assertEquals(1,result.size());
+        assertThat(result.get(0).deckName()).isEqualTo("Test Deck");
 
         verify(userService).getAuthenticatedUser();
-        verify(deckRepository).findByUser(testUser, pageable);
+        verify(deckRepository).findByUser(testUser);
     }
 
     @Test
     void getAllPublicDecks_ShouldReturnPublicDecks() {
-        Pageable pageable = PageRequest.of(0, 4);
-        Page<Deck> deckPage = new PageImpl<>(List.of(testDeck));
+        List<Deck> deckPage = List.of(testDeck);
 
         when(userService.getAuthenticatedUser()).thenReturn(testUser);
-        when(deckRepository.findByIsPublicTrue(pageable)).thenReturn(deckPage);
+        when(deckRepository.findByIsPublicTrue()).thenReturn(deckPage);
 
-        Page<DeckResponse> result = deckService.getAllPublicDecks(0, 4);
+        List<DeckResponse> result = deckService.getAllPublicDecks();
 
         assertThat(result).isNotNull();
-        assertThat(result.getContent()).hasSize(1);
-        assertThat(result.getContent().get(0).isPublic()).isTrue();
+        assertEquals(1, result.size());
+        assertThat(result.get(0).isPublic()).isTrue();
 
-        verify(deckRepository).findByIsPublicTrue(pageable);
+        verify(deckRepository).findByIsPublicTrue();
     }
 
     @Test
@@ -194,8 +192,7 @@ class DeckServiceTest {
         DeckRequest updateRequest = new DeckRequest(
                 "Updated Deck",
                 false,
-                Legality.MODERN,
-                1L
+                Legality.MODERN
         );
 
         when(userService.getAuthenticatedUser()).thenReturn(testUser);

@@ -20,7 +20,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.Collections;
 import java.util.List;
 
-import static org.mockito.ArgumentMatchers.any;
+import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -61,34 +61,30 @@ class DeckSearchControllerTest {
     @Test
     @WithMockUser(roles = "USER")
     void getDecksByFormat_ShouldReturnDecks() throws Exception {
-        Page<DeckResponse> deckPage = new PageImpl<>(List.of(testDeckResponse));
-        when(deckSearchService.getDecksByFormat(eq("STANDARD"), any())).thenReturn(deckPage);
+        List<DeckResponse> deckPage = List.of(testDeckResponse);
+        when(deckSearchService.getDecksByFormat(eq("STANDARD"))).thenReturn(deckPage);
 
-        mockMvc.perform(get("/api/decks/search/by-format/STANDARD")
-                        .param("page", "1")
-                        .param("size", "4"))
+        mockMvc.perform(get("/api/decks/search/by-format/STANDARD"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content").isArray())
-                .andExpect(jsonPath("$.content[0].deckName").value("Test Deck"))
-                .andExpect(jsonPath("$.content[0].type").value("STANDARD"));
+                .andExpect(jsonPath("$", hasSize(1)))
+                .andExpect(jsonPath("$.[0].deckName").value("Test Deck"))
+                .andExpect(jsonPath("$.[0].type").value("STANDARD"));
 
-        verify(deckSearchService).getDecksByFormat(eq("STANDARD"), any());
+        verify(deckSearchService).getDecksByFormat(eq("STANDARD"));
     }
 
     @Test
     @WithMockUser(roles = "USER")
     void getPublicDecksByUser_ShouldReturnDecks() throws Exception {
-        Page<DeckResponse> deckPage = new PageImpl<>(List.of(testDeckResponse));
-        when(deckSearchService.getPublicDecksByUser(eq(1L), any())).thenReturn(deckPage);
+        List<DeckResponse> deckPage = List.of(testDeckResponse);
+        when(deckSearchService.getPublicDecksByUser(eq(1L))).thenReturn(deckPage);
 
-        mockMvc.perform(get("/api/decks/search/by-user/1")
-                        .param("page", "1")
-                        .param("size", "4"))
+        mockMvc.perform(get("/api/decks/search/by-user/1"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content").isArray())
-                .andExpect(jsonPath("$.content[0].deckName").value("Test Deck"))
-                .andExpect(jsonPath("$.content[0].userId").value(1));
+                .andExpect(jsonPath("$", hasSize(1)))
+                .andExpect(jsonPath("$.[0].deckName").value("Test Deck"))
+                .andExpect(jsonPath("$.[0].userId").value(1));
 
-        verify(deckSearchService).getPublicDecksByUser(eq(1L), any());
+        verify(deckSearchService).getPublicDecksByUser(eq(1L));
     }
 }

@@ -6,11 +6,12 @@ import com.MagicTheGathering.deck.dto.DeckRequest;
 import com.MagicTheGathering.deck.dto.DeckResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/decks")
@@ -21,20 +22,14 @@ public class DeckController {
 
     @GetMapping("/my-decks")
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<Page<DeckResponse>> getMyDecks(
-            @RequestParam(defaultValue = "1") int page,
-            @RequestParam(defaultValue = "4") int size
-    ) {
-        Page<DeckResponse> decks = DECK_SERVICE.getAllDeckByUser(convertToZeroBasedPage(page), size);
+    public ResponseEntity<List<DeckResponse>> getMyDecks() {
+        List<DeckResponse> decks = DECK_SERVICE.getAllDeckByUser();
         return new ResponseEntity<>(decks, HttpStatus.OK);
     }
 
     @GetMapping("/public")
-    public ResponseEntity<Page<DeckResponse>> getPublicDecks(
-            @RequestParam(defaultValue = "1") int page,
-            @RequestParam(defaultValue = "4") int size
-    ) {
-        Page<DeckResponse> publicDecks = DECK_SERVICE.getAllPublicDecks(convertToZeroBasedPage(page), size);
+    public ResponseEntity<List<DeckResponse>> getPublicDecks() {
+        List<DeckResponse> publicDecks = DECK_SERVICE.getAllPublicDecks();
         return new ResponseEntity<>(publicDecks, HttpStatus.OK);
     }
 

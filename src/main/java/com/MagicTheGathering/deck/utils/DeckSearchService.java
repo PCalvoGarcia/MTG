@@ -11,9 +11,11 @@ import com.MagicTheGathering.user.UserRepository;
 import com.MagicTheGathering.user.exceptions.UserIdNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional(readOnly = true)
@@ -23,22 +25,26 @@ public class DeckSearchService {
     private final DeckRepository DECK_REPOSITORY;
     private final UserRepository USER_REPOSITORY;
 
-    public Page<DeckResponse> getDecksByFormat(String format, Pageable pageable){
+    public List<DeckResponse> getDecksByFormat(String format){
         try {
             Legality legality = Legality.valueOf(format.toUpperCase());
-            Page<Deck> decks = DECK_REPOSITORY.findByTypeAndIsPublicTrue(legality, pageable);
-            return decks.map(DeckMapperDto::fromEntity);
+            List<Deck> decks = DECK_REPOSITORY.findByTypeAndIsPublicTrue(legality);
+            return decks.stream()
+                    .map(DeckMapperDto::fromEntity)
+                    .collect(Collectors.toList());
         } catch (IllegalArgumentException e){
             throw new InvalidFormatsException( format, java.util.Arrays.toString(Legality.values()));
         }
     }
 
-    public Page<DeckResponse> getPublicDecksByUser(Long userId, Pageable pageable){
+    public List<DeckResponse> getPublicDecksByUser(Long userId){
         User user = USER_REPOSITORY.findById(userId)
                 .orElseThrow(() -> new UserIdNotFoundException(userId));
 
-        Page<Deck> decks = DECK_REPOSITORY.findByUserAndIsPublicTrue(user, pageable);
-        return decks.map(DeckMapperDto::fromEntity);
+        List<Deck> decks = DECK_REPOSITORY.findByUserAndIsPublicTrue(user);
+        return decks.stream()
+                .map(DeckMapperDto::fromEntity)
+                .collect(Collectors.toList());
     }
 
 }
