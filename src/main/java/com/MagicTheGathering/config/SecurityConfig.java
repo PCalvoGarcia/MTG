@@ -41,7 +41,7 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
-//                      CONNECT WITH FRONT
+//                      CONNECT WITH FRONT THROUGH NGROK TUNNEL
 //    @Bean
 //    public WebMvcConfigurer corsConfigurer() {
 //        return new WebMvcConfigurer() {
