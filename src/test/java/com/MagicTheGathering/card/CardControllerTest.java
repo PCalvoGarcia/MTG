@@ -12,11 +12,8 @@ import org.junit.jupiter.api.Test;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -29,8 +26,10 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
+import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
@@ -57,6 +56,7 @@ public class CardControllerTest {
     private ObjectMapper objectMapper;
 
     private CardResponse mockCardResponse;
+
     private MockMultipartFile imageFile;
 
 
@@ -141,20 +141,17 @@ public class CardControllerTest {
     @Test
     @WithMockUser(roles = {"USER"})
     void should_getAllCardsByUser() throws Exception {
-        // Create mock page response
-        Page<CardResponse> mockPage = new PageImpl<>(Arrays.asList(mockCardResponse));
-        when(cardService.getAllCardsByUser(eq(0), eq(4))).thenReturn(mockPage);
+        List<CardResponse> mockPage =Arrays.asList(mockCardResponse);
+        when(cardService.getAllCardsByUser()).thenReturn(mockPage);
 
         mockMvc.perform(get("/api/cards/my-cards")
-                        .param("page", "1")
-                        .param("size", "4")
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content").isArray())
-                .andExpect(jsonPath("$.content[0].id").value(1L))
-                .andExpect(jsonPath("$.content[0].name").value("Lightning Bolt"));
+                .andExpect(jsonPath("$", hasSize(1)))
+                .andExpect(jsonPath("$.[0].id").value(1L))
+                .andExpect(jsonPath("$.[0].name").value("Lightning Bolt"));
 
-        verify(cardService, times(1)).getAllCardsByUser(0, 4);
+        verify(cardService, times(1)).getAllCardsByUser();
     }
 
     @Test
@@ -199,7 +196,7 @@ public class CardControllerTest {
                         .param("endurance", "15")
                         .param("loyalty", "0")
                         .param("collection", "Core Set 2021")
-                        .param("cart_number", "137")
+                        .param("cardNumber", "137")
                         .param("artist", "Christopher Rush")
                         .param("edition", "M21")
                         .param("legality", Legality.BRAWL.name())
@@ -241,7 +238,7 @@ public class CardControllerTest {
                         .param("endurance", "15")
                         .param("loyalty", "0")
                         .param("collection", "Core Set 2021")
-                        .param("cart_number", "137")
+                        .param("cardNumber", "137")
                         .param("artist", "Christopher Rush")
                         .param("edition", "M21")
                         .param("legality", Legality.BRAWL.name())
@@ -262,10 +259,8 @@ public class CardControllerTest {
     @Test
     @WithMockUser(roles = "USER")
     void deleteCardById_ShouldReturnNoContent() throws Exception {
-        // Given
         doNothing().when(cardService).deleteCard(1L);
 
-        // When & Then
         mockMvc.perform(delete("/api/cards/1")
                         .with(csrf()))
                 .andExpect(status().isNoContent());
@@ -275,49 +270,15 @@ public class CardControllerTest {
 
     @Test
     @WithMockUser(roles = "USER")
-    void getMyCards_ShouldReturnPageOfCards() throws Exception {
-        // Given
-        Page<CardResponse> page = new PageImpl<>(Arrays.asList(mockCardResponse));
-        when(cardService.getAllCardsByUser(0, 4)).thenReturn(page);
-
-        // When & Then
-        mockMvc.perform(get("/api/cards/my-cards")
-                        .param("page", "1")
-                        .param("size", "4"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content[0].name").value("Lightning Bolt"))
-                .andExpect(jsonPath("$.content[0].id").value(1))
-                .andExpect(jsonPath("$.totalElements").value(1));
-
-        verify(cardService).getAllCardsByUser(0, 4);
-    }
-
-    @Test
-    @WithMockUser(roles = "USER")
     void getMyCardById_ShouldReturnCard() throws Exception {
-        // Given
         when(cardService.getCardById(1L)).thenReturn(mockCardResponse);
 
-        // When & Then
         mockMvc.perform(get("/api/cards/1"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value("Lightning Bolt"))
                 .andExpect(jsonPath("$.id").value(1));
 
         verify(cardService).getCardById(1L);
-    }
-    @Test
-    @WithMockUser(roles = {"USER"})
-    void should_returnDefaultPaginationValues_whenNoParamsProvided() throws Exception {
-        Page<CardResponse> mockPage = new PageImpl<>(Arrays.asList(mockCardResponse));
-        when(cardService.getAllCardsByUser(eq(0), eq(4))).thenReturn(mockPage);
-
-        mockMvc.perform(get("/api/cards/my-cards")
-                        .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content").isArray());
-
-        verify(cardService, times(1)).getAllCardsByUser(0, 4);
     }
 
     @Test

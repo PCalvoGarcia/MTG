@@ -70,7 +70,7 @@ class CardServiceHelperTest {
                 CardType.INSTANT,
                 "Instant",
                 1,
-                ManaColor.RED,
+                Set.of(ManaColor.RED),
                 "Lightning Bolt deals 3 damage to any target.",
                 0,
                 0,
@@ -80,7 +80,7 @@ class CardServiceHelperTest {
                 "Christopher Rush",
                 "M21",
                 mockFile,
-                Legality.STANDARD,
+                Set.of(Legality.STANDARD),
                 4
         );
     }
@@ -102,8 +102,8 @@ class CardServiceHelperTest {
     @Test
     void cloudinaryManagement_ShouldNotProcess_WhenImageIsNull() {
         CardRequest requestWithNullImage = new CardRequest(
-                "Test", CardType.INSTANT, "Test", 1, ManaColor.RED, "Test",
-                0, 0, 0, "Test", 1, "Test", "Test", null, Legality.STANDARD, 1
+                "Test", CardType.INSTANT, "Test", 1, Set.of(ManaColor.RED), "Test",
+                0, 0, 0, "Test", 1, "Test", "Test", null, Set.of(Legality.STANDARD), 1
         );
 
         cardServiceHelper.cloudinaryManagement(requestWithNullImage, testCard);
@@ -115,8 +115,8 @@ class CardServiceHelperTest {
     void cloudinaryManagement_ShouldNotProcess_WhenImageIsEmpty() {
         MockMultipartFile emptyFile = new MockMultipartFile("image", "", "image/jpeg", new byte[0]);
         CardRequest requestWithEmptyImage = new CardRequest(
-                "Test", CardType.INSTANT, "Test", 1, ManaColor.RED, "Test",
-                0, 0, 0, "Test", 1, "Test", "Test", emptyFile, Legality.STANDARD, 1
+                "Test", CardType.INSTANT, "Test", 1, Set.of(ManaColor.RED), "Test",
+                0, 0, 0, "Test", 1, "Test", "Test", emptyFile, Set.of(Legality.STANDARD), 1
         );
 
         cardServiceHelper.cloudinaryManagement(requestWithEmptyImage, testCard);
@@ -207,8 +207,8 @@ class CardServiceHelperTest {
         Card existingCard = Card.builder().id(1L).build();
 
         CardRequest requestWithNegativeQuantity = new CardRequest(
-                "Test", CardType.INSTANT, "Test", 1, ManaColor.RED, "Test",
-                0, 0, 0, "Test", 1, "Test", "Test", null, Legality.STANDARD, -1
+                "Test", CardType.INSTANT, "Test", 1, Set.of(ManaColor.RED), "Test",
+                0, 0, 0, "Test", 1, "Test", "Test", null, Set.of(Legality.STANDARD), -1
         );
 
         CardServiceHelper.updatePartOfCard(requestWithNegativeQuantity, newCard, existingCard, testUser);

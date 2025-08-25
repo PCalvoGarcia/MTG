@@ -19,7 +19,7 @@ INSERT INTO user_roles (user_id, roles) VALUES
 (7, 'USER');
 
 -- Insert cards associated with users
-INSERT INTO cards (created_at, name, specific_type, mana_total_cost, text_rules, power, endurance, loyalty, collection, cart_number, artist, edition, image_url, quantity, user_id) VALUES
+INSERT INTO cards (created_at, name, specific_type, mana_total_cost, text_rules, power, endurance, loyalty, collection, card_number, artist, edition, image_url, quantity, user_id) VALUES
 (NOW(), 'Lightning Bolt', 'Instant', 1, 'Lightning Bolt deals 3 damage to any target.', 0, 0, 0, 'Core Set 2021', 137, 'Christopher Rush', 'M21', 'https://example.com/lightning_bolt.jpg', 4, 3), -- John Doe
 (NOW(), 'Forest', 'Basic Land', 0, 'Add G.', 0, 0, 0, 'Zendikar Rising', 277, 'Adam Paquette', 'ZNR', 'https://example.com/forest.jpg', 10, 3), -- John Doe
 (NOW(), 'Grizzly Bears', 'Creature - Bear', 2, '', 2, 2, 0, 'Dominaria United', 170, 'Carl Critchlow', 'DMU', 'https://example.com/grizzly_bears.jpg', 2, 4), -- Jane Smith

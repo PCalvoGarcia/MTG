@@ -34,7 +34,7 @@ CREATE TABLE IF NOT EXISTS cards (
     endurance INT,
     loyalty INT,
     collection VARCHAR(255),
-    cart_number INT,
+    card_number INT,
     artist VARCHAR(255),
     edition VARCHAR(255),
     image_url VARCHAR(255),

@@ -19,9 +19,12 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.w3c.dom.stylesheets.LinkStyle;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -36,11 +39,13 @@ public class CardService {
     private final DeckCardRepository DECK_CARD_REPOSITORY;
 
     @Transactional(readOnly = true)
-    public Page<CardResponse> getAllCardsByUser(int page, int size) {
+    public List<CardResponse> getAllCardsByUser() {
         User user = USER_SERVICE.getAuthenticatedUser();
-        Pageable pageable = PageRequest.of(page, size);
-        Page<Card> cards = CARD_REPOSITORY.findByUser(user, pageable);
-        return cards.map(CardMapperDto::fromEntity);
+        List<CardResponse> cards = CARD_REPOSITORY.findByUser(user)
+                .stream()
+                .map(CardMapperDto::fromEntity)
+                .collect(Collectors.toList());
+        return cards;
     }
 
     @Transactional(readOnly = true)
@@ -66,8 +71,6 @@ public class CardService {
         return cardResponse;
     }
 
-
-
     public CardResponse updateCard(Long id, CardRequest cardRequest) {
         User user = USER_SERVICE.getAuthenticatedUser();
         Card cardIsExisting = CARD_REPOSITORY.findById(id)
@@ -84,8 +87,6 @@ public class CardService {
         CARD_SERVICE_HELPER.updatePartOfCard(cardRequest, newCard, cardIsExisting, user);
         return CardMapperDto.fromEntity(newCard);
     }
-
-
 
     public void deleteCard(Long id){
         User user = USER_SERVICE.getAuthenticatedUser();
@@ -106,8 +107,4 @@ public class CardService {
         CARD_SERVICE_HELPER.deleteImageCloudinary(publicId);
         CARD_REPOSITORY.delete(cardIsExisting);
     }
-
-
-
-
 }

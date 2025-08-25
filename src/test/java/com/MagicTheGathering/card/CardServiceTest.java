@@ -109,7 +109,7 @@ public class CardServiceTest {
                 CardType.INSTANT,
                 "Instant",
                 1,
-                ManaColor.RED,
+                 Set.of(ManaColor.RED),
                 "Lightning Bolt deals 3 damage to any target.",
                 0,
                 0,
@@ -119,7 +119,7 @@ public class CardServiceTest {
                 "Christopher Rush",
                 "M21",
                 mockFile,
-                Legality.STANDARD,
+                Set.of(Legality.STANDARD),
                 4
         );
     }
@@ -128,20 +128,18 @@ public class CardServiceTest {
     void getAllCardsByUser_ShouldReturnPageOfCards() {
         Pageable pageable = PageRequest.of(0, 4);
         List<Card> cards = Arrays.asList(testCard);
-        Page<Card> cardPage = new PageImpl<>(cards, pageable, 1);
 
         when(userService.getAuthenticatedUser()).thenReturn(testUser);
-        when(cardRepository.findByUser(testUser, pageable)).thenReturn(cardPage);
+        when(cardRepository.findByUser(testUser)).thenReturn(cards);
 
-        Page<CardResponse> result = cardService.getAllCardsByUser(0, 4);
+        List<CardResponse> result = cardService.getAllCardsByUser();
 
         assertNotNull(result);
-        assertEquals(1, result.getTotalElements());
-        assertEquals(1, result.getContent().size());
-        assertEquals("Lightning Bolt", result.getContent().get(0).name());
+        assertEquals(1, result.size());
+        assertEquals("Lightning Bolt", result.get(0).name());
 
         verify(userService).getAuthenticatedUser();
-        verify(cardRepository).findByUser(testUser, pageable);
+        verify(cardRepository).findByUser(testUser);
     }
 
     @Test

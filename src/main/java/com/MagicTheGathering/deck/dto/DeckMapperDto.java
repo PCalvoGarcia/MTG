@@ -40,7 +40,7 @@ public class DeckMapperDto {
                                 deckCard.getCard().getEndurance(),
                                 deckCard.getCard().getLoyalty(),
                                 deckCard.getCard().getCollection(),
-                                deckCard.getCard().getCartNumber(),
+                                deckCard.getCard().getCardNumber(),
                                 deckCard.getCard().getArtist(),
                                 deckCard.getCard().getEdition(),
                                 deckCard.getCard().getImageUrl(),
