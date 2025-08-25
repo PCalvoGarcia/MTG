@@ -86,7 +86,7 @@ public class CardServiceTest {
                 .endurance(0)
                 .loyalty(0)
                 .collection("Core Set 2021")
-                .cartNumber(137)
+                .cardNumber(137)
                 .artist("Christopher Rush")
                 .edition("M21")
                 .imageUrl("https://example.com/lightning_bolt.jpg")
