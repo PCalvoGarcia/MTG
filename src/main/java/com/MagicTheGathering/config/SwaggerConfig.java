@@ -22,7 +22,7 @@ public class SwaggerConfig {
         final String securitySchemeName = "bearerAuth";
 
         return new OpenAPI()
-                .addServersItem(new Server().url("https://53a0871d3114.ngrok-free.app"))
+//                .addServersItem(new Server().url("https://53a0871d3114.ngrok-free.app"))      ADD NGROK TUNNEL
                 .info(new Info()
                         .title("MTG API")
                         .version("1.0.0"))
