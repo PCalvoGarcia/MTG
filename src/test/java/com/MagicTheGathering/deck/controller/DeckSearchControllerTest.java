@@ -61,8 +61,8 @@ class DeckSearchControllerTest {
     @Test
     @WithMockUser(roles = "USER")
     void getDecksByFormat_ShouldReturnDecks() throws Exception {
-        Page<DeckResponse> deckPage = new PageImpl<>(List.of(testDeckResponse));
-        when(deckSearchService.getDecksByFormat(eq("STANDARD"), any())).thenReturn(deckPage);
+        List<DeckResponse> deckPage = List.of(testDeckResponse);
+        when(deckSearchService.getDecksByFormat(eq("STANDARD"))).thenReturn(deckPage);
 
         mockMvc.perform(get("/api/decks/search/by-format/STANDARD")
                         .param("page", "1")
@@ -72,14 +72,14 @@ class DeckSearchControllerTest {
                 .andExpect(jsonPath("$.content[0].deckName").value("Test Deck"))
                 .andExpect(jsonPath("$.content[0].type").value("STANDARD"));
 
-        verify(deckSearchService).getDecksByFormat(eq("STANDARD"), any());
+        verify(deckSearchService).getDecksByFormat(eq("STANDARD"));
     }
 
     @Test
     @WithMockUser(roles = "USER")
     void getPublicDecksByUser_ShouldReturnDecks() throws Exception {
-        Page<DeckResponse> deckPage = new PageImpl<>(List.of(testDeckResponse));
-        when(deckSearchService.getPublicDecksByUser(eq(1L), any())).thenReturn(deckPage);
+        List<DeckResponse> deckPage = List.of(testDeckResponse);
+        when(deckSearchService.getPublicDecksByUser(eq(1L))).thenReturn(deckPage);
 
         mockMvc.perform(get("/api/decks/search/by-user/1")
                         .param("page", "1")
@@ -89,6 +89,6 @@ class DeckSearchControllerTest {
                 .andExpect(jsonPath("$.content[0].deckName").value("Test Deck"))
                 .andExpect(jsonPath("$.content[0].userId").value(1));
 
-        verify(deckSearchService).getPublicDecksByUser(eq(1L), any());
+        verify(deckSearchService).getPublicDecksByUser(eq(1L));
     }
 }

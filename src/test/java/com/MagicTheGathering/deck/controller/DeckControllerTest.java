@@ -66,8 +66,7 @@ class DeckControllerTest {
         testDeckRequest = new DeckRequest(
                 "Test Deck",
                 true,
-                Legality.STANDARD,
-                1L
+                Legality.STANDARD
         );
 
         addCardRequest = new AddCardDeckRequest(1L, 2);
@@ -76,11 +75,9 @@ class DeckControllerTest {
     @Test
     @WithMockUser(roles = "USER")
     void getMyDecks_WithValidUser_ShouldReturnDecks() throws Exception {
-        // Given
-        Page<DeckResponse> deckPage = new PageImpl<>(List.of(testDeckResponse));
-        when(deckService.getAllDeckByUser(0, 4)).thenReturn(deckPage);
+        List<DeckResponse> deckPage = List.of(testDeckResponse);
+        when(deckService.getAllDeckByUser()).thenReturn(deckPage);
 
-        // When & Then
         mockMvc.perform(get("/api/decks/my-decks")
                         .param("page", "1")
                         .param("size", "4"))
@@ -89,15 +86,14 @@ class DeckControllerTest {
                 .andExpect(jsonPath("$.content[0].deckName").value("Test Deck"))
                 .andExpect(jsonPath("$.content[0].id").value(1));
 
-        verify(deckService).getAllDeckByUser(0, 4);
+        verify(deckService).getAllDeckByUser();
     }
 
     @Test
     @WithMockUser(roles = "USER")
     void getPublicDecks_WithoutAuthentication_ShouldReturnDecks() throws Exception {
-        // Given
-        Page<DeckResponse> deckPage = new PageImpl<>(List.of(testDeckResponse));
-        when(deckService.getAllPublicDecks(0, 4)).thenReturn(deckPage);
+        List<DeckResponse> deckPage = List.of(testDeckResponse);
+        when(deckService.getAllPublicDecks()).thenReturn(deckPage);
 
         // When & Then
         mockMvc.perform(get("/api/decks/public")
@@ -107,7 +103,7 @@ class DeckControllerTest {
                 .andExpect(jsonPath("$.content").isArray())
                 .andExpect(jsonPath("$.content[0].deckName").value("Test Deck"));
 
-        verify(deckService).getAllPublicDecks(0, 4);
+        verify(deckService).getAllPublicDecks();
     }
 
     @Test
@@ -151,8 +147,7 @@ class DeckControllerTest {
         DeckRequest invalidRequest = new DeckRequest(
                 "", // Invalid: empty name
                 true,
-                Legality.STANDARD,
-                1L
+                Legality.STANDARD
         );
 
         // When & Then

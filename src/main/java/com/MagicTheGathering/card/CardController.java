@@ -22,10 +22,7 @@ public class CardController {
 
     @GetMapping("/my-cards")
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<List<CardResponse>> getMyCards(
-            @RequestParam(defaultValue = "1") int page,
-            @RequestParam(defaultValue = "4") int size
-    ){
+    public ResponseEntity<List<CardResponse>> getMyCards(){
         List<CardResponse> cards = CARD_SERVICE.getAllCardsByUser();
         return new ResponseEntity<>(cards, HttpStatus.OK);
     }

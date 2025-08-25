@@ -2,7 +2,6 @@ package com.MagicTheGathering.deck;
 
 import com.MagicTheGathering.Exceptions.UnauthorizedModificationsException;
 import com.MagicTheGathering.card.Card;
-import com.MagicTheGathering.card.CardService;
 import com.MagicTheGathering.deck.dto.AddCardDeckRequest;
 import com.MagicTheGathering.deck.dto.DeckMapperDto;
 import com.MagicTheGathering.deck.dto.DeckRequest;
@@ -18,11 +17,11 @@ import com.MagicTheGathering.user.User;
 import com.MagicTheGathering.user.UserService;
 import com.MagicTheGathering.user.utils.UserSecurityUtils;
 import lombok.AllArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -37,19 +36,21 @@ public class DeckService {
     private final DeckCardService DECK_CARD_SERVICE;
 
     @Transactional(readOnly = true)
-    public Page<DeckResponse> getAllDeckByUser(int page, int size) {
+    public List<DeckResponse> getAllDeckByUser() {
         User user = USER_SERVICE.getAuthenticatedUser();
-        Pageable pageable = PageRequest.of(page, size);
-        Page<Deck> decks = DECK_REPOSITORY.findByUser(user, pageable);
-        return decks.map(DeckMapperDto::fromEntity);
+        List<Deck> decks = DECK_REPOSITORY.findByUser(user);
+        return decks.stream()
+                .map(DeckMapperDto::fromEntity)
+                .collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
-    public Page<DeckResponse> getAllPublicDecks(int page, int size){
+    public List<DeckResponse> getAllPublicDecks(){
         User user = USER_SERVICE.getAuthenticatedUser();
-        Pageable pageable = PageRequest.of(page, size);
-        Page<Deck> decks = DECK_REPOSITORY.findByIsPublicTrue(pageable);
-        return decks.map(DeckMapperDto::fromEntity);
+        List<Deck> decks = DECK_REPOSITORY.findByIsPublicTrue();
+        return decks.stream()
+                .map(DeckMapperDto::fromEntity)
+                .collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)

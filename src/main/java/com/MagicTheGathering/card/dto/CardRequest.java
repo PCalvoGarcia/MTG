@@ -18,7 +18,7 @@ public record CardRequest(
 
         String specificType,
 
-        @Positive
+        @PositiveOrZero
         @Max(16)
         int manaTotalCost,
 

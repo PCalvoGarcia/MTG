@@ -3,18 +3,17 @@ package com.MagicTheGathering.deck;
 import com.MagicTheGathering.legality.Legality;
 import com.MagicTheGathering.user.User;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
+
+import java.util.List;
 
 public interface DeckRepository extends JpaRepository<Deck, Long> {
-    Page<Deck> findByUser(User user, Pageable pageable);
+    List<Deck> findByUser(User user);
 
-    Page<Deck> findByIsPublicTrue(Pageable pageable);
+    List<Deck> findByIsPublicTrue();
 
-    Page<Deck> findByTypeAndIsPublicTrue(Legality legality, Pageable pageable);
+    List<Deck> findByTypeAndIsPublicTrue(Legality legality);
 
-    Page<Deck> findByUserAndIsPublicTrue(User user, Pageable pageable);
+    List<Deck> findByUserAndIsPublicTrue(User user);
 
 }
