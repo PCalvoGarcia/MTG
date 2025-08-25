@@ -60,8 +60,8 @@ public class Card {
 
     private String collection;
 
-    @Column(name = "cart_number")
-    private int cartNumber;
+    @Column(name = "card_number")
+    private int cardNumber;
 
     private String artist;
 
