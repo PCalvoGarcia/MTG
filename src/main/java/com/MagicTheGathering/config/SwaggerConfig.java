@@ -9,6 +9,7 @@ import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
+import io.swagger.v3.oas.models.servers.Server;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -21,6 +22,7 @@ public class SwaggerConfig {
         final String securitySchemeName = "bearerAuth";
 
         return new OpenAPI()
+                .addServersItem(new Server().url("https://53a0871d3114.ngrok-free.app"))
                 .info(new Info()
                         .title("MTG API")
                         .version("1.0.0"))
@@ -39,8 +41,8 @@ public class SwaggerConfig {
                         .addResponses("Unauthorized", apiResponse(401, "Authentication required"))
                         .addResponses("Forbidden", apiResponse(403, "You do not have permission to access this resource"))
                         .addResponses("NotFound", apiResponse(404, "Requested resource not found"))
-                        .addResponses("DestinationNotFound", apiResponse(404, "Destination not found."))
-                        .addResponses("ReviewNotFound", apiResponse(404, "Review not found."))
+                        .addResponses("CardNotFound", apiResponse(404, "Card not found."))
+                        .addResponses("DeckNotFound", apiResponse(404, "Deck not found."))
                         .addResponses("UserNotFound", apiResponse(404, "User not found."))
                         .addResponses("InternalServerError", apiResponse(500, "Internal server error"))
                         .addResponses("NoContent", new ApiResponse()
