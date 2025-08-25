@@ -2,14 +2,12 @@ package com.MagicTheGathering.deck.controller;
 
 import com.MagicTheGathering.deck.dto.DeckResponse;
 import com.MagicTheGathering.deck.utils.DeckSearchService;
-import com.MagicTheGathering.legality.Legality;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -37,7 +35,4 @@ public class DeckSearchController {
         return new ResponseEntity<>(decks, HttpStatus.OK);
     }
 
-    private int convertToZeroBasedPage(int page) {
-        return page - 1;
-    }
 }

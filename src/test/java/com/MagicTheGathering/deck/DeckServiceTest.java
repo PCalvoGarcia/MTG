@@ -100,8 +100,7 @@ class DeckServiceTest {
 
     @Test
     void getAllDeckByUser_ShouldReturnUserDecks() {
-        Pageable pageable = PageRequest.of(0, 4);
-        List<Deck> deckPage =List.of(testDeck);
+        List<Deck> deckPage = List.of(testDeck);
 
         when(userService.getAuthenticatedUser()).thenReturn(testUser);
         when(deckRepository.findByUser(testUser)).thenReturn(deckPage);
@@ -109,7 +108,7 @@ class DeckServiceTest {
         List<DeckResponse> result = deckService.getAllDeckByUser();
 
         assertThat(result).isNotNull();
-        assertEquals(1, result.size());
+        assertEquals(1,result.size());
         assertThat(result.get(0).deckName()).isEqualTo("Test Deck");
 
         verify(userService).getAuthenticatedUser();
@@ -118,7 +117,6 @@ class DeckServiceTest {
 
     @Test
     void getAllPublicDecks_ShouldReturnPublicDecks() {
-        Pageable pageable = PageRequest.of(0, 4);
         List<Deck> deckPage = List.of(testDeck);
 
         when(userService.getAuthenticatedUser()).thenReturn(testUser);

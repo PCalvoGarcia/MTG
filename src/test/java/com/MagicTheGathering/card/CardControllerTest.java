@@ -129,7 +129,6 @@ public class CardControllerTest {
     void should_deleteCard_whenAuthorized() throws Exception {
         Long cardId = 1L;
 
-        // Mock the service method to not throw any exception
         doNothing().when(cardService).deleteCard(cardId);
 
         mockMvc.perform(delete("/api/cards/{id}", cardId))
