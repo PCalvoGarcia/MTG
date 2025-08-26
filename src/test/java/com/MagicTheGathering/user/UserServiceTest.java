@@ -314,6 +314,14 @@ public class UserServiceTest {
             RuntimeException exception = assertThrows(RuntimeException.class, () -> userService.getAllUsers());
             assertEquals(new EmptyListException().getMessage(), exception.getMessage());
         }
+
+        @Test
+        void should_getAllUsers_throws_emptyList() {
+            when(userServiceHelper.getAllUserResponseList()).thenReturn(List.of());
+
+            RuntimeException exception = assertThrows(RuntimeException.class, () -> userService.getAllUsers());
+            assertEquals(new EmptyListException().getMessage(), exception.getMessage());
+        }
     }
 
     @Nested
