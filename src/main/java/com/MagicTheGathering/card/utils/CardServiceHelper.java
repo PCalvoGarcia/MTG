@@ -51,7 +51,6 @@ public class CardServiceHelper {
             card.setImageUrl(imageUrl);
         } catch (Exception e) {
             card.setImageUrl("http://localhost:8080/images/dream-logo.png");
-            System.out.println("Fallo Cloudinary, usando imagen por defecto: " + card.getImageUrl());
         }
     }
 
