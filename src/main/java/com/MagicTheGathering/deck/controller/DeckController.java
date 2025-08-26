@@ -85,9 +85,5 @@ public class DeckController {
         DeckResponse updatedDeck = DECK_SERVICE.removeCardFromDeck(deckId, cardId, quantity);
         return new ResponseEntity<>(updatedDeck, HttpStatus.OK);
     }
-
-    private int convertToZeroBasedPage(int page) {
-        return page - 1;
-    }
 }
 

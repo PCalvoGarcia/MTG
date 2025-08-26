@@ -15,8 +15,10 @@ import com.MagicTheGathering.deckCartId.DeckCardId;
 import com.MagicTheGathering.legality.Legality;
 import com.MagicTheGathering.user.User;
 import com.MagicTheGathering.user.UserService;
+import com.MagicTheGathering.user.exceptions.UsernameAlreadyExistException;
 import com.MagicTheGathering.user.utils.UserSecurityUtils;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -34,6 +36,7 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
@@ -131,46 +134,70 @@ class DeckServiceTest {
         verify(deckRepository).findByIsPublicTrue();
     }
 
-    @Test
-    void getDeckById_WhenAuthorized_ShouldReturnDeck() {
-        when(deckRepository.findById(1L)).thenReturn(Optional.of(testDeck));
-        when(userService.getAuthenticatedUser()).thenReturn(testUser);
 
-        DeckResponse result = deckService.getDeckById(1L);
+    @Nested
+    class GetDeckById {
 
-        assertThat(result).isNotNull();
-        assertThat(result.deckName()).isEqualTo("Test Deck");
-        assertThat(result.id()).isEqualTo(1L);
+        @Test
+        void getDeckById_WhenAuthorized_ShouldReturnDeck() {
+            when(deckRepository.findById(1L)).thenReturn(Optional.of(testDeck));
+            when(userService.getAuthenticatedUser()).thenReturn(testUser);
 
-        verify(deckRepository).findById(1L);
-        verify(userService).getAuthenticatedUser();
-    }
+            DeckResponse result = deckService.getDeckById(1L);
 
-    @Test
-    void getDeckById_WhenNotFound_ShouldThrowException() {
-        when(deckRepository.findById(1L)).thenReturn(Optional.empty());
+            assertThat(result).isNotNull();
+            assertThat(result.deckName()).isEqualTo("Test Deck");
+            assertThat(result.id()).isEqualTo(1L);
 
-        assertThatThrownBy(() -> deckService.getDeckById(1L))
-                .isInstanceOf(RuntimeException.class)
-                .hasMessageContaining("deck not found");
+            verify(deckRepository).findById(1L);
+            verify(userService).getAuthenticatedUser();
+        }
 
-        verify(deckRepository).findById(1L);
-    }
+        @Test
+        void getDeckById_WhenNotFound_ShouldThrowException() {
+            when(deckRepository.findById(1L)).thenReturn(Optional.empty());
 
-    @Test
-    void getDeckById_WhenNotAuthorizedForPrivateDeck_ShouldThrowException() {
-        testDeck.setIsPublic(false);
+            assertThatThrownBy(() -> deckService.getDeckById(1L))
+                    .isInstanceOf(RuntimeException.class)
+                    .hasMessageContaining("Deck not found");
 
-        when(deckRepository.findById(1L)).thenReturn(Optional.of(testDeck));
-        when(userService.getAuthenticatedUser()).thenReturn(testUser);
-        when(userSecurityUtils.isAuthorizedToModifyDeck(testDeck)).thenReturn(false);
+            verify(deckRepository).findById(1L);
+        }
 
-        assertThatThrownBy(() -> deckService.getDeckById(1L))
-                .isInstanceOf(RuntimeException.class)
-                .hasMessageContaining("unauthorized");
+        @Test
+        void getDeckById_WhenNotAuthorizedForPrivateDeck_ShouldThrowException() {
+            testDeck.setIsPublic(false);
 
-        verify(deckRepository).findById(1L);
-        verify(userSecurityUtils).isAuthorizedToModifyDeck(testDeck);
+            when(deckRepository.findById(1L)).thenReturn(Optional.of(testDeck));
+            when(userService.getAuthenticatedUser()).thenReturn(testUser);
+            when(userSecurityUtils.isAuthorizedToModifyDeck(testDeck)).thenReturn(false);
+
+            assertThatThrownBy(() -> deckService.getDeckById(1L))
+                    .isInstanceOf(RuntimeException.class)
+                    .hasMessageContaining("Unauthorized");
+
+            verify(deckRepository).findById(1L);
+            verify(userSecurityUtils).isAuthorizedToModifyDeck(testDeck);
+        }
+
+        @Test
+        void getDeckById_WhenNotPublicButUserIsAuthorized_ShouldReturnDeck() {
+            testDeck.setIsPublic(false);
+
+            when(deckRepository.findById(1L)).thenReturn(Optional.of(testDeck));
+            when(userService.getAuthenticatedUser()).thenReturn(testUser);
+            when(userSecurityUtils.isAuthorizedToModifyDeck(testDeck)).thenReturn(true);
+
+            DeckResponse result = deckService.getDeckById(1L);
+
+            assertThat(result).isNotNull();
+            assertThat(result.deckName()).isEqualTo("Test Deck");
+            assertThat(result.id()).isEqualTo(1L);
+            verify(deckRepository).findById(1L);
+            verify(userService).getAuthenticatedUser();
+            verify(userSecurityUtils).isAuthorizedToModifyDeck(testDeck);
+        }
+
     }
 
     @Test
@@ -187,183 +214,278 @@ class DeckServiceTest {
         verify(deckRepository).save(any(Deck.class));
     }
 
-    @Test
-    void updateDeck_WhenAuthorized_ShouldReturnUpdatedDeck() {
-        DeckRequest updateRequest = new DeckRequest(
-                "Updated Deck",
-                false,
-                Legality.MODERN
-        );
+    @Nested
+    class UpdateDeck {
 
-        when(userService.getAuthenticatedUser()).thenReturn(testUser);
-        when(deckRepository.findById(1L)).thenReturn(Optional.of(testDeck));
-        when(userSecurityUtils.isAuthorizedToModifyDeck(testDeck)).thenReturn(true);
+        @Test
+        void updateDeck_WhenAuthorized_ShouldReturnUpdatedDeck() {
+            DeckRequest updateRequest = new DeckRequest(
+                    "Updated Deck",
+                    false,
+                    Legality.MODERN
+            );
 
-        DeckResponse result = deckService.updateDeck(1L, updateRequest);
+            when(userService.getAuthenticatedUser()).thenReturn(testUser);
+            when(deckRepository.findById(1L)).thenReturn(Optional.of(testDeck));
+            when(userSecurityUtils.isAuthorizedToModifyDeck(testDeck)).thenReturn(true);
 
-        assertThat(result).isNotNull();
-        assertThat(testDeck.getDeckName()).isEqualTo("Updated Deck");
-        assertThat(testDeck.getIsPublic()).isFalse();
-        assertThat(testDeck.getType()).isEqualTo(Legality.MODERN);
+            DeckResponse result = deckService.updateDeck(1L, updateRequest);
 
-        verify(deckRepository).findById(1L);
-        verify(userSecurityUtils).isAuthorizedToModifyDeck(testDeck);
+            assertThat(result).isNotNull();
+            assertThat(testDeck.getDeckName()).isEqualTo("Updated Deck");
+            assertThat(testDeck.getIsPublic()).isFalse();
+            assertThat(testDeck.getType()).isEqualTo(Legality.MODERN);
+
+            verify(deckRepository).findById(1L);
+            verify(userSecurityUtils).isAuthorizedToModifyDeck(testDeck);
+        }
+
+        @Test
+        void updateDeck_WhenNotAuthorized_ShouldThrowException() {
+            when(userService.getAuthenticatedUser()).thenReturn(testUser);
+            when(deckRepository.findById(1L)).thenReturn(Optional.of(testDeck));
+            when(userSecurityUtils.isAuthorizedToModifyDeck(testDeck)).thenReturn(false);
+
+            assertThatThrownBy(() -> deckService.updateDeck(1L, deckRequest))
+                    .isInstanceOf(UnauthorizedModificationsException.class);
+
+            verify(userSecurityUtils).isAuthorizedToModifyDeck(testDeck);
+        }
+
+        @Test
+        void updateDeck_WhenDeckNotFound_ShouldThrowException() {
+            when(userService.getAuthenticatedUser()).thenReturn(testUser);
+            when(deckRepository.findById(999L)).thenReturn(Optional.empty());
+
+            assertThatThrownBy(() -> deckService.updateDeck(999L, deckRequest))
+                    .isInstanceOf(DeckIdNotFoundException.class);
+
+            verify(deckRepository).findById(999L);
+        }
+
     }
 
-    @Test
-    void updateDeck_WhenNotAuthorized_ShouldThrowException() {
-        when(userService.getAuthenticatedUser()).thenReturn(testUser);
-        when(deckRepository.findById(1L)).thenReturn(Optional.of(testDeck));
-        when(userSecurityUtils.isAuthorizedToModifyDeck(testDeck)).thenReturn(false);
+    @Nested
+    class DeleteDeck {
 
-        assertThatThrownBy(() -> deckService.updateDeck(1L, deckRequest))
-                .isInstanceOf(UnauthorizedModificationsException.class);
+        @Test
+        void deleteDeck_WhenAuthorized_ShouldDeleteDeck() {
+            when(userService.getAuthenticatedUser()).thenReturn(testUser);
+            when(deckRepository.findById(1L)).thenReturn(Optional.of(testDeck));
 
-        verify(userSecurityUtils).isAuthorizedToModifyDeck(testDeck);
+            deckService.deleteDeck(1L);
+
+            verify(deckRepository).findById(1L);
+            verify(deckRepository).delete(testDeck);
+        }
+
+        @Test
+        void deleteDeck_whenAuthorizedAndPrivate() {
+            testDeck.setIsPublic(false);
+
+            when(deckRepository.findById(1L)).thenReturn(Optional.of(testDeck));
+            when(userService.getAuthenticatedUser()).thenReturn(testUser);
+            when(userSecurityUtils.isAuthorizedToModifyDeck(testDeck)).thenReturn(true);
+
+            deckService.deleteDeck(1L);
+
+            verify(deckRepository).findById(1L);
+            verify(userSecurityUtils).isAuthorizedToModifyDeck(testDeck);
+        }
+
+        @Test
+        void deleteDeck_whenUnauthorizedAndPrivate_should_throwException() {
+            testDeck.setIsPublic(false);
+
+            when(deckRepository.findById(1L)).thenReturn(Optional.of(testDeck));
+            when(userService.getAuthenticatedUser()).thenReturn(testUser);
+            when(userSecurityUtils.isAuthorizedToModifyDeck(testDeck)).thenReturn(false);
+
+            RuntimeException exception = assertThrows(RuntimeException.class, () -> deckService.deleteDeck(1L));
+            assertEquals(new UnauthorizedModificationsException().getMessage(), exception.getMessage());
+        }
+
+        @Test
+        void deleteDeck_WhenDeckNotFound_ShouldThrowException() {
+            when(userService.getAuthenticatedUser()).thenReturn(testUser);
+            when(deckRepository.findById(999L)).thenReturn(Optional.empty());
+
+            assertThatThrownBy(() -> deckService.deleteDeck(999L))
+                    .isInstanceOf(DeckIdNotFoundException.class);
+
+            verify(deckRepository).findById(999L);
+        }
+
     }
 
-    @Test
-    void deleteDeck_WhenAuthorized_ShouldDeleteDeck() {
-        when(userService.getAuthenticatedUser()).thenReturn(testUser);
-        when(deckRepository.findById(1L)).thenReturn(Optional.of(testDeck));
+    @Nested
+    class addCardToDeck{
 
-        deckService.deleteDeck(1L);
+        @Test
+        void addCardToDeck_ShouldAddCardSuccessfully() {
+            AddCardDeckRequest request = new AddCardDeckRequest(1L, 2);
+            DeckCardId deckCardId = new DeckCardId(1L, 1L);
 
-        verify(deckRepository).findById(1L);
-        verify(deckRepository).delete(testDeck);
+            DeckCard existingDeckCard = new DeckCard();
+            existingDeckCard.setId(deckCardId);
+            existingDeckCard.setQuantity(2);
+            existingDeckCard.setCard(testCard);
+
+            when(userService.getAuthenticatedUser()).thenReturn(testUser);
+            when(deckRepository.findById(1L)).thenReturn(Optional.of(testDeck));
+
+            when(userSecurityUtils.isAuthorizedToModifyDeck(any(Deck.class))).thenReturn(true);
+
+            when(userSecurityUtils.findCardById(any(AddCardDeckRequest.class))).thenReturn(testCard);
+            when(deckCardService.getExistingDeckCard(deckCardId)).thenReturn(existingDeckCard);
+
+            DeckResponse result = deckService.addCardToDeck(1L, request);
+
+            assertThat(result).isNotNull();
+            assertThat(existingDeckCard.getQuantity()).isEqualTo(4);
+
+            verify(deckServiceHelper).validateCardAddition(testDeck, testCard, 2);
+            verify(deckServiceHelper).validateMaxCopiesLand(testCard, 4);
+            verify(deckCardRepository).save(existingDeckCard);
+        }
+
+        @Test
+        void addCardToDeck_WhenCardExists_ShouldUpdateQuantity() {
+            AddCardDeckRequest request = new AddCardDeckRequest(1L, 2);
+            DeckCardId deckCardId = new DeckCardId(1L, 1L);
+
+            DeckCard existingDeckCard = new DeckCard();
+            existingDeckCard.setId(deckCardId);
+            existingDeckCard.setQuantity(2);
+            existingDeckCard.setCard(testCard);
+
+            when(userService.getAuthenticatedUser()).thenReturn(testUser);
+            when(deckRepository.findById(1L)).thenReturn(Optional.of(testDeck));
+            when(userSecurityUtils.isAuthorizedToModifyDeck(testDeck)).thenReturn(true);
+            when(userSecurityUtils.findCardById(request)).thenReturn(testCard);
+            when(deckCardService.getExistingDeckCard(deckCardId)).thenReturn(existingDeckCard);
+            when(deckRepository.findById(1L)).thenReturn(Optional.of(testDeck));
+
+            DeckResponse result = deckService.addCardToDeck(1L, request);
+
+            assertThat(result).isNotNull();
+            assertThat(existingDeckCard.getQuantity()).isEqualTo(4);
+
+            verify(deckServiceHelper).validateMaxCopiesLand(testCard, 4);
+            verify(deckCardRepository).save(existingDeckCard);
+        }
+
+        @Test
+        void addCardToDeck_whenUnauthorized_throw_exception() {
+            testDeck.setIsPublic(false);
+            AddCardDeckRequest request = new AddCardDeckRequest(1L, 2);
+
+            when(deckRepository.findById(1L)).thenReturn(Optional.of(testDeck));
+            when(userService.getAuthenticatedUser()).thenReturn(testUser);
+            when(userSecurityUtils.isAuthorizedToModifyDeck(testDeck)).thenReturn(false);
+
+            RuntimeException exception = assertThrows(RuntimeException.class, () -> deckService.addCardToDeck(1L,request ));
+            assertEquals(new UnauthorizedModificationsException().getMessage(), exception.getMessage());
+        }
+
+        @Test
+        void addCardToDeck_WhenCardNotExists() {
+            AddCardDeckRequest request = new AddCardDeckRequest(1L, 2);
+            DeckCardId deckCardId = new DeckCardId(1L, 1L);
+
+            DeckCard newDeckCard = new DeckCard();
+            newDeckCard.setId(deckCardId);
+            newDeckCard.setQuantity(2);
+            newDeckCard.setCard(testCard);
+
+            when(userService.getAuthenticatedUser()).thenReturn(testUser);
+            when(deckRepository.findById(1L)).thenReturn(Optional.of(testDeck));
+            when(userSecurityUtils.isAuthorizedToModifyDeck(testDeck)).thenReturn(true);
+            when(userSecurityUtils.findCardById(request)).thenReturn(testCard);
+            when(deckCardService.getExistingDeckCard(deckCardId)).thenReturn(null);
+            when(deckRepository.findById(1L)).thenReturn(Optional.of(testDeck));
+
+
+            DeckResponse result = deckService.addCardToDeck(1L, request);
+
+            assertThat(result).isNotNull();
+
+            verify(deckServiceHelper).validateCardAddition(testDeck, testCard, 2);
+            verify(deckCardRepository).save(newDeckCard);
+        }
     }
 
-    @Test
-    void addCardToDeck_ShouldAddCardSuccessfully() {
-        AddCardDeckRequest request = new AddCardDeckRequest(1L, 2);
-        DeckCardId deckCardId = new DeckCardId(1L, 1L);
+    @Nested
+    class removeCardFromDeck{
 
-        DeckCard existingDeckCard = new DeckCard();
-        existingDeckCard.setId(deckCardId);
-        existingDeckCard.setQuantity(2);
-        existingDeckCard.setCard(testCard);
+        @Test
+        void removeCardFromDeck_ShouldRemoveCardSuccessfully() {
+            DeckCardId deckCardId = new DeckCardId(1L, 1L);
+            DeckCard deckCard = new DeckCard();
+            deckCard.setId(deckCardId);
+            deckCard.setQuantity(3);
 
-        when(userService.getAuthenticatedUser()).thenReturn(testUser);
-        when(deckRepository.findById(1L)).thenReturn(Optional.of(testDeck));
+            when(userService.getAuthenticatedUser()).thenReturn(testUser);
+            when(deckRepository.findById(1L)).thenReturn(Optional.of(testDeck));
+            when(userSecurityUtils.isAuthorizedToModifyDeck(testDeck)).thenReturn(true);
+            when(deckCardRepository.findById(deckCardId)).thenReturn(Optional.of(deckCard));
+            when(deckRepository.findById(1L)).thenReturn(Optional.of(testDeck));
 
-        when(userSecurityUtils.isAuthorizedToModifyDeck(any(Deck.class))).thenReturn(true);
+            DeckResponse result = deckService.removeCardFromDeck(1L, 1L, 2);
 
-        when(userSecurityUtils.findCardById(any(AddCardDeckRequest.class))).thenReturn(testCard);
-        when(deckCardService.getExistingDeckCard(deckCardId)).thenReturn(existingDeckCard);
+            assertThat(result).isNotNull();
+            assertThat(deckCard.getQuantity()).isEqualTo(1);
 
-        DeckResponse result = deckService.addCardToDeck(1L, request);
+            verify(deckCardRepository).save(deckCard);
+            verify(deckRepository, times(2)).findById(1L);
+        }
 
-        assertThat(result).isNotNull();
-        assertThat(existingDeckCard.getQuantity()).isEqualTo(4);
+        @Test
+        void removeCardFromDeck_WhenRemovingAllCopies_ShouldDeleteCard() {
+            DeckCardId deckCardId = new DeckCardId(1L, 1L);
+            DeckCard deckCard = new DeckCard();
+            deckCard.setId(deckCardId);
+            deckCard.setQuantity(2);
 
-        verify(deckServiceHelper).validateCardAddition(testDeck, testCard, 2);
-        verify(deckServiceHelper).validateMaxCopiesLand(testCard, 4);
-        verify(deckCardRepository).save(existingDeckCard);
-    }
+            when(userService.getAuthenticatedUser()).thenReturn(testUser);
+            when(deckRepository.findById(1L)).thenReturn(Optional.of(testDeck));
+            when(userSecurityUtils.isAuthorizedToModifyDeck(testDeck)).thenReturn(true);
+            when(deckCardRepository.findById(deckCardId)).thenReturn(Optional.of(deckCard));
+            when(deckRepository.findById(1L)).thenReturn(Optional.of(testDeck));
 
-    @Test
-    void addCardToDeck_WhenCardExists_ShouldUpdateQuantity() {
-        AddCardDeckRequest request = new AddCardDeckRequest(1L, 2);
-        DeckCardId deckCardId = new DeckCardId(1L, 1L);
+            DeckResponse result = deckService.removeCardFromDeck(1L, 1L, 3);
 
-        DeckCard existingDeckCard = new DeckCard();
-        existingDeckCard.setId(deckCardId);
-        existingDeckCard.setQuantity(2);
-        existingDeckCard.setCard(testCard);
+            assertThat(result).isNotNull();
 
-        when(userService.getAuthenticatedUser()).thenReturn(testUser);
-        when(deckRepository.findById(1L)).thenReturn(Optional.of(testDeck));
-        when(userSecurityUtils.isAuthorizedToModifyDeck(testDeck)).thenReturn(true);
-        when(userSecurityUtils.findCardById(request)).thenReturn(testCard);
-        when(deckCardService.getExistingDeckCard(deckCardId)).thenReturn(existingDeckCard);
-        when(deckRepository.findById(1L)).thenReturn(Optional.of(testDeck));
+            verify(deckCardRepository).delete(deckCard);
+            verify(deckCardRepository, never()).save(any(DeckCard.class));
+        }
 
-        DeckResponse result = deckService.addCardToDeck(1L, request);
+        @Test
+        void removeCardFromDeck_WhenCardNotInDeck_ShouldThrowException() {
+            DeckCardId deckCardId = new DeckCardId(1L, 1L);
 
-        assertThat(result).isNotNull();
-        assertThat(existingDeckCard.getQuantity()).isEqualTo(4);
+            when(userService.getAuthenticatedUser()).thenReturn(testUser);
+            when(deckRepository.findById(1L)).thenReturn(Optional.of(testDeck));
+            when(userSecurityUtils.isAuthorizedToModifyDeck(testDeck)).thenReturn(true);
+            when(deckCardRepository.findById(deckCardId)).thenReturn(Optional.empty());
 
-        verify(deckServiceHelper).validateMaxCopiesLand(testCard, 4);
-        verify(deckCardRepository).save(existingDeckCard);
-    }
+            assertThatThrownBy(() -> deckService.removeCardFromDeck(1L, 1L, 1))
+                    .isInstanceOf(CardIdNotFoundInDeckException.class);
 
-    @Test
-    void removeCardFromDeck_ShouldRemoveCardSuccessfully() {
-        DeckCardId deckCardId = new DeckCardId(1L, 1L);
-        DeckCard deckCard = new DeckCard();
-        deckCard.setId(deckCardId);
-        deckCard.setQuantity(3);
+            verify(deckCardRepository).findById(deckCardId);
+        }
 
-        when(userService.getAuthenticatedUser()).thenReturn(testUser);
-        when(deckRepository.findById(1L)).thenReturn(Optional.of(testDeck));
-        when(userSecurityUtils.isAuthorizedToModifyDeck(testDeck)).thenReturn(true);
-        when(deckCardRepository.findById(deckCardId)).thenReturn(Optional.of(deckCard));
-        when(deckRepository.findById(1L)).thenReturn(Optional.of(testDeck));
+        @Test
+        void removeCardFromDeck_when_UserIsUnauthorized() {
+            DeckCardId deckCardId = new DeckCardId(1L, 1L);
 
-        DeckResponse result = deckService.removeCardFromDeck(1L, 1L, 2);
+            when(userService.getAuthenticatedUser()).thenReturn(testUser);
+            when(deckRepository.findById(1L)).thenReturn(Optional.of(testDeck));
+            when(userSecurityUtils.isAuthorizedToModifyDeck(testDeck)).thenReturn(false);
 
-        assertThat(result).isNotNull();
-        assertThat(deckCard.getQuantity()).isEqualTo(1);
-
-        verify(deckCardRepository).save(deckCard);
-        verify(deckRepository, times(2)).findById(1L);
-    }
-
-    @Test
-    void removeCardFromDeck_WhenRemovingAllCopies_ShouldDeleteCard() {
-        DeckCardId deckCardId = new DeckCardId(1L, 1L);
-        DeckCard deckCard = new DeckCard();
-        deckCard.setId(deckCardId);
-        deckCard.setQuantity(2);
-
-        when(userService.getAuthenticatedUser()).thenReturn(testUser);
-        when(deckRepository.findById(1L)).thenReturn(Optional.of(testDeck));
-        when(userSecurityUtils.isAuthorizedToModifyDeck(testDeck)).thenReturn(true);
-        when(deckCardRepository.findById(deckCardId)).thenReturn(Optional.of(deckCard));
-        when(deckRepository.findById(1L)).thenReturn(Optional.of(testDeck));
-
-        DeckResponse result = deckService.removeCardFromDeck(1L, 1L, 3);
-
-        assertThat(result).isNotNull();
-
-        verify(deckCardRepository).delete(deckCard);
-        verify(deckCardRepository, never()).save(any(DeckCard.class));
-    }
-
-    @Test
-    void removeCardFromDeck_WhenCardNotInDeck_ShouldThrowException() {
-        DeckCardId deckCardId = new DeckCardId(1L, 1L);
-
-        when(userService.getAuthenticatedUser()).thenReturn(testUser);
-        when(deckRepository.findById(1L)).thenReturn(Optional.of(testDeck));
-        when(userSecurityUtils.isAuthorizedToModifyDeck(testDeck)).thenReturn(true);
-        when(deckCardRepository.findById(deckCardId)).thenReturn(Optional.empty());
-
-        assertThatThrownBy(() -> deckService.removeCardFromDeck(1L, 1L, 1))
-                .isInstanceOf(CardIdNotFoundInDeckException.class);
-
-        verify(deckCardRepository).findById(deckCardId);
-    }
-
-    @Test
-    void updateDeck_WhenDeckNotFound_ShouldThrowException() {
-        when(userService.getAuthenticatedUser()).thenReturn(testUser);
-        when(deckRepository.findById(999L)).thenReturn(Optional.empty());
-
-        assertThatThrownBy(() -> deckService.updateDeck(999L, deckRequest))
-                .isInstanceOf(DeckIdNotFoundException.class);
-
-        verify(deckRepository).findById(999L);
-    }
-
-    @Test
-    void deleteDeck_WhenDeckNotFound_ShouldThrowException() {
-        when(userService.getAuthenticatedUser()).thenReturn(testUser);
-        when(deckRepository.findById(999L)).thenReturn(Optional.empty());
-
-        assertThatThrownBy(() -> deckService.deleteDeck(999L))
-                .isInstanceOf(DeckIdNotFoundException.class);
-
-        verify(deckRepository).findById(999L);
+            assertThatThrownBy(() -> deckService.removeCardFromDeck(1L, 1L, 1))
+                    .isInstanceOf(UnauthorizedModificationsException.class);
+        }
     }
 }

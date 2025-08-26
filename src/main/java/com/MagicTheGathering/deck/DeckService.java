@@ -56,12 +56,12 @@ public class DeckService {
     @Transactional(readOnly = true)
     public DeckResponse getDeckById(Long id) {
         Deck deck = DECK_REPOSITORY.findById(id)
-                .orElseThrow(() -> new RuntimeException("deck not found"));
+                .orElseThrow(() -> new RuntimeException("Deck not found"));
 
         User currentUser = USER_SERVICE.getAuthenticatedUser();
 
         if (!deck.getIsPublic() && !USER_SECURITY_UTILS.isAuthorizedToModifyDeck(deck)){
-            throw new RuntimeException("unauthorized");
+            throw new RuntimeException("Unauthorized");
         }
 
         return DeckMapperDto.fromEntity(deck);
