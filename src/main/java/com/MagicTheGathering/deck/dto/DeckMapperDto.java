@@ -49,7 +49,7 @@ public class DeckMapperDto {
                                 .stream()
                                 .map(Enum::name)
                                 .collect(java.util.stream.Collectors.toSet()),
-                                deckCard.getQuantity(),
+                                deckCard.getCard().getQuantity(),
                                 deckCard.getCard().getUser() != null ? deckCard.getCard().getUser().getId() : null),
                                 deckCard.getQuantity()
                 ))

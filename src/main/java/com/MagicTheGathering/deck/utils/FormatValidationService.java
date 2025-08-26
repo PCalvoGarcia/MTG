@@ -60,7 +60,7 @@ public class FormatValidationService {
         boolean isBasicLand = isBasicLand(card);
         boolean isCommander = isCommander(card, format);
 
-        if (!isBasicLand  && quantity > 1) {
+        if (!isBasicLand && !isCommander && quantity > 1) {
             throw new MaxCopiesAllowedFormatException(card.getName(), format);
         }
         if (isCommander && quantity > 1) {
