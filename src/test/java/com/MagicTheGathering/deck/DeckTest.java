@@ -13,6 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 @ActiveProfiles("test")
 @ExtendWith(MockitoExtension.class)
 public class DeckTest {
+
     @Test
     void onCreate() {
         Deck deck = new Deck();

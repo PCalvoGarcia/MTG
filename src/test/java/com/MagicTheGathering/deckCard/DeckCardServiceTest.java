@@ -28,12 +28,23 @@ import static org.mockito.Mockito.*;
 
 class DeckCardServiceTest {
 
-    @Mock private DeckCardRepository deckCardRepository;
-    @Mock private DeckRepository deckRepository;
-    @Mock private UserService userService;
-    @Mock private UserSecurityUtils userSecurityUtils;
-    @Mock private CardService cardService;
-    @InjectMocks private DeckCardService deckCardService;
+    @Mock
+    private DeckCardRepository deckCardRepository;
+
+    @Mock
+    private DeckRepository deckRepository;
+
+    @Mock
+    private UserService userService;
+
+    @Mock
+    private UserSecurityUtils userSecurityUtils;
+
+    @Mock
+    private CardService cardService;
+
+    @InjectMocks
+    private DeckCardService deckCardService;
 
     private Deck deck;
     private Card card;
