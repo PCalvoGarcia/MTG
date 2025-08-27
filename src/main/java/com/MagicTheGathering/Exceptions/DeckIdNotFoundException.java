@@ -1,6 +1,4 @@
-package com.MagicTheGathering.deckCard.exceptions;
-
-import com.MagicTheGathering.Exceptions.AppException;
+package com.MagicTheGathering.Exceptions;
 
 public class DeckIdNotFoundException extends AppException {
     public DeckIdNotFoundException(Long deckId) {

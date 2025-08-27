@@ -71,7 +71,7 @@ public class SecurityConfig {
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/register").permitAll()
                         .requestMatchers(HttpMethod.POST, "/login").permitAll()
-                        .requestMatchers(HttpMethod.GET,"/api/cards/**", "/api/decks/**", "/api/deck-cards", "/api/users/my-user")
+                        .requestMatchers(HttpMethod.GET,"/api/cards/**", "/api/decks/**", "/api/deck-cards", "/api/users/my-user", "/api/deck/{id}/like")
                         .hasRole("USER")
                         .requestMatchers(HttpMethod.POST,"/api/cards/**", "/api/decks/**", "/api/deck-cards")
                         .hasRole("USER")

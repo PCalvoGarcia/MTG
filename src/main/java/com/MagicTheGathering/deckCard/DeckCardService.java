@@ -2,8 +2,6 @@ package com.MagicTheGathering.deckCard;
 
 import com.MagicTheGathering.Exceptions.UnauthorizedAccessException;
 import com.MagicTheGathering.Exceptions.UnauthorizedModificationsException;
-import com.MagicTheGathering.card.Card;
-import com.MagicTheGathering.card.CardRepository;
 import com.MagicTheGathering.card.CardService;
 import com.MagicTheGathering.card.dto.CardResponse;
 import com.MagicTheGathering.cardType.CardType;
@@ -13,7 +11,7 @@ import com.MagicTheGathering.deckCard.dto.DeckCardMapperDto;
 import com.MagicTheGathering.deckCard.dto.DeckCardResponse;
 import com.MagicTheGathering.deckCard.exceptions.AccessDeniedPrivateDeckException;
 import com.MagicTheGathering.deckCard.exceptions.CardIdNotFoundInDeckException;
-import com.MagicTheGathering.deckCard.exceptions.DeckIdNotFoundException;
+import com.MagicTheGathering.Exceptions.DeckIdNotFoundException;
 import com.MagicTheGathering.deckCard.exceptions.MaxCopiesAllowedException;
 import com.MagicTheGathering.deckCartId.DeckCardId;
 import com.MagicTheGathering.user.User;

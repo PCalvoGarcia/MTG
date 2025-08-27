@@ -11,8 +11,10 @@ import com.MagicTheGathering.deckCard.DeckCard;
 import com.MagicTheGathering.deckCard.DeckCardRepository;
 import com.MagicTheGathering.deckCard.DeckCardService;
 import com.MagicTheGathering.deckCard.exceptions.CardIdNotFoundInDeckException;
-import com.MagicTheGathering.deckCard.exceptions.DeckIdNotFoundException;
+import com.MagicTheGathering.Exceptions.DeckIdNotFoundException;
 import com.MagicTheGathering.deckCartId.DeckCardId;
+import com.MagicTheGathering.like.DeckLike;
+import com.MagicTheGathering.like.DeckLikeService;
 import com.MagicTheGathering.user.User;
 import com.MagicTheGathering.user.UserService;
 import com.MagicTheGathering.user.utils.UserSecurityUtils;
@@ -27,18 +29,19 @@ import java.util.stream.Collectors;
 @Transactional
 @AllArgsConstructor
 public class DeckService {
-    private final DeckRepository DECK_REPOSITORY;
-    private final DeckCardRepository DECK_CARD_REPOSITORY;
-    private final UserService USER_SERVICE;
-    private final UserSecurityUtils USER_SERVICE_UTILS;
-    private final UserSecurityUtils USER_SECURITY_UTILS;
-    private final DeckServiceHelper DECK_SERVICE_HELPER;
-    private final DeckCardService DECK_CARD_SERVICE;
+
+    private final DeckRepository deckRepository;
+    private final DeckCardRepository deckCardRepository;
+    private final UserService userService;
+    private final UserSecurityUtils userSecurityUtils;
+    private final DeckServiceHelper deckServiceHelper;
+    private final DeckCardService deckCardService;
+    private final DeckLikeService deckLikeService;
 
     @Transactional(readOnly = true)
     public List<DeckResponse> getAllDeckByUser() {
-        User user = USER_SERVICE.getAuthenticatedUser();
-        List<Deck> decks = DECK_REPOSITORY.findByUser(user);
+        User user = userService.getAuthenticatedUser();
+        List<Deck> decks = deckRepository.findByUser(user);
         return decks.stream()
                 .map(DeckMapperDto::fromEntity)
                 .collect(Collectors.toList());
@@ -46,8 +49,8 @@ public class DeckService {
 
     @Transactional(readOnly = true)
     public List<DeckResponse> getAllPublicDecks(){
-        User user = USER_SERVICE.getAuthenticatedUser();
-        List<Deck> decks = DECK_REPOSITORY.findByIsPublicTrue();
+        User user = userService.getAuthenticatedUser();
+        List<Deck> decks = deckRepository.findByIsPublicTrue();
         return decks.stream()
                 .map(DeckMapperDto::fromEntity)
                 .collect(Collectors.toList());
@@ -55,33 +58,65 @@ public class DeckService {
 
     @Transactional(readOnly = true)
     public DeckResponse getDeckById(Long id) {
-        Deck deck = DECK_REPOSITORY.findById(id)
+        Deck deck = deckRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Deck not found"));
 
-        User currentUser = USER_SERVICE.getAuthenticatedUser();
+        User currentUser = userService.getAuthenticatedUser();
 
-        if (!deck.getIsPublic() && !USER_SECURITY_UTILS.isAuthorizedToModifyDeck(deck)){
+        if (!deck.getIsPublic() && !userSecurityUtils.isAuthorizedToModifyDeck(deck)){
             throw new RuntimeException("Unauthorized");
         }
 
         return DeckMapperDto.fromEntity(deck);
     }
 
+    @Transactional(readOnly = true)
+    public Deck getDeckObjById(Long id) {
+        Deck deck = deckRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Deck not found"));
+
+        User currentUser = userService.getAuthenticatedUser();
+
+        if (!deck.getIsPublic() && !userSecurityUtils.isAuthorizedToModifyDeck(deck)){
+            throw new RuntimeException("Unauthorized");
+        }
+
+        return deck;
+    }
+
+    @Transactional
+    public List<DeckResponse> getLikedDecksByUser() {
+        User user = userService.getAuthenticatedUser();
+        List<DeckLike> deckLikeList = deckLikeService.getDeckLikedByUser(user);
+
+        List<Deck> decks = deckLikeList.stream()
+                .map(DeckLike::getDeck)
+                .collect(Collectors.toList());
+
+        return decks.stream()
+                .map(DeckMapperDto::fromEntity)
+                .collect(Collectors.toList());
+    }
+
     public DeckResponse createDeck(DeckRequest deckRequest) {
-        User user = USER_SERVICE.getAuthenticatedUser();
+        User user = userService.getAuthenticatedUser();
         Deck newDeck = DeckMapperDto.toEntity(deckRequest, user);
-        Deck savedDeck = DECK_REPOSITORY.save(newDeck);
+        Deck savedDeck = deckRepository.save(newDeck);
 
         return DeckMapperDto.fromEntity(savedDeck);
     }
 
     public DeckResponse updateDeck(Long id, DeckRequest deckRequest){
-        User user = USER_SERVICE.getAuthenticatedUser();
-        Deck existingDeck = DECK_REPOSITORY.findById(id)
+        User user = userService.getAuthenticatedUser();
+        Deck existingDeck = deckRepository.findById(id)
                 .orElseThrow(() -> new DeckIdNotFoundException(id));
 
-        if (!USER_SECURITY_UTILS.isAuthorizedToModifyDeck(existingDeck)){
+        if (!userSecurityUtils.isAuthorizedToModifyDeck(existingDeck)){
             throw new UnauthorizedModificationsException();
+        }
+
+        if (!deckRequest.isPublic()) {
+            deckLikeService.deleteLikesByDeckId(existingDeck.getId());
         }
 
         existingDeck.setDeckName(deckRequest.deckName());
@@ -93,75 +128,75 @@ public class DeckService {
     }
 
     public void deleteDeck(Long id){
-        User user = USER_SERVICE.getAuthenticatedUser();
-        Deck existingDeck = DECK_REPOSITORY.findById(id)
+        User user = userService.getAuthenticatedUser();
+        Deck existingDeck = deckRepository.findById(id)
                 .orElseThrow(() -> new DeckIdNotFoundException(id));
 
-        if (!existingDeck.getIsPublic() && !USER_SECURITY_UTILS.isAuthorizedToModifyDeck(existingDeck)){
+        if (!existingDeck.getIsPublic() && !userSecurityUtils.isAuthorizedToModifyDeck(existingDeck)){
             throw new UnauthorizedModificationsException();
         }
 
-        DECK_REPOSITORY.delete(existingDeck);
+        deckRepository.delete(existingDeck);
     }
 
     public DeckResponse addCardToDeck(Long deckId, AddCardDeckRequest request){
-        User user = USER_SERVICE.getAuthenticatedUser();
-        Deck deck = DECK_REPOSITORY.findById(deckId)
+        User user = userService.getAuthenticatedUser();
+        Deck deck = deckRepository.findById(deckId)
                 .orElseThrow(() -> new DeckIdNotFoundException(deckId));
 
-        if (!USER_SECURITY_UTILS.isAuthorizedToModifyDeck(deck)){
+        if (!userSecurityUtils.isAuthorizedToModifyDeck(deck)){
             throw new UnauthorizedModificationsException();
         }
 
-        Card card = USER_SERVICE_UTILS.findCardById(request);
+        Card card = userSecurityUtils.findCardById(request);
 
-        DECK_SERVICE_HELPER.validateCardAddition(deck, card, request.quantity());
+        deckServiceHelper.validateCardAddition(deck, card, request.quantity());
 
         DeckCardId deckCardId = new DeckCardId(deckId, request.cardId());
-        DeckCard existingDeckCard = DECK_CARD_SERVICE.getExistingDeckCard(deckCardId);
+        DeckCard existingDeckCard = deckCardService.getExistingDeckCard(deckCardId);
 
         if (!(existingDeckCard == null)) {
             int newQuantity = existingDeckCard.getQuantity() + request.quantity();
-            DECK_SERVICE_HELPER.validateMaxCopiesLand(card, newQuantity);
+            deckServiceHelper.validateMaxCopiesLand(card, newQuantity);
             existingDeckCard.setQuantity(newQuantity);
-            DECK_CARD_REPOSITORY.save(existingDeckCard);
+            deckCardRepository.save(existingDeckCard);
         } else {
             DeckCard newDeckCard = new DeckCard();
             newDeckCard.setId(deckCardId);
             newDeckCard.setDeck(deck);
             newDeckCard.setCard(card);
             newDeckCard.setQuantity(request.quantity());
-            DECK_CARD_REPOSITORY.save(newDeckCard);
+            deckCardRepository.save(newDeckCard);
         }
 
-        Deck updatedDeck = DECK_REPOSITORY.findById(deckId)
+        Deck updatedDeck = deckRepository.findById(deckId)
                 .orElseThrow(() -> new DeckIdNotFoundException(deckId));
 
         return DeckMapperDto.fromEntity(updatedDeck);
     }
 
     public DeckResponse removeCardFromDeck(Long deckId, Long cardId, int quantityToRemove) {
-        User user = USER_SERVICE.getAuthenticatedUser();
-        Deck deck = DECK_REPOSITORY.findById(deckId)
+        User user = userService.getAuthenticatedUser();
+        Deck deck = deckRepository.findById(deckId)
                 .orElseThrow(() -> new DeckIdNotFoundException(deckId));
 
-        if (!USER_SECURITY_UTILS.isAuthorizedToModifyDeck(deck)){
+        if (!userSecurityUtils.isAuthorizedToModifyDeck(deck)){
             throw new UnauthorizedModificationsException();
         }
 
         DeckCardId deckCardId = new DeckCardId(deckId, cardId);
-        DeckCard deckCard = DECK_CARD_REPOSITORY.findById(deckCardId)
+        DeckCard deckCard = deckCardRepository.findById(deckCardId)
                 .orElseThrow(() -> new CardIdNotFoundInDeckException());
 
         if (deckCard.getQuantity() <= quantityToRemove){
-            DECK_CARD_REPOSITORY.delete(deckCard);
+            deckCardRepository.delete(deckCard);
         } else {
             deckCard.setQuantity(deckCard.getQuantity() - quantityToRemove);
-             DECK_CARD_REPOSITORY.save(deckCard);
+             deckCardRepository.save(deckCard);
 
         }
 
-        Deck updatedDeck = DECK_REPOSITORY.findById(deckId)
+        Deck updatedDeck = deckRepository.findById(deckId)
                 .orElseThrow(() -> new DeckIdNotFoundException(deckId));
 
         return DeckMapperDto.fromEntity(updatedDeck);
