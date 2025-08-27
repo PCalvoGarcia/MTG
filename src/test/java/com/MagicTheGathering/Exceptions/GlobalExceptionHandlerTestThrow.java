@@ -31,129 +31,129 @@ import static org.mockito.Mockito.*;
 
 public class GlobalExceptionHandlerTestThrow {
 
-    private GlobalExceptionHandler handler;
+    private GlobalExceptionHandler globalExceptionHandler;
 
     @BeforeEach
     void setUp() {
-        handler = new GlobalExceptionHandler();
+        globalExceptionHandler = new GlobalExceptionHandler();
     }
 
     @Test
     void handleAppException() {
         AppException ex = new AppException("App error");
-        ResponseEntity<?> response = handler.handleAppException(ex);
+        ResponseEntity<?> response = globalExceptionHandler.handleAppException(ex);
         assertThat(response.getStatusCodeValue()).isEqualTo(400);
         assertThat(((HashMap<?, ?>) response.getBody()).get("error")).isEqualTo("App error");
     }
 
     @Test
     void handleEmptyList() {
-        ResponseEntity<String> response = handler.handleEmptyList(new EmptyListException());
+        ResponseEntity<String> response = globalExceptionHandler.handleEmptyList(new EmptyListException());
         assertThat(response.getStatusCodeValue()).isEqualTo(204);
         assertThat(response.getBody()).isEqualTo("The list is empty");
     }
 
     @Test
     void handleUnauthorizedAccess() {
-        ResponseEntity<String> response = handler.handleUnauthorizedAccess(new UnauthorizedAccessException());
+        ResponseEntity<String> response = globalExceptionHandler.handleUnauthorizedAccess(new UnauthorizedAccessException());
         assertThat(response.getStatusCodeValue()).isEqualTo(403);
         assertThat(response.getBody()).isEqualTo("You are not authorized to access");
     }
 
     @Test
     void handleUnauthorizedModifications() {
-        ResponseEntity<String> response = handler.handleUnauthorizedModifications(new UnauthorizedModificationsException());
+        ResponseEntity<String> response = globalExceptionHandler.handleUnauthorizedModifications(new UnauthorizedModificationsException());
         assertThat(response.getStatusCodeValue()).isEqualTo(403);
         assertThat(response.getBody()).isEqualTo("Unauthorized to modify");
     }
 
     @Test
     void handleUsernameAlreadyExist() {
-        ResponseEntity<String> response = handler.handleUsernameAlreadyExist(new UsernameAlreadyExistException("User exists"));
+        ResponseEntity<String> response = globalExceptionHandler.handleUsernameAlreadyExist(new UsernameAlreadyExistException("User exists"));
         assertThat(response.getStatusCodeValue()).isEqualTo(409);
         assertThat(response.getBody()).isEqualTo("This username: User exists already exist.");
     }
 
     @Test
     void handleEmailAlreadyExist() {
-        ResponseEntity<String> response = handler.handleEmailAlreadyExist(new EmailAlreadyExistException("Email exists"));
+        ResponseEntity<String> response = globalExceptionHandler.handleEmailAlreadyExist(new EmailAlreadyExistException("Email exists"));
         assertThat(response.getStatusCodeValue()).isEqualTo(409);
         assertThat(response.getBody()).isEqualTo("The email: Email exists already exist");
     }
 
     @Test
     void handleUserIdNotFound() {
-        ResponseEntity<String> response = handler.handleUserIdNotFound(new UserIdNotFoundException(1L));
+        ResponseEntity<String> response = globalExceptionHandler.handleUserIdNotFound(new UserIdNotFoundException(1L));
         assertThat(response.getStatusCodeValue()).isEqualTo(404);
         assertThat(response.getBody()).isEqualTo("This user id: 1 not found.");
     }
 
     @Test
     void handleCardIdNotFound() {
-        ResponseEntity<String> response = handler.handleCardIdNotFound(new CardIdNotFoundException(1L));
+        ResponseEntity<String> response = globalExceptionHandler.handleCardIdNotFound(new CardIdNotFoundException(1L));
         assertThat(response.getStatusCodeValue()).isEqualTo(404);
         assertThat(response.getBody()).isEqualTo("Card witch id: 1 not found.");
     }
 
     @Test
     void handleDeckIdNotFound() {
-        ResponseEntity<String> response = handler.handleDeckIdNotFound(new DeckIdNotFoundException(1L));
+        ResponseEntity<String> response = globalExceptionHandler.handleDeckIdNotFound(new DeckIdNotFoundException(1L));
         assertThat(response.getStatusCodeValue()).isEqualTo(404);
         assertThat(response.getBody()).isEqualTo("Deck not found with id: 1");
     }
 
     @Test
     void handleAccessDeniedPrivateDeck() {
-        ResponseEntity<String> response = handler.handleAccessDeniedPrivateDeck(new AccessDeniedPrivateDeckException());
+        ResponseEntity<String> response = globalExceptionHandler.handleAccessDeniedPrivateDeck(new AccessDeniedPrivateDeckException());
         assertThat(response.getStatusCodeValue()).isEqualTo(404);
         assertThat(response.getBody()).isEqualTo("Access denied to private deck");
     }
 
     @Test
     void handleCardIdNotFoundInDeck() {
-        ResponseEntity<String> response = handler.handleCardIdNotFoundInDeck(new CardIdNotFoundInDeckException());
+        ResponseEntity<String> response = globalExceptionHandler.handleCardIdNotFoundInDeck(new CardIdNotFoundInDeckException());
         assertThat(response.getStatusCodeValue()).isEqualTo(404);
         assertThat(response.getBody()).isEqualTo("Card not found in deck");
     }
 
     @Test
     void handleMaxCopiesAllowed() {
-        ResponseEntity<String> response = handler.handleMaxCopiesAllowed(new MaxCopiesAllowedException());
+        ResponseEntity<String> response = globalExceptionHandler.handleMaxCopiesAllowed(new MaxCopiesAllowedException());
         assertThat(response.getStatusCodeValue()).isEqualTo(404);
         assertThat(response.getBody()).isEqualTo("Maximum 4 copies of a card allowed");
     }
 
     @Test
     void handleIllegalCard() {
-        ResponseEntity<String> response = handler.handleIllegalCard(new IllegalCardException("commander", Legality.COMMANDER));
+        ResponseEntity<String> response = globalExceptionHandler.handleIllegalCard(new IllegalCardException("commander", Legality.COMMANDER));
         assertThat(response.getStatusCodeValue()).isEqualTo(409);
         assertThat(response.getBody()).isEqualTo("Card 'commander' is not legal in COMMANDER format");
     }
 
     @Test
     void handleMaxCommander() {
-        ResponseEntity<String> response = handler.handleMaxCommander(new MaxCommanderException());
+        ResponseEntity<String> response = globalExceptionHandler.handleMaxCommander(new MaxCommanderException());
         assertThat(response.getStatusCodeValue()).isEqualTo(409);
         assertThat(response.getBody()).isEqualTo("Only 1 commander allowed");
     }
 
     @Test
     void handleMaxCopiesAllowedFormat() {
-        ResponseEntity<String> response = handler.handleMaxCopiesAllowedFormat(new MaxCopiesAllowedFormatException("commander", Legality.COMMANDER));
+        ResponseEntity<String> response = globalExceptionHandler.handleMaxCopiesAllowedFormat(new MaxCopiesAllowedFormatException("commander", Legality.COMMANDER));
         assertThat(response.getStatusCodeValue()).isEqualTo(409);
         assertThat(response.getBody()).isEqualTo("Only 1 copy of 'commander' allowed in COMMANDER format (singleton)");
     }
 
     @Test
     void handleDeleteCardNotAllowed() {
-        ResponseEntity<String> response = handler.handleDeleteCardNotAllowed(new DeleteCardNotAllowedException());
+        ResponseEntity<String> response = globalExceptionHandler.handleDeleteCardNotAllowed(new DeleteCardNotAllowedException());
         assertThat(response.getStatusCodeValue()).isEqualTo(409);
         assertThat(response.getBody()).isEqualTo("Cannot delete card: it is currently used in one or more decks");
     }
 
     @Test
     void handleInvalidFormats() {
-        ResponseEntity<String> response = handler.handleInvalidFormats(new InvalidFormatsException("COMMANDER", "COMMANDER"));
+        ResponseEntity<String> response = globalExceptionHandler.handleInvalidFormats(new InvalidFormatsException("COMMANDER", "COMMANDER"));
         assertThat(response.getStatusCodeValue()).isEqualTo(409);
         assertThat(response.getBody()).isEqualTo("Invalid format: COMMANDER. Valid formats are: COMMANDER");
     }
@@ -164,7 +164,7 @@ public class GlobalExceptionHandlerTestThrow {
         when(bindingResult.getFieldErrors()).thenReturn(Collections.singletonList(new FieldError("object", "field", "must not be blank")));
         MethodArgumentNotValidException ex = new MethodArgumentNotValidException(null, bindingResult);
 
-        ResponseEntity<String> response = handler.handleValidationErrors(ex);
+        ResponseEntity<String> response = globalExceptionHandler.handleValidationErrors(ex);
         assertThat(response.getStatusCodeValue()).isEqualTo(400);
         assertThat(response.getBody()).contains("Validation failed");
     }
@@ -174,7 +174,7 @@ public class GlobalExceptionHandlerTestThrow {
         InvalidFormatException ex = mock(InvalidFormatException.class);
         when(ex.getOriginalMessage()).thenReturn("Invalid format");
 
-        ResponseEntity<String> response = handler.handleInvalidFormatException(ex);
+        ResponseEntity<String> response = globalExceptionHandler.handleInvalidFormatException(ex);
         assertThat(response.getStatusCodeValue()).isEqualTo(400);
         assertThat(response.getBody()).isEqualTo("Error in role: \nInvalid format");
     }
@@ -183,7 +183,7 @@ public class GlobalExceptionHandlerTestThrow {
     void handleDataIntegrityViolation() {
         DataIntegrityViolationException ex = new DataIntegrityViolationException("Constraint violated");
 
-        ResponseEntity<String> response = handler.handleDataIntegrityViolationException(ex);
+        ResponseEntity<String> response = globalExceptionHandler.handleDataIntegrityViolationException(ex);
         assertThat(response.getStatusCodeValue()).isEqualTo(409);
         assertThat(response.getBody()).contains("Constraint violated");
     }
