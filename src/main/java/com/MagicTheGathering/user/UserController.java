@@ -57,7 +57,7 @@ public class UserController {
 
 
     @PutMapping("/api/users/{id}")
-    public ResponseEntity<UserResponse> updateUserRoleRole( @PathVariable Long id, @Valid @RequestBody UserRequestUpdateAdmin request) {
+    public ResponseEntity<UserResponse> updateUser(@PathVariable Long id, @Valid @RequestBody UserRequestUpdateAdmin request) {
         return ResponseEntity.ok(userService.updateUser(id, request));
     }
 
