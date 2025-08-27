@@ -22,6 +22,7 @@ import static org.mockito.ArgumentMatchers.*;
 @ActiveProfiles("test")
 @ExtendWith(MockitoExtension.class)
 public class CloudinaryServiceTest {
+
     private CloudinaryService cloudinaryService;
     private Cloudinary cloudinary;
     private Uploader uploader;
@@ -38,7 +39,6 @@ public class CloudinaryServiceTest {
 
         @Test
         void when_postImage_from_multipartFile() throws IOException {
-
             MockMultipartFile image = new MockMultipartFile(
                     "image",
                     "image.jpg",
@@ -60,7 +60,6 @@ public class CloudinaryServiceTest {
 
     @Nested
     class deleteFile{
-
         @Test
         void when_deleteImage_from_publicId() throws IOException{
 
