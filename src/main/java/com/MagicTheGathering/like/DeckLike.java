@@ -26,7 +26,7 @@ public class DeckLike {
     private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "destination_id", nullable = false)
+    @JoinColumn(name = "deck_id", nullable = false)
     private Deck deck;
 
     @Column(name = "created_at")
