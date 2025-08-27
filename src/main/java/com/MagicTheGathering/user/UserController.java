@@ -61,6 +61,11 @@ public class UserController {
         return ResponseEntity.ok(userService.updateUser(id, request));
     }
 
+    @PutMapping("/api/users/my-user")
+    public ResponseEntity<UserResponse> updateLoggedUser( @Valid @RequestBody UserRequest request) {
+        return ResponseEntity.ok(userService.updateLoggedUser(request));
+    }
+
 
     @DeleteMapping("/api/users/{id}")
     public ResponseEntity<String> deleteUserById(@PathVariable Long id) {
