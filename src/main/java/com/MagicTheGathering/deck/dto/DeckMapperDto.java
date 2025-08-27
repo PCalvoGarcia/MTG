@@ -40,7 +40,7 @@ public class DeckMapperDto {
                                 deckCard.getCard().getEndurance(),
                                 deckCard.getCard().getLoyalty(),
                                 deckCard.getCard().getCollection(),
-                                deckCard.getCard().getCartNumber(),
+                                deckCard.getCard().getCardNumber(),
                                 deckCard.getCard().getArtist(),
                                 deckCard.getCard().getEdition(),
                                 deckCard.getCard().getImageUrl(),
@@ -49,7 +49,7 @@ public class DeckMapperDto {
                                 .stream()
                                 .map(Enum::name)
                                 .collect(java.util.stream.Collectors.toSet()),
-                                deckCard.getQuantity(),
+                                deckCard.getCard().getQuantity(),
                                 deckCard.getCard().getUser() != null ? deckCard.getCard().getUser().getId() : null),
                                 deckCard.getQuantity()
                 ))

@@ -12,6 +12,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/cards")
@@ -21,11 +22,8 @@ public class CardController {
 
     @GetMapping("/my-cards")
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<Page<CardResponse>> getMyCards(
-            @RequestParam(defaultValue = "1") int page,
-            @RequestParam(defaultValue = "4") int size
-    ){
-        Page<CardResponse> cards = CARD_SERVICE.getAllCardsByUser(convertToZeroBasedPage(page), size);
+    public ResponseEntity<List<CardResponse>> getMyCards(){
+        List<CardResponse> cards = CARD_SERVICE.getAllCardsByUser();
         return new ResponseEntity<>(cards, HttpStatus.OK);
     }
 
@@ -61,9 +59,5 @@ public class CardController {
     public ResponseEntity<Void> deleteCardById( @PathVariable Long id){
         CARD_SERVICE.deleteCard(id);
         return ResponseEntity.noContent().build();
-    }
-
-    private int convertToZeroBasedPage(int page) {
-        return page - 1;
     }
 }

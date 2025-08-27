@@ -6,6 +6,8 @@ import com.MagicTheGathering.user.dto.UserMapperDto;
 import com.MagicTheGathering.user.dto.UserResponse;
 import com.MagicTheGathering.user.dto.ADMIN.UserRequestUpdateAdmin;
 import com.MagicTheGathering.user.User;
+import com.MagicTheGathering.user.exceptions.EmailAlreadyExistException;
+import com.MagicTheGathering.user.exceptions.UsernameAlreadyExistException;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -46,6 +48,13 @@ class UserServiceHelperTest {
 
             verify(userRepository).findByEmail("email@test.com");
         }
+
+        @Test
+        void when_checkEmail_throw_EmailAlreadyExistException() {
+            when(userRepository.findByEmail("email@test.com")).thenReturn(Optional.of(new User()));
+
+            assertThrows(EmailAlreadyExistException.class,() ->userServiceHelper.checkEmail("email@test.com"));
+        }
         
     }
 
@@ -60,6 +69,13 @@ class UserServiceHelperTest {
             assertDoesNotThrow(() ->userServiceHelper.checkUsername("usernameTest"));
 
             verify(userRepository).findByUsername("usernameTest");
+        }
+
+        @Test
+        void when_checkUsername_throw_UsernameAlreadyExistException() {
+            when(userRepository.findByUsername("usernameTest")).thenReturn(Optional.of(new User()));
+
+            assertThrows(UsernameAlreadyExistException.class,() ->userServiceHelper.checkUsername("usernameTest"));
         }
     }
 

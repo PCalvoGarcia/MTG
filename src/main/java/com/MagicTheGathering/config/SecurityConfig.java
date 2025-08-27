@@ -14,6 +14,14 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
+import java.util.Arrays;
+import java.util.List;
 
 @Configuration
 public class SecurityConfig {
@@ -33,11 +41,33 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
+//                      CONNECT WITH FRONT THROUGH NGROK TUNNEL
+//    @Bean
+//    public WebMvcConfigurer corsConfigurer() {
+//        return new WebMvcConfigurer() {
+//            @Override
+//            public void addCorsMappings(CorsRegistry registry) {
+//                registry.addMapping("/**")
+//                        .allowedOrigins("https://3596eafc18b0.ngrok-free.app")
+//                        .allowedMethods("GET","POST","PUT","DELETE","OPTIONS")
+//                        .allowedHeaders("*");
+//            }
+//        };
+//    }
 
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-
-        return http.authorizeHttpRequests((authHttp) -> authHttp
+        return http
+//                      CONNECT WITH NGROK TUNNEL
+//                .cors(cors -> cors.configurationSource(request -> {
+//                    CorsConfiguration config = new CorsConfiguration();
+//                    config.setAllowCredentials(true);
+//                    config.setAllowedOrigins(List.of("https://53a0871d3114.ngrok-free.app"));
+//                    config.setAllowedMethods(List.of("GET","POST","PUT","DELETE","OPTIONS"));
+//                    config.setAllowedHeaders(List.of("*"));
+//                    return config;
+//                }))
+                .authorizeHttpRequests((authHttp) -> authHttp
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/register").permitAll()
                         .requestMatchers(HttpMethod.POST, "/login").permitAll()

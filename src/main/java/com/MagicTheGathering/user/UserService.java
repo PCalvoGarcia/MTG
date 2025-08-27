@@ -1,5 +1,6 @@
 package com.MagicTheGathering.user;
 
+import com.MagicTheGathering.Exceptions.EmptyListException;
 import com.MagicTheGathering.role.Role;
 import com.MagicTheGathering.user.dto.ADMIN.UserRequestAdmin;
 import com.MagicTheGathering.user.dto.ADMIN.UserRequestUpdateAdmin;
@@ -94,7 +95,7 @@ public class UserService implements UserDetailsService {
 
     public List<UserResponse> getAllUsers() {
         if (userServiceHelper.getAllUserResponseList().isEmpty()){
-            throw new RuntimeException("Error");
+            throw new EmptyListException();
         }
 
         return userServiceHelper.getAllUserResponseList();

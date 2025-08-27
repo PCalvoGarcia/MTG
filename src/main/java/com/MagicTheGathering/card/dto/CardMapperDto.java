@@ -4,11 +4,9 @@ import com.MagicTheGathering.card.Card;
 import com.MagicTheGathering.cardType.CardType;
 import com.MagicTheGathering.legality.Legality;
 import com.MagicTheGathering.manaColor.ManaColor;
-import com.MagicTheGathering.user.User;
 
 import java.util.HashSet;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 public class CardMapperDto {
     public static CardResponse fromEntity(Card card){
@@ -48,7 +46,7 @@ public class CardMapperDto {
                 card.getEndurance(),
                 card.getLoyalty(),
                 card.getCollection(),
-                card.getCartNumber(),
+                card.getCardNumber(),
                 card.getArtist(),
                 card.getEdition(),
                 card.getImageUrl(),
@@ -68,35 +66,22 @@ public class CardMapperDto {
             cardTypes.add(cardRequest.cardType());
         }
 
-        Set<ManaColor> manaColors = new HashSet<>();
-        if (cardRequest.manaColor() != null) {
-            manaColors.add(cardRequest.manaColor());
-        }
-
-
-        Set<Legality> legalities = new HashSet<>();
-        if (cardRequest.legality() != null) {
-            legalities.add(cardRequest.legality());
-        }
-
-
-
         return Card.builder()
                 .name(cardRequest.name())
                 .types(cardTypes)
                 .specificType(cardRequest.specificType())
                 .manaTotalCost(cardRequest.manaTotalCost())
-                .manaColors(manaColors)
+                .manaColors(cardRequest.manaColor())
                 .textRules(cardRequest.textRules())
                 .power(cardRequest.power())
                 .endurance(cardRequest.endurance())
                 .loyalty(cardRequest.loyalty())
                 .collection(cardRequest.collection())
-                .cartNumber(cardRequest.cart_number())
+                .cardNumber(cardRequest.cardNumber())
                 .artist(cardRequest.artist())
                 .edition(cardRequest.edition())
                 .imageUrl(imageUrl)
-                .legalityFormat(legalities)
+                .legalityFormat(cardRequest.legality())
                 .quantity(cardRequest.quantity())
                 .build();
     }

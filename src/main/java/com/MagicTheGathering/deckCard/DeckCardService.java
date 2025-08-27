@@ -2,6 +2,11 @@ package com.MagicTheGathering.deckCard;
 
 import com.MagicTheGathering.Exceptions.UnauthorizedAccessException;
 import com.MagicTheGathering.Exceptions.UnauthorizedModificationsException;
+import com.MagicTheGathering.card.Card;
+import com.MagicTheGathering.card.CardRepository;
+import com.MagicTheGathering.card.CardService;
+import com.MagicTheGathering.card.dto.CardResponse;
+import com.MagicTheGathering.cardType.CardType;
 import com.MagicTheGathering.deck.Deck;
 import com.MagicTheGathering.deck.DeckRepository;
 import com.MagicTheGathering.deckCard.dto.DeckCardMapperDto;
@@ -29,6 +34,7 @@ public class DeckCardService {
 
     private final DeckCardRepository DECK_CARD_REPOSITORY;
     private final DeckRepository DECK_REPOSITORY;
+    private final CardService CARD_SERVICE;
     private final UserService USER_SERVICE;
     private final UserSecurityUtils USER_SECURITY_UTILS;
 
@@ -76,6 +82,8 @@ public class DeckCardService {
         DeckCard deckCard = DECK_CARD_REPOSITORY.findById(deckCardId)
                 .orElseThrow(() -> new CardIdNotFoundInDeckException());
 
+        CardResponse card = CARD_SERVICE.getCardById(cardId);
+
         if (!USER_SECURITY_UTILS.isAuthorizedToModifyDeck(deckCard.getDeck())) {
             throw new UnauthorizedModificationsException();
         }
@@ -85,7 +93,7 @@ public class DeckCardService {
             return null;
         }
 
-        if (newQuantity > 4) {
+        if (newQuantity > 4 && !card.cardType().contains(CardType.BASIC_LAND)) {
             throw new MaxCopiesAllowedException();
         }
 

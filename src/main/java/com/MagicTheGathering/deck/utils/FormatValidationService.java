@@ -42,16 +42,10 @@ public class FormatValidationService {
             case COMMANDER, BRAWL -> {
                 validateSingletonFormat(card, totalQuantity, format);
             }
-            case BOOSTER_DRAFT, SEALED_DECK -> {
-                validateLimitedFormat(card, totalQuantity);
-            }
             default -> {
-                validateConstructedFormat(card, totalQuantity); // Default a constructed
+                validateConstructedFormat(card, totalQuantity);
             }
         }
-    }
-
-    private void validateLimitedFormat(Card card, int totalQuantity) {
     }
 
     private void validateConstructedFormat(Card card, int quantity) {
@@ -80,37 +74,16 @@ public class FormatValidationService {
                 .sum();
 
         int newSize = currentSize + additionalCards;
-        int maxCards = getMaxCardsForFormat(format);
-        int minCards = getMinCardsForFormat(format);
+        int maxCards = format.getMaxCards();
 
         if (newSize > maxCards) {
             throw new RuntimeException("Adding " + additionalCards + " cards would exceed maximum deck size of " + maxCards + " for " + format);
         }
     }
 
-    private int getMaxCardsForFormat(Legality format) {
-        return switch (format) {
-            case STANDARD, MODERN, PIONEER, LEGACY_VINTAGE, PAUPER -> 75;
-            case COMMANDER -> 100;
-            case BRAWL -> 60;
-            case BOOSTER_DRAFT, SEALED_DECK -> 40;
-            default -> 60;
-        };
-    }
-
-    private int getMinCardsForFormat(Legality format) {
-        return switch (format) {
-            case STANDARD, MODERN, PIONEER, LEGACY_VINTAGE, PAUPER -> 60;
-            case COMMANDER -> 100;
-            case BRAWL -> 60;
-            case BOOSTER_DRAFT, SEALED_DECK -> 40;
-            default -> 60;
-        };
-    }
 
     private boolean isBasicLand(Card card) {
-        return card.getTypes().toString().contains("BASIC_LAND") &&
-                card.getTypes().toString().contains("LAND");
+        return card.getTypes().toString().contains("BASIC_LAND");
     }
 
     private boolean isCommander(Card card, Legality format) {
@@ -121,20 +94,4 @@ public class FormatValidationService {
         return card.getTypes().toString().contains("COMMANDER");
     }
 
-    public boolean allowsMultipleCopies(Legality format) {
-        return switch (format) {
-            case STANDARD, MODERN, PIONEER, LEGACY_VINTAGE, PAUPER, BOOSTER_DRAFT, SEALED_DECK -> true;
-            case COMMANDER, BRAWL -> false;
-            default -> true;
-        };
-    }
-
-    public int getMaxCopiesPerCard(Legality format) {
-        return switch (format) {
-            case STANDARD, MODERN, PIONEER, LEGACY_VINTAGE, PAUPER -> 4;
-            case COMMANDER, BRAWL -> 1;
-            case BOOSTER_DRAFT, SEALED_DECK -> Integer.MAX_VALUE;
-            default -> 4;
-        };
-    }
 }

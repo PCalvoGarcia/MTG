@@ -6,6 +6,8 @@ import com.MagicTheGathering.manaColor.ManaColor;
 import jakarta.validation.constraints.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.Set;
+
 public record CardRequest(
 
         @NotBlank(message = "Name cannot be blank") @Size(min = 2,max = 50, message = "Name cannot be longer than 50 characters!")
@@ -16,12 +18,12 @@ public record CardRequest(
 
         String specificType,
 
-        @Positive
+        @PositiveOrZero
         @Max(16)
         int manaTotalCost,
 
         @NotNull(message = "Mana color cannot be null")
-        ManaColor manaColor,
+        Set<ManaColor> manaColor,
 
         String textRules,
 
@@ -37,7 +39,7 @@ public record CardRequest(
 
         String collection,
 
-        int cart_number,
+        int cardNumber,
 
         String artist,
 
@@ -47,7 +49,7 @@ public record CardRequest(
         MultipartFile image,
 
         @NotNull(message = "Legality cannot be null")
-        Legality legality,
+        Set<Legality> legality,
 
         @Positive
         int quantity
