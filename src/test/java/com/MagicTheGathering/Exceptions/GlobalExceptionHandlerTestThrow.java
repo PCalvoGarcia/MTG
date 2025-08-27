@@ -8,7 +8,6 @@ import com.MagicTheGathering.deck.exceptions.MaxCommanderException;
 import com.MagicTheGathering.deck.exceptions.MaxCopiesAllowedFormatException;
 import com.MagicTheGathering.deckCard.exceptions.AccessDeniedPrivateDeckException;
 import com.MagicTheGathering.deckCard.exceptions.CardIdNotFoundInDeckException;
-import com.MagicTheGathering.deckCard.exceptions.DeckIdNotFoundException;
 import com.MagicTheGathering.deckCard.exceptions.MaxCopiesAllowedException;
 import com.MagicTheGathering.legality.Legality;
 import com.MagicTheGathering.user.exceptions.EmailAlreadyExistException;

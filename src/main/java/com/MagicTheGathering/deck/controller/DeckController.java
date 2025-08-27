@@ -33,6 +33,12 @@ public class DeckController {
         return new ResponseEntity<>(publicDecks, HttpStatus.OK);
     }
 
+    @GetMapping("/my-liked-decks")
+    public ResponseEntity<List<DeckResponse>> getLikedDecksByLoggedUser(){
+        List<DeckResponse> listLikedDecks = DECK_SERVICE.getLikedDecksByUser();
+        return new ResponseEntity<>(listLikedDecks, HttpStatus.OK);
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<DeckResponse> getDeckById(@PathVariable Long id) {
         DeckResponse deck = DECK_SERVICE.getDeckById(id);

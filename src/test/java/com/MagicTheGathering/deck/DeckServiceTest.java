@@ -10,12 +10,12 @@ import com.MagicTheGathering.deckCard.DeckCard;
 import com.MagicTheGathering.deckCard.DeckCardRepository;
 import com.MagicTheGathering.deckCard.DeckCardService;
 import com.MagicTheGathering.deckCard.exceptions.CardIdNotFoundInDeckException;
-import com.MagicTheGathering.deckCard.exceptions.DeckIdNotFoundException;
+import com.MagicTheGathering.Exceptions.DeckIdNotFoundException;
 import com.MagicTheGathering.deckCartId.DeckCardId;
 import com.MagicTheGathering.legality.Legality;
+import com.MagicTheGathering.like.DeckLikeService;
 import com.MagicTheGathering.user.User;
 import com.MagicTheGathering.user.UserService;
-import com.MagicTheGathering.user.exceptions.UsernameAlreadyExistException;
 import com.MagicTheGathering.user.utils.UserSecurityUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -24,10 +24,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
@@ -60,6 +56,9 @@ class DeckServiceTest {
 
     @Mock
     private DeckCardService deckCardService;
+
+    @Mock
+    private DeckLikeService deckLikeService;
 
     @InjectMocks
     private DeckService deckService;
@@ -228,6 +227,7 @@ class DeckServiceTest {
             when(userService.getAuthenticatedUser()).thenReturn(testUser);
             when(deckRepository.findById(1L)).thenReturn(Optional.of(testDeck));
             when(userSecurityUtils.isAuthorizedToModifyDeck(testDeck)).thenReturn(true);
+            doNothing().when(deckLikeService).deleteLikesByDeckId(1L);
 
             DeckResponse result = deckService.updateDeck(1L, updateRequest);
 
