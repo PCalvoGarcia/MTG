@@ -13,6 +13,7 @@ import com.MagicTheGathering.deckCard.exceptions.CardIdNotFoundInDeckException;
 import com.MagicTheGathering.Exceptions.DeckIdNotFoundException;
 import com.MagicTheGathering.deckCartId.DeckCardId;
 import com.MagicTheGathering.legality.Legality;
+import com.MagicTheGathering.like.DeckLikeService;
 import com.MagicTheGathering.user.User;
 import com.MagicTheGathering.user.UserService;
 import com.MagicTheGathering.user.utils.UserSecurityUtils;
@@ -55,6 +56,9 @@ class DeckServiceTest {
 
     @Mock
     private DeckCardService deckCardService;
+
+    @Mock
+    private DeckLikeService deckLikeService;
 
     @InjectMocks
     private DeckService deckService;
@@ -223,6 +227,7 @@ class DeckServiceTest {
             when(userService.getAuthenticatedUser()).thenReturn(testUser);
             when(deckRepository.findById(1L)).thenReturn(Optional.of(testDeck));
             when(userSecurityUtils.isAuthorizedToModifyDeck(testDeck)).thenReturn(true);
+            doNothing().when(deckLikeService).deleteLikesByDeckId(1L);
 
             DeckResponse result = deckService.updateDeck(1L, updateRequest);
 
