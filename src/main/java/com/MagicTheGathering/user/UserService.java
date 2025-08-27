@@ -114,6 +114,14 @@ public class UserService implements UserDetailsService {
         return UserMapperDto.fromEntity(user);
     }
 
+    @Transactional
+    public UserResponse updateLoggedUser(UserRequestUpdateAdmin request) {
+        User user = getAuthenticatedUser();
+        userServiceHelper.updateUserData(request, user);
+
+        return UserMapperDto.fromEntity(user);
+    }
+
     public void deleteUser(Long id) {
         userServiceHelper.checkUserId(id);
         userRepository.deleteById(id);
