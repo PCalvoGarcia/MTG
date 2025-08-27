@@ -60,8 +60,4 @@ public class CardController {
         CARD_SERVICE.deleteCard(id);
         return ResponseEntity.noContent().build();
     }
-
-    private int convertToZeroBasedPage(int page) {
-        return page - 1;
-    }
 }
