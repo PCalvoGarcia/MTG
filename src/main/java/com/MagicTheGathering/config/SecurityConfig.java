@@ -75,7 +75,7 @@ public class SecurityConfig {
                         .hasRole("USER")
                         .requestMatchers(HttpMethod.POST,"/api/cards/**", "/api/decks/**", "/api/deck-cards")
                         .hasRole("USER")
-                        .requestMatchers(HttpMethod.PUT,"/api/cards/**", "/api/decks/**", "/api/deck-cards")
+                        .requestMatchers(HttpMethod.PUT,"/api/cards/**", "/api/decks/**", "/api/deck-cards", "/api/users/my-user")
                         .hasRole("USER")
                         .requestMatchers(HttpMethod.DELETE,"/api/cards/**", "/api/decks/**", "/api/deck-cards")
                         .hasRole("USER")

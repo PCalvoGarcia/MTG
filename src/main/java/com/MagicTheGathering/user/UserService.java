@@ -115,9 +115,10 @@ public class UserService implements UserDetailsService {
     }
 
     @Transactional
-    public UserResponse updateLoggedUser(UserRequestUpdateAdmin request) {
+    public UserResponse updateLoggedUser(UserRequest request) {
         User user = getAuthenticatedUser();
-        userServiceHelper.updateUserData(request, user);
+        UserRequestUpdateAdmin newRequest = new UserRequestUpdateAdmin(request.username(), request.email(), request.password(), Role.USER);
+        userServiceHelper.updateUserData(newRequest, user);
 
         return UserMapperDto.fromEntity(user);
     }
