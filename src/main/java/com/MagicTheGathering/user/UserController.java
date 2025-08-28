@@ -4,6 +4,7 @@ import com.MagicTheGathering.auth.AuthServiceHelper;
 import com.MagicTheGathering.user.dto.ADMIN.UserRequestAdmin;
 import com.MagicTheGathering.user.dto.ADMIN.UserRequestUpdateAdmin;
 import com.MagicTheGathering.user.dto.USER.UserRequest;
+import com.MagicTheGathering.user.dto.UserMapperDto;
 import com.MagicTheGathering.user.dto.UserResponse;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -31,6 +32,11 @@ public class UserController {
         return ResponseEntity.ok(userService.getUserById(id));
     }
 
+    @GetMapping("/api/users/my-user")
+    public ResponseEntity<UserResponse> getLoggedUser(){
+        return ResponseEntity.ok(UserMapperDto.fromEntity(userService.getAuthenticatedUser()));
+    }
+
 
     @PostMapping("/auth/refresh")
     public ResponseEntity<Map<String, String>> refreshToken(@RequestBody Map<String, String> body) {
@@ -51,8 +57,13 @@ public class UserController {
 
 
     @PutMapping("/api/users/{id}")
-    public ResponseEntity<UserResponse> updateUserRoleRole( @PathVariable Long id, @Valid @RequestBody UserRequestUpdateAdmin request) {
+    public ResponseEntity<UserResponse> updateUser(@PathVariable Long id, @Valid @RequestBody UserRequestUpdateAdmin request) {
         return ResponseEntity.ok(userService.updateUser(id, request));
+    }
+
+    @PutMapping("/api/users/my-user")
+    public ResponseEntity<UserResponse> updateLoggedUser( @Valid @RequestBody UserRequest request) {
+        return ResponseEntity.ok(userService.updateLoggedUser(request));
     }
 
 
