@@ -479,4 +479,45 @@ public class UserServiceTest {
             assertEquals("No authenticated user found", exception.getMessage());
         }
     }
+
+    @Test
+    void updateLoggedUser(){
+        User authenticatedUser = new User();
+        authenticatedUser.setId(1L);
+        authenticatedUser.setUsername("oldUser");
+        authenticatedUser.setEmail("old@test.com");
+        authenticatedUser.setPassword("oldPassword");
+        authenticatedUser.setRoles(Set.of(Role.USER));
+
+        SecurityContext context = SecurityContextHolder.createEmptyContext();
+        Authentication authentication = Mockito.mock(Authentication.class);
+        when(authentication.isAuthenticated()).thenReturn(true);
+        when(authentication.getName()).thenReturn("oldUser");
+        context.setAuthentication(authentication);
+        SecurityContextHolder.setContext(context);
+
+        when(userRepository.findByUsername("oldUser")).thenReturn(Optional.of(authenticatedUser));
+
+        UserRequest updateRequest = new UserRequest("newUser", "new@test.com", "newPassword");
+
+        doAnswer(invocation -> {
+            UserRequestUpdateAdmin req = invocation.getArgument(0);
+            User user = invocation.getArgument(1);
+
+            user.setUsername(req.username());
+            user.setEmail(req.email());
+            user.setPassword(req.password()); // aquí podrías usar el encoder si aplica
+            user.setRoles(Set.of(Role.USER));
+            return null;
+        }).when(userServiceHelper).updateUserData(any(UserRequestUpdateAdmin.class), any(User.class));
+
+        UserResponse response = userService.updateLoggedUser(updateRequest);
+
+        assertNotNull(response);
+        assertEquals("newUser", response.username());
+        assertEquals("new@test.com", response.email());
+        assertEquals(Role.USER, authenticatedUser.getRoles().iterator().next());
+
+        verify(userServiceHelper).updateUserData(any(UserRequestUpdateAdmin.class), eq(authenticatedUser));
+    }
 }
