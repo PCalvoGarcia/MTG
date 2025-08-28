@@ -1,5 +1,8 @@
 SET FOREIGN_KEY_CHECKS = 0;
 
+DROP TABLE IF EXISTS deck_likes;
+DROP TABLE IF EXISTS deck_cards;
+DROP TABLE IF EXISTS decks;
 DROP TABLE IF EXISTS legality_card;
 DROP TABLE IF EXISTS color_card;
 DROP TABLE IF EXISTS type_card;
@@ -75,11 +78,21 @@ CREATE TABLE IF NOT EXISTS decks (
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
-CREATE TABLE IF NOT EXISTS deck_card (
+CREATE TABLE IF NOT EXISTS deck_cards (
     id_deck BIGINT NOT NULL,
     id_card BIGINT NOT NULL,
     quantity INT NOT NULL,
     PRIMARY KEY (id_deck, id_card),
     FOREIGN KEY (id_deck) REFERENCES decks(id) ON DELETE CASCADE,
     FOREIGN KEY (id_card) REFERENCES cards(id) ON DELETE CASCADE
+);
+
+CREATE TABLE deck_likes (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    deck_id BIGINT NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (deck_id) REFERENCES decks(id) ON DELETE CASCADE,
+    UNIQUE KEY unique_user_deck_like (user_id, deck_id)
 );

@@ -34,8 +34,8 @@ INSERT INTO cards (created_at, name, specific_type, mana_total_cost, text_rules,
 
 -- Insert types for all cards
 INSERT INTO type_card (card_id, types) VALUES
-(1, 'INSTANT'), (2, 'LAND'), (3, 'CREATURE'), (4, 'INSTANT'), (5, 'LAND'), (6, 'CREATURE'),
-(7, 'INSTANT'), (8, 'LAND'), (9, 'CREATURE'), (10, 'LAND'), (11, 'LAND');
+(1, 'INSTANT'), (2, 'BASIC_LAND'), (3, 'CREATURE'), (4, 'INSTANT'), (5, 'BASIC_LAND'), (6, 'CREATURE'),
+(7, 'INSTANT'), (8, 'BASIC_LAND'), (9, 'CREATURE'), (10, 'BASIC_LAND'), (11, 'BASIC_LAND');
 
 -- Insert mana colors
 INSERT INTO color_card (card_id, mana_colors) VALUES
@@ -77,3 +77,9 @@ INSERT INTO deck_card (id_deck, id_card, quantity) VALUES
 (10, 11, 30), (10, 6, 1),
 (11, 4, 4), (11, 8, 20),
 (12, 2, 10), (12, 5, 10), (12, 10, 10);
+
+INSERT INTO deck_likes (user_id, deck_id) VALUES
+(6, 5),
+(2, 5),
+(4, 5),
+(7, 5);
