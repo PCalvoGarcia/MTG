@@ -153,4 +153,24 @@ public class UserControllerTest {
         mockMvc.perform(delete("/api/users/{id}", userId))
                 .andExpect(status().isNoContent());
     }
+
+    @Test
+    @Transactional
+    @WithMockUser(roles = {"USER"})
+    void should_updateLoggedUser_fromRequest() throws Exception {
+        UserRequest userRequest = new UserRequest(
+                "updatedUser",
+                "updateduser@test.com",
+                "newpassword123"
+        );
+
+        mockMvc.perform(put("/api/users/my-user")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(userRequest)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.username").value("updatedUser"))
+                .andExpect(jsonPath("$.email").value("updateduser@test.com"))
+                .andExpect(jsonPath("$.id").exists());
+    }
+
 }

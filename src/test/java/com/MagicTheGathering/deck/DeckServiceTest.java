@@ -13,6 +13,7 @@ import com.MagicTheGathering.deckCard.exceptions.CardIdNotFoundInDeckException;
 import com.MagicTheGathering.Exceptions.DeckIdNotFoundException;
 import com.MagicTheGathering.deckCartId.DeckCardId;
 import com.MagicTheGathering.legality.Legality;
+import com.MagicTheGathering.like.DeckLike;
 import com.MagicTheGathering.like.DeckLikeService;
 import com.MagicTheGathering.user.User;
 import com.MagicTheGathering.user.UserService;
@@ -67,6 +68,8 @@ class DeckServiceTest {
     private Deck testDeck;
     private Card testCard;
     private DeckRequest deckRequest;
+    private DeckLike testDeckLike;
+
 
     @BeforeEach
     void setUp() {
@@ -91,6 +94,12 @@ class DeckServiceTest {
                 .id(1L)
                 .name("Lightning Bolt")
                 .manaTotalCost(1)
+                .build();
+
+        testDeckLike = DeckLike.builder()
+                .id(1L)
+                .user(testUser)
+                .deck(testDeck)
                 .build();
 
         deckRequest = new DeckRequest(
@@ -199,6 +208,171 @@ class DeckServiceTest {
 
     }
 
+    @Nested
+    class GetDeckObjById {
+
+        @Test
+        void getDeckObjById_WhenDeckExistsAndIsPublic_ShouldReturnDeck() {
+            when(deckRepository.findById(1L)).thenReturn(Optional.of(testDeck));
+            when(userService.getAuthenticatedUser()).thenReturn(testUser);
+
+            Deck result = deckService.getDeckObjById(1L);
+
+            assertThat(result).isNotNull();
+            assertThat(result.getId()).isEqualTo(1L);
+            assertThat(result.getDeckName()).isEqualTo("Test Deck");
+
+            verify(deckRepository).findById(1L);
+            verify(userService).getAuthenticatedUser();
+        }
+
+        @Test
+        void getDeckObjById_WhenDeckNotFound_ShouldThrowRuntimeException() {
+            when(deckRepository.findById(1L)).thenReturn(Optional.empty());
+
+            assertThrows(RuntimeException.class, () -> {
+                deckService.getDeckObjById(1L);
+            });
+
+            verify(deckRepository).findById(1L);
+        }
+
+        @Test
+        void getDeckObjById_WhenDeckIsPrivateAndUserIsOwner_ShouldReturnDeck() {
+            testDeck.setIsPublic(false);
+
+            when(deckRepository.findById(1L)).thenReturn(Optional.of(testDeck));
+            when(userService.getAuthenticatedUser()).thenReturn(testUser);
+            when(userSecurityUtils.isAuthorizedToModifyDeck(testDeck)).thenReturn(true);
+
+            Deck result = deckService.getDeckObjById(1L);
+
+            assertThat(result).isNotNull();
+            assertThat(result.getId()).isEqualTo(1L);
+
+            verify(deckRepository).findById(1L);
+            verify(userService).getAuthenticatedUser();
+            verify(userSecurityUtils).isAuthorizedToModifyDeck(testDeck);
+        }
+
+        @Test
+        void getDeckObjById_WhenDeckIsPrivateAndUserIsNotOwner_ShouldThrowRuntimeException() {
+            testDeck.setIsPublic(false);
+            User otherUser = User.builder().id(2L).username("otheruser").build();
+
+            when(deckRepository.findById(1L)).thenReturn(Optional.of(testDeck));
+            when(userService.getAuthenticatedUser()).thenReturn(otherUser);
+            when(userSecurityUtils.isAuthorizedToModifyDeck(testDeck)).thenReturn(false);
+
+            assertThrows(RuntimeException.class, () -> {
+                deckService.getDeckObjById(1L);
+            });
+
+            verify(deckRepository).findById(1L);
+            verify(userService).getAuthenticatedUser();
+            verify(userSecurityUtils).isAuthorizedToModifyDeck(testDeck);
+        }
+
+        @Test
+        void getDeckObjById_WhenDeckIsPublicAndUserIsNotOwner_ShouldReturnDeck() {
+            User otherUser = User.builder().id(2L).username("otheruser").build();
+
+            when(deckRepository.findById(1L)).thenReturn(Optional.of(testDeck));
+            when(userService.getAuthenticatedUser()).thenReturn(otherUser);
+
+            Deck result = deckService.getDeckObjById(1L);
+
+            assertThat(result).isNotNull();
+            assertThat(result.getId()).isEqualTo(1L);
+
+            verify(deckRepository).findById(1L);
+            verify(userService).getAuthenticatedUser();
+            verify(userSecurityUtils, never()).isAuthorizedToModifyDeck(any());
+        }
+    }
+
+    @Nested
+    class GetLikedDecksByUser {
+
+        @Test
+        void getLikedDecksByUser_WhenUserHasLikedDecks_ShouldReturnDeckResponses() {
+            List<DeckLike> likedDecks = List.of(testDeckLike);
+
+            when(userService.getAuthenticatedUser()).thenReturn(testUser);
+            when(deckLikeService.getDeckLikedByUser(testUser)).thenReturn(likedDecks);
+
+            List<DeckResponse> result = deckService.getLikedDecksByUser();
+
+            assertThat(result).isNotNull();
+            assertThat(result).hasSize(1);
+            assertThat(result.get(0).id()).isEqualTo(1L);
+            assertThat(result.get(0).deckName()).isEqualTo("Test Deck");
+
+            verify(userService).getAuthenticatedUser();
+            verify(deckLikeService).getDeckLikedByUser(testUser);
+        }
+
+        @Test
+        void getLikedDecksByUser_WhenUserHasNoLikedDecks_ShouldReturnEmptyList() {
+            when(userService.getAuthenticatedUser()).thenReturn(testUser);
+            when(deckLikeService.getDeckLikedByUser(testUser)).thenReturn(List.of());
+
+            List<DeckResponse> result = deckService.getLikedDecksByUser();
+
+            assertThat(result).isNotNull();
+            assertThat(result).isEmpty();
+
+            verify(userService).getAuthenticatedUser();
+            verify(deckLikeService).getDeckLikedByUser(testUser);
+        }
+
+        @Test
+        void getLikedDecksByUser_WhenUserHasMultipleLikedDecks_ShouldReturnAllDecks() {
+            Deck deck2 = Deck.builder()
+                    .id(2L)
+                    .deckName("Test Deck 2")
+                    .isPublic(true)
+                    .user(testUser)
+                    .type(Legality.STANDARD)
+                    .build();
+
+            DeckLike deckLike2 = DeckLike.builder()
+                    .id(2L)
+                    .user(testUser)
+                    .deck(deck2)
+                    .build();
+
+            List<DeckLike> likedDecks = List.of(testDeckLike, deckLike2);
+
+            when(userService.getAuthenticatedUser()).thenReturn(testUser);
+            when(deckLikeService.getDeckLikedByUser(testUser)).thenReturn(likedDecks);
+
+            List<DeckResponse> result = deckService.getLikedDecksByUser();
+
+            assertThat(result).isNotNull();
+            assertThat(result).hasSize(2);
+            assertThat(result.get(0).id()).isEqualTo(1L);
+            assertThat(result.get(1).id()).isEqualTo(2L);
+
+            verify(userService).getAuthenticatedUser();
+            verify(deckLikeService).getDeckLikedByUser(testUser);
+        }
+
+        @Test
+        void getLikedDecksByUser_WhenServiceThrowsException_ShouldPropagateException() {
+            when(userService.getAuthenticatedUser()).thenReturn(testUser);
+            when(deckLikeService.getDeckLikedByUser(testUser))
+                    .thenThrow(new RuntimeException("Database error"));
+
+            assertThrows(RuntimeException.class, () -> {
+                deckService.getLikedDecksByUser();
+            });
+
+            verify(userService).getAuthenticatedUser();
+            verify(deckLikeService).getDeckLikedByUser(testUser);
+        }
+    }
+
     @Test
     void createDeck_ShouldReturnCreatedDeck() {
         when(userService.getAuthenticatedUser()).thenReturn(testUser);
@@ -238,6 +412,7 @@ class DeckServiceTest {
 
             verify(deckRepository).findById(1L);
             verify(userSecurityUtils).isAuthorizedToModifyDeck(testDeck);
+            verify(deckLikeService).deleteLikesByDeckId(1L);
         }
 
         @Test
@@ -261,6 +436,45 @@ class DeckServiceTest {
                     .isInstanceOf(DeckIdNotFoundException.class);
 
             verify(deckRepository).findById(999L);
+        }
+
+        @Test
+        void updateDeck_WhenChangingToPrivate_ShouldDeleteLikes() {
+            testDeck.setIsPublic(true);
+
+            DeckRequest updateRequest = new DeckRequest(
+                    "Updated Deck",
+                    false,
+                    Legality.MODERN
+            );
+
+            when(userService.getAuthenticatedUser()).thenReturn(testUser);
+            when(deckRepository.findById(1L)).thenReturn(Optional.of(testDeck));
+            when(userSecurityUtils.isAuthorizedToModifyDeck(testDeck)).thenReturn(true);
+            doNothing().when(deckLikeService).deleteLikesByDeckId(1L);
+
+            deckService.updateDeck(1L, updateRequest);
+
+            verify(deckLikeService).deleteLikesByDeckId(1L);
+        }
+
+        @Test
+        void updateDeck_WhenStayingPublic_ShouldNotDeleteLikes() {
+            testDeck.setIsPublic(true);
+
+            DeckRequest updateRequest = new DeckRequest(
+                    "Updated Deck",
+                    true,
+                    Legality.MODERN
+            );
+
+            when(userService.getAuthenticatedUser()).thenReturn(testUser);
+            when(deckRepository.findById(1L)).thenReturn(Optional.of(testDeck));
+            when(userSecurityUtils.isAuthorizedToModifyDeck(testDeck)).thenReturn(true);
+
+            deckService.updateDeck(1L, updateRequest);
+
+            verify(deckLikeService, never()).deleteLikesByDeckId(1L);
         }
 
     }

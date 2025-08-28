@@ -1,6 +1,8 @@
 package com.MagicTheGathering.user.dto;
 
 import com.MagicTheGathering.user.User;
+import com.MagicTheGathering.user.dto.ADMIN.UserRequestAdmin;
+import com.MagicTheGathering.user.dto.USER.UserRequest;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.context.ActiveProfiles;
 
@@ -23,6 +25,27 @@ class UserMapperTest {
         assertNotNull(response.roles());
         assertTrue(response.roles().isEmpty(), "Expected roles to be empty when user has no roles");
 
+    }
+
+    @Test
+    void when_fromEntity_return_null_from_nullUser(){
+        User user = null;
+
+        assertNull(UserMapperDto.fromEntity(user));
+    }
+
+    @Test
+    void when_toEntity_return_null_from_nullUser(){
+        UserRequest userRequest = null;
+
+        assertNull(UserMapperDto.toEntity(userRequest));
+    }
+
+    @Test
+    void when_toEntityAdmin_return_null_from_nullUser(){
+        UserRequestAdmin userRequestAdmin = null;
+
+        assertNull(UserMapperDto.toEntityAdmin(userRequestAdmin));
     }
 
 }
