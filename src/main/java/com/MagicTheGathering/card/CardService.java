@@ -1,6 +1,8 @@
 package com.MagicTheGathering.card;
 
 import com.MagicTheGathering.Cloudinary.CloudinaryService;
+import com.MagicTheGathering.Exceptions.EmptyListException;
+import com.MagicTheGathering.Exceptions.UnauthorizedAccessException;
 import com.MagicTheGathering.Exceptions.UnauthorizedModificationsException;
 import com.MagicTheGathering.card.dto.CardMapperDto;
 import com.MagicTheGathering.card.dto.CardRequest;
@@ -45,19 +47,23 @@ public class CardService {
                 .stream()
                 .map(CardMapperDto::fromEntity)
                 .collect(Collectors.toList());
+        if (cards.isEmpty()){throw new EmptyListException();}
         return cards;
     }
 
     @Transactional(readOnly = true)
     public CardResponse getCardById(Long id) {
+        User user = USER_SERVICE.getAuthenticatedUser();
         Card card = CARD_REPOSITORY.findById(id)
                 .orElseThrow(() -> new CardIdNotFoundException(id));
+        if (card.getUser() != user){throw new UnauthorizedAccessException(); }
         return CardMapperDto.fromEntity(card);
     }
 
     public CardResponse createCard(CardRequest cardRequest) {
         User user = USER_SERVICE.getAuthenticatedUser();
         CardResponse cardResponse;
+
         try {
             Map uploadResult = CLOUDINARY_SERVICE.uploadFile(cardRequest.image());
             String imageUrl = (String) uploadResult.get("secure_url");
