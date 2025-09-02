@@ -1,5 +1,6 @@
 package com.MagicTheGathering.deck;
 
+import com.MagicTheGathering.Exceptions.UnauthorizedAccessException;
 import com.MagicTheGathering.Exceptions.UnauthorizedModificationsException;
 import com.MagicTheGathering.card.Card;
 import com.MagicTheGathering.deck.dto.AddCardDeckRequest;
@@ -59,12 +60,12 @@ public class DeckService {
     @Transactional(readOnly = true)
     public DeckResponse getDeckById(Long id) {
         Deck deck = deckRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Deck not found"));
+                .orElseThrow(() -> new UnauthorizedAccessException());
 
         User currentUser = userService.getAuthenticatedUser();
 
         if (!deck.getIsPublic() && !userSecurityUtils.isAuthorizedToModifyDeck(deck)){
-            throw new RuntimeException("Unauthorized");
+            throw new UnauthorizedAccessException();
         }
 
         return DeckMapperDto.fromEntity(deck);
@@ -73,12 +74,12 @@ public class DeckService {
     @Transactional(readOnly = true)
     public Deck getDeckObjById(Long id) {
         Deck deck = deckRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Deck not found"));
+                .orElseThrow(() -> new DeckIdNotFoundException(id));
 
         User currentUser = userService.getAuthenticatedUser();
 
         if (!deck.getIsPublic() && !userSecurityUtils.isAuthorizedToModifyDeck(deck)){
-            throw new RuntimeException("Unauthorized");
+            throw new UnauthorizedAccessException();
         }
 
         return deck;
