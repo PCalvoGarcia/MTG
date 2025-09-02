@@ -167,7 +167,7 @@ class DeckServiceTest {
 
             assertThatThrownBy(() -> deckService.getDeckById(1L))
                     .isInstanceOf(RuntimeException.class)
-                    .hasMessageContaining("Deck not found");
+                    .hasMessageContaining("Deck not found with id: 1");
 
             verify(deckRepository).findById(1L);
         }
@@ -182,7 +182,7 @@ class DeckServiceTest {
 
             assertThatThrownBy(() -> deckService.getDeckById(1L))
                     .isInstanceOf(RuntimeException.class)
-                    .hasMessageContaining("Unauthorized");
+                    .hasMessageContaining("You are not authorized to access");
 
             verify(deckRepository).findById(1L);
             verify(userSecurityUtils).isAuthorizedToModifyDeck(testDeck);
