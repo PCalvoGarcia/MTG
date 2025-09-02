@@ -1,5 +1,8 @@
 package com.MagicTheGathering.user.utils;
 
+import com.MagicTheGathering.Exceptions.EmailSendException;
+import com.MagicTheGathering.email.EmailService;
+import com.MagicTheGathering.email.UserEmailTemplates;
 import com.MagicTheGathering.role.Role;
 import com.MagicTheGathering.user.UserRepository;
 import com.MagicTheGathering.user.dto.UserMapperDto;
@@ -8,6 +11,7 @@ import com.MagicTheGathering.user.dto.ADMIN.UserRequestUpdateAdmin;
 import com.MagicTheGathering.user.User;
 import com.MagicTheGathering.user.exceptions.EmailAlreadyExistException;
 import com.MagicTheGathering.user.exceptions.UsernameAlreadyExistException;
+import jakarta.mail.MessagingException;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -36,6 +40,9 @@ class UserServiceHelperTest {
 
     @Mock
     private  PasswordEncoder passwordEncoder;
+
+    @Mock
+    private EmailService emailService;
 
     @Nested
     class checkEmail {
@@ -250,6 +257,49 @@ class UserServiceHelperTest {
             assertEquals("existing@example.com", user.getEmail());
             assertEquals("existingPassword", user.getPassword());
             assertTrue(user.getRoles().contains(Role.USER));
+        }
+    }
+
+    @Nested
+    class sendEmailRegisterNewUser {
+
+        @Test
+        void when_sendEmailRegisterNewUser_return_void() throws Exception {
+            User user = new User();
+            user.setEmail("test@example.com");
+            user.setUsername("testUser");
+
+            assertDoesNotThrow(() -> userServiceHelper.sendEmailRegisterNewUser(user));
+
+            verify(emailService).sendUserWelcomeEmail(
+                    eq("test@example.com"),
+                    eq(UserEmailTemplates.getUserCreatedSubject()),
+                    eq(UserEmailTemplates.getUserWelcomeEmailPlainText(user)),
+                    eq(UserEmailTemplates.getUserWelcomeEmailHtml(user))
+            );
+        }
+
+        @Test
+        void when_sendEmailRegisterNewUser_throw_EmailSendException() throws Exception {
+            User user = new User();
+            user.setEmail("test@example.com");
+            user.setUsername("testUser");
+
+            doThrow(new MessagingException("SMTP error"))
+                    .when(emailService)
+                    .sendUserWelcomeEmail(
+                            anyString(),
+                            anyString(),
+                            anyString(),
+                            anyString()
+                    );
+
+            EmailSendException exception = assertThrows(
+                    EmailSendException.class,
+                    () -> userServiceHelper.sendEmailRegisterNewUser(user)
+            );
+
+            assertTrue(exception.getMessage().contains("Error sending email. "));
         }
     }
 }
