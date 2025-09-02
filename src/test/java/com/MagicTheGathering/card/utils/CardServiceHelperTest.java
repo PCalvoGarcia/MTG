@@ -112,16 +112,13 @@ class CardServiceHelperTest {
     }
 
     @Test
-    void when_cloudinaryManagement_shouldNotProcess_WhenImageIsEmpty() {
-        MockMultipartFile emptyFile = new MockMultipartFile("image", "", "image/jpeg", new byte[0]);
-        CardRequest requestWithEmptyImage = new CardRequest(
-                "Test", CardType.INSTANT, "Test", 1, Set.of(ManaColor.RED), "Test",
-                0, 0, 0, "Test", 1, "Test", "Test", emptyFile, Set.of(Legality.STANDARD), 1
-        );
+    void when_cloudinaryManagement_shouldProcess_WhenImageIsNotEmpty() throws IOException {
+        String imageUrl = "https://cloudinary.com/test/image.jpg";
 
-        cardServiceHelper.cloudinaryManagement(requestWithEmptyImage, testCard);
+        cardServiceHelper.cloudinaryManagement(cardRequest, testCard);
 
-        verifyNoInteractions(cloudinaryService);
+        verify(cloudinaryService).deleteFile(imageUrl);
+        verify(cloudinaryService).uploadFile(cardRequest.image());
     }
 
     @Test
