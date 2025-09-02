@@ -295,7 +295,7 @@ class DeckServiceTest {
     class GetLikedDecksByUser {
 
         @Test
-        void getLikedDecksByUser_WhenUserHasLikedDecks_ShouldReturnDeckResponses() {
+        void getLikedDecksByUser_When_UserHasLikedDecks_Should_Return_DeckResponses() {
             List<DeckLike> likedDecks = List.of(testDeckLike);
 
             when(userService.getAuthenticatedUser()).thenReturn(testUser);
@@ -313,7 +313,7 @@ class DeckServiceTest {
         }
 
         @Test
-        void getLikedDecksByUser_WhenUserHasNoLikedDecks_ShouldReturnEmptyList() {
+        void getLikedDecksByUser_When_UserHasNoLikedDecks_Should_Return_EmptyList() {
             when(userService.getAuthenticatedUser()).thenReturn(testUser);
             when(deckLikeService.getDeckLikedByUser(testUser)).thenReturn(List.of());
 
@@ -327,7 +327,7 @@ class DeckServiceTest {
         }
 
         @Test
-        void getLikedDecksByUser_WhenUserHasMultipleLikedDecks_ShouldReturnAllDecks() {
+        void getLikedDecksByUser_When_UserHasMultipleLikedDecks_Should_Return_AllDecks() {
             Deck deck2 = Deck.builder()
                     .id(2L)
                     .deckName("Test Deck 2")
@@ -359,7 +359,7 @@ class DeckServiceTest {
         }
 
         @Test
-        void getLikedDecksByUser_WhenServiceThrowsException_ShouldPropagateException() {
+        void getLikedDecksByUser_When_ServiceThrowsException_Should_ThrowException() {
             when(userService.getAuthenticatedUser()).thenReturn(testUser);
             when(deckLikeService.getDeckLikedByUser(testUser))
                     .thenThrow(new RuntimeException("Database error"));
@@ -374,7 +374,7 @@ class DeckServiceTest {
     }
 
     @Test
-    void createDeck_ShouldReturnCreatedDeck() {
+    void createDeck_Should_Return_CreatedDeck() {
         when(userService.getAuthenticatedUser()).thenReturn(testUser);
         when(deckRepository.save(any(Deck.class))).thenReturn(testDeck);
 
@@ -391,7 +391,7 @@ class DeckServiceTest {
     class UpdateDeck {
 
         @Test
-        void updateDeck_WhenAuthorized_ShouldReturnUpdatedDeck() {
+        void updateDeck_When_Authorized_Should_Return_UpdatedDeck() {
             DeckRequest updateRequest = new DeckRequest(
                     "Updated Deck",
                     false,
@@ -416,7 +416,7 @@ class DeckServiceTest {
         }
 
         @Test
-        void updateDeck_WhenNotAuthorized_ShouldThrowException() {
+        void updateDeck_When_NotAuthorized_Should_Throw_Exception() {
             when(userService.getAuthenticatedUser()).thenReturn(testUser);
             when(deckRepository.findById(1L)).thenReturn(Optional.of(testDeck));
             when(userSecurityUtils.isAuthorizedToModifyDeck(testDeck)).thenReturn(false);
@@ -428,7 +428,7 @@ class DeckServiceTest {
         }
 
         @Test
-        void updateDeck_WhenDeckNotFound_ShouldThrowException() {
+        void updateDeck_When_DeckNotFound_Should_ThrowException() {
             when(userService.getAuthenticatedUser()).thenReturn(testUser);
             when(deckRepository.findById(999L)).thenReturn(Optional.empty());
 
@@ -439,7 +439,7 @@ class DeckServiceTest {
         }
 
         @Test
-        void updateDeck_WhenChangingToPrivate_ShouldDeleteLikes() {
+        void updateDeck_When_ChangingToPrivate_Should_DeleteLikes() {
             testDeck.setIsPublic(true);
 
             DeckRequest updateRequest = new DeckRequest(
@@ -459,7 +459,7 @@ class DeckServiceTest {
         }
 
         @Test
-        void updateDeck_WhenStayingPublic_ShouldNotDeleteLikes() {
+        void updateDeck_WhenStayingPublic_Should_NotDeleteLikes() {
             testDeck.setIsPublic(true);
 
             DeckRequest updateRequest = new DeckRequest(
@@ -483,7 +483,7 @@ class DeckServiceTest {
     class DeleteDeck {
 
         @Test
-        void deleteDeck_WhenAuthorized_ShouldDeleteDeck() {
+        void deleteDeck_When_Authorized_Should_DeleteDeck() {
             when(userService.getAuthenticatedUser()).thenReturn(testUser);
             when(deckRepository.findById(1L)).thenReturn(Optional.of(testDeck));
 
@@ -494,7 +494,7 @@ class DeckServiceTest {
         }
 
         @Test
-        void deleteDeck_whenAuthorizedAndPrivate() {
+        void deleteDeck_when_AuthorizedAndPrivate() {
             testDeck.setIsPublic(false);
 
             when(deckRepository.findById(1L)).thenReturn(Optional.of(testDeck));
@@ -508,7 +508,7 @@ class DeckServiceTest {
         }
 
         @Test
-        void deleteDeck_whenUnauthorizedAndPrivate_should_throwException() {
+        void deleteDeck_when_UnauthorizedAndPrivate_should_throwException() {
             testDeck.setIsPublic(false);
 
             when(deckRepository.findById(1L)).thenReturn(Optional.of(testDeck));
@@ -520,7 +520,7 @@ class DeckServiceTest {
         }
 
         @Test
-        void deleteDeck_WhenDeckNotFound_ShouldThrowException() {
+        void deleteDeck_When_DeckNotFound_Should_ThrowException() {
             when(userService.getAuthenticatedUser()).thenReturn(testUser);
             when(deckRepository.findById(999L)).thenReturn(Optional.empty());
 
@@ -536,7 +536,7 @@ class DeckServiceTest {
     class addCardToDeck{
 
         @Test
-        void addCardToDeck_ShouldAddCardSuccessfully() {
+        void addCardToDeck_Should_AddCardSuccessfully() {
             AddCardDeckRequest request = new AddCardDeckRequest(1L, 2);
             DeckCardId deckCardId = new DeckCardId(1L, 1L);
 
@@ -564,7 +564,7 @@ class DeckServiceTest {
         }
 
         @Test
-        void addCardToDeck_WhenCardExists_ShouldUpdateQuantity() {
+        void addCardToDeck_When_CardExists_Should_UpdateQuantity() {
             AddCardDeckRequest request = new AddCardDeckRequest(1L, 2);
             DeckCardId deckCardId = new DeckCardId(1L, 1L);
 
@@ -590,7 +590,7 @@ class DeckServiceTest {
         }
 
         @Test
-        void addCardToDeck_whenUnauthorized_throw_exception() {
+        void addCardToDeck_when_Unauthorized_throw_exception() {
             testDeck.setIsPublic(false);
             AddCardDeckRequest request = new AddCardDeckRequest(1L, 2);
 
@@ -603,7 +603,7 @@ class DeckServiceTest {
         }
 
         @Test
-        void addCardToDeck_WhenCardNotExists() {
+        void addCardToDeck_When_CardNotExists() {
             AddCardDeckRequest request = new AddCardDeckRequest(1L, 2);
             DeckCardId deckCardId = new DeckCardId(1L, 1L);
 
@@ -633,7 +633,7 @@ class DeckServiceTest {
     class removeCardFromDeck{
 
         @Test
-        void removeCardFromDeck_ShouldRemoveCardSuccessfully() {
+        void removeCardFromDeck_Should_RemoveCardSuccessfully() {
             DeckCardId deckCardId = new DeckCardId(1L, 1L);
             DeckCard deckCard = new DeckCard();
             deckCard.setId(deckCardId);
@@ -655,7 +655,7 @@ class DeckServiceTest {
         }
 
         @Test
-        void removeCardFromDeck_WhenRemovingAllCopies_ShouldDeleteCard() {
+        void removeCardFromDeck_When_RemovingAllCopies_Should_DeleteCard() {
             DeckCardId deckCardId = new DeckCardId(1L, 1L);
             DeckCard deckCard = new DeckCard();
             deckCard.setId(deckCardId);
@@ -676,7 +676,7 @@ class DeckServiceTest {
         }
 
         @Test
-        void removeCardFromDeck_WhenCardNotInDeck_ShouldThrowException() {
+        void removeCardFromDeck_When_CardNotInDeck_Should_ThrowException() {
             DeckCardId deckCardId = new DeckCardId(1L, 1L);
 
             when(userService.getAuthenticatedUser()).thenReturn(testUser);

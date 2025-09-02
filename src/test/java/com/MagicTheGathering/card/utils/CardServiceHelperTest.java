@@ -86,7 +86,7 @@ class CardServiceHelperTest {
     }
 
     @Test
-    void getSavedCard_ShouldReturnSavedCard() {
+    void when_getSavedCard_should_ReturnSavedCard() {
         String imageUrl = "https://cloudinary.com/image.jpg";
         Card expectedCard = Card.builder().name("Lightning Bolt").build();
 
@@ -100,7 +100,7 @@ class CardServiceHelperTest {
     }
 
     @Test
-    void cloudinaryManagement_ShouldNotProcess_WhenImageIsNull() {
+    void when_cloudinaryManagement_shouldNotProcess_WhenImageIsNull() {
         CardRequest requestWithNullImage = new CardRequest(
                 "Test", CardType.INSTANT, "Test", 1, Set.of(ManaColor.RED), "Test",
                 0, 0, 0, "Test", 1, "Test", "Test", null, Set.of(Legality.STANDARD), 1
@@ -112,7 +112,7 @@ class CardServiceHelperTest {
     }
 
     @Test
-    void cloudinaryManagement_ShouldNotProcess_WhenImageIsEmpty() {
+    void when_cloudinaryManagement_shouldNotProcess_WhenImageIsEmpty() {
         MockMultipartFile emptyFile = new MockMultipartFile("image", "", "image/jpeg", new byte[0]);
         CardRequest requestWithEmptyImage = new CardRequest(
                 "Test", CardType.INSTANT, "Test", 1, Set.of(ManaColor.RED), "Test",
@@ -125,7 +125,7 @@ class CardServiceHelperTest {
     }
 
     @Test
-    void getPublicIdCloudinary_ShouldExtractPublicId() {
+    void when_getPublicIdCloudinary_should_ExtractPublicId() {
         String imageUrl = "https://res.cloudinary.com/demo/image/upload/v1234567890/sample.jpg";
 
         String result = CardServiceHelper.getPublicIdCloudinary(imageUrl);
@@ -134,7 +134,7 @@ class CardServiceHelperTest {
     }
 
     @Test
-    void getPublicIdCloudinary_ShouldHandleUrlWithoutVersion() {
+    void when_getPublicIdCloudinary_should_handleUrlWithoutVersion() {
         String imageUrl = "https://res.cloudinary.com/demo/image/upload/sample.jpg";
 
         String result = CardServiceHelper.getPublicIdCloudinary(imageUrl);
@@ -143,7 +143,7 @@ class CardServiceHelperTest {
     }
 
     @Test
-    void postImageCloudinary_ShouldUpdateImageUrl_WhenSuccessful() throws Exception {
+    void when_postImageCloudinary_shouldUpdateImageUrl_whenSuccessful() throws Exception {
         Map<String, Object> uploadResult = Map.of("secure_url", "https://cloudinary.com/new-image.jpg");
         when(cloudinaryService.uploadFile(cardRequest.image())).thenReturn(uploadResult);
 
@@ -154,7 +154,7 @@ class CardServiceHelperTest {
     }
 
     @Test
-    void postImageCloudinary_ShouldUseDefaultImage_WhenCloudinaryFails() throws Exception {
+    void when_postImageCloudinary_shouldUseDefaultImage_whenCloudinaryFails() throws Exception {
         when(cloudinaryService.uploadFile(cardRequest.image())).thenThrow(new RuntimeException("Cloudinary error"));
 
         cardServiceHelper.postImageCloudinary(cardRequest, testCard);
@@ -164,7 +164,7 @@ class CardServiceHelperTest {
     }
 
     @Test
-    void deleteImageCloudinary_ShouldCallCloudinaryService() throws IOException {
+    void when_deleteImageCloudinary_should_callCloudinaryService() throws IOException {
         String publicId = "test_public_id";
         doNothing().when(cloudinaryService).deleteFile(publicId);
 
@@ -174,7 +174,7 @@ class CardServiceHelperTest {
     }
 
     @Test
-    void deleteImageCloudinary_ShouldThrowException_WhenCloudinaryFails() throws IOException {
+    void when_deleteImageCloudinary_shouldThrowException_whenCloudinaryFails() throws IOException {
         String publicId = "test_public_id";
         doThrow(new IOException("Delete failed")).when(cloudinaryService).deleteFile(publicId);
 
@@ -186,7 +186,7 @@ class CardServiceHelperTest {
     }
 
     @Test
-    void updatePartOfCard_ShouldUpdateCardFields() {
+    void when_updatePartOfCard_should_updateCardFields() {
         Card newCard = new Card();
         Card existingCard = Card.builder()
                 .id(1L)
@@ -202,7 +202,7 @@ class CardServiceHelperTest {
     }
 
     @Test
-    void updatePartOfCard_ShouldSetQuantityToOne_WhenNegative() {
+    void when_updatePartOfCard_shouldSetQuantityToOne_whenNegative() {
         Card newCard = new Card();
         Card existingCard = Card.builder().id(1L).build();
 

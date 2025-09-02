@@ -506,7 +506,7 @@ public class UserServiceTest {
 
             user.setUsername(req.username());
             user.setEmail(req.email());
-            user.setPassword(req.password()); // aquí podrías usar el encoder si aplica
+            user.setPassword(req.password());
             user.setRoles(Set.of(Role.USER));
             return null;
         }).when(userServiceHelper).updateUserData(any(UserRequestUpdateAdmin.class), any(User.class));

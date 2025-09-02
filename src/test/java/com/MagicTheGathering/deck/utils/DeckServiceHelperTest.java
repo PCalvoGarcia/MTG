@@ -94,7 +94,7 @@ class DeckServiceHelperTest {
     }
 
     @Test
-    void validateCardAddition_shouldCallFormatValidationService() {
+    void validateCardAddition_should_CallFormatValidationService() {
         int quantity = 2;
 
         deckServiceHelper.validateCardAddition(deck, nonBasicCard, quantity);
@@ -103,17 +103,17 @@ class DeckServiceHelperTest {
     }
 
     @Test
-    void validateMaxCopiesLand_shouldAllowMoreThan4BasicLands() {
+    void validateMaxCopiesLand_should_AllowMoreThan4BasicLands() {
         assertDoesNotThrow(() -> deckServiceHelper.validateMaxCopiesLand(basicLand, 10));
     }
 
     @Test
-    void validateMaxCopiesLand_shouldAllowUpTo4NonBasicCards() {
+    void validateMaxCopiesLand_should_AllowUpTo4NonBasicCards() {
         assertDoesNotThrow(() -> deckServiceHelper.validateMaxCopiesLand(nonBasicCard, 4));
     }
 
     @Test
-    void validateMaxCopiesLand_shouldThrowExceptionForMoreThan4NonBasicCards() {
+    void validateMaxCopiesLand_should_Throw_ExceptionForMoreThan4NonBasicCards() {
         MaxCopiesAllowedException exception = assertThrows(
                 MaxCopiesAllowedException.class,
                 () -> deckServiceHelper.validateMaxCopiesLand(nonBasicCard, 5)
@@ -123,7 +123,7 @@ class DeckServiceHelperTest {
     }
 
     @Test
-    void validateMaxCopiesLand_shouldAllowExactly4NonBasicCards() {
+    void validateMaxCopiesLand_should_AllowExactly4NonBasicCards() {
         assertDoesNotThrow(() -> deckServiceHelper.validateMaxCopiesLand(nonBasicCard, 4));
     }
 }

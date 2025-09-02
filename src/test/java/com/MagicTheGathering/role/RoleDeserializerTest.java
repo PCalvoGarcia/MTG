@@ -17,7 +17,7 @@ public class RoleDeserializerTest {
     }
 
     @BeforeEach
-    void setUo(){
+    void setUp(){
         objectMapper = new ObjectMapper();
         SimpleModule simpleModule = new SimpleModule();
         simpleModule.addDeserializer(Role.class, new RoleDeserializer());

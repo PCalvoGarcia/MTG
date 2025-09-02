@@ -28,9 +28,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 
-
-
-
 @ActiveProfiles("test")
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -63,7 +60,7 @@ class DeckLikeControllerTest {
     class ManageLike {
 
         @Test
-        void manageLike_WhenValidDeckId_ShouldReturnDeckLikeResponse() throws Exception {
+        void manageLike_When_ValidDeckId_Should_Return_DeckLikeResponse() throws Exception {
             when(deckLikeService.manageLike(1L)).thenReturn(testResponse);
 
             mockMvc.perform(post("/api/deck/1/like")
@@ -77,7 +74,7 @@ class DeckLikeControllerTest {
         }
 
         @Test
-        void manageLike_WhenDeckNotFound_ShouldReturnNotFound() throws Exception {
+        void manageLike_When_DeckNotFound_Should_Return_NotFound() throws Exception {
             when(deckLikeService.manageLike(1L)).thenThrow(new DeckIdNotFoundException(1L));
 
             mockMvc.perform(post("/api/deck/1/like")
@@ -89,7 +86,7 @@ class DeckLikeControllerTest {
         }
 
         @Test
-        void manageLike_WhenPrivateDeck_ShouldReturnNotFound() throws Exception {
+        void manageLike_When_PrivateDeck_Should_Return_NotFound() throws Exception {
             when(deckLikeService.manageLike(1L)).thenThrow(new AccessDeniedPrivateDeckException());
 
             mockMvc.perform(post("/api/deck/1/like")
@@ -105,7 +102,7 @@ class DeckLikeControllerTest {
     class GetLikesByDeck {
 
         @Test
-        void getLikesByDeck_WhenValidDeckId_ShouldReturnDeckLikeResponse() throws Exception {
+        void getLikesByDeck_When_ValidDeckId_Should_Return_DeckLikeResponse() throws Exception {
             when(deckLikeService.getLikesByDeckId(1L)).thenReturn(testResponse);
             System.out.println(testResponse.likeCount());
             System.out.println(testResponse.liked());
@@ -123,7 +120,7 @@ class DeckLikeControllerTest {
         }
 
         @Test
-        void getLikesByDeck_WhenDeckNotFound_ShouldReturnNotFound() throws Exception {
+        void getLikesByDeck_When_DeckNotFound_Should_Return_NotFound() throws Exception {
             when(deckLikeService.getLikesByDeckId(1L)).thenThrow(new DeckIdNotFoundException(1L));
 
             mockMvc.perform(get("/api/deck/1/like")
@@ -134,7 +131,7 @@ class DeckLikeControllerTest {
         }
 
         @Test
-        void getLikesByDeck_WhenUserNotLiked_ShouldReturnFalse() throws Exception {
+        void getLikesByDeck_When_UserNotLiked_Should_Return_False() throws Exception {
             DeckLikeResponse notLikedResponse = DeckLikeResponse.builder()
                     .deckId(1L)
                     .liked(false)

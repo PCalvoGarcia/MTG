@@ -70,7 +70,7 @@ class DeckLikeServiceTest {
     class ManageLike {
 
         @Test
-        void manageLike_WhenDeckNotFound_ShouldThrowDeckIdNotFoundException() {
+        void manageLike_When_DeckNotFound_Should_Throw_DeckIdNotFoundException() {
             when(userService.getAuthenticatedUser()).thenReturn(testUser);
             when(deckRepository.findById(1L)).thenReturn(Optional.empty());
 
@@ -82,7 +82,7 @@ class DeckLikeServiceTest {
         }
 
         @Test
-        void manageLike_WhenDeckIsPrivate_ShouldThrowAccessDeniedPrivateDeckException() {
+        void manageLike_When_DeckIsPrivate_Should_Throw_AccessDeniedPrivateDeckException() {
             testDeck.setIsPublic(false);
 
             when(userService.getAuthenticatedUser()).thenReturn(testUser);
@@ -97,7 +97,7 @@ class DeckLikeServiceTest {
         }
 
         @Test
-        void manageLike_WhenUserNotLikedDeck_ShouldAddLike() {
+        void manageLike_When_UserNotLikedDeck_Should_AddLike() {
             when(userService.getAuthenticatedUser()).thenReturn(testUser);
             when(deckRepository.findById(1L)).thenReturn(Optional.of(testDeck));
             when(deckLikeRepository.findByUserAndDeck(testUser, testDeck)).thenReturn(Optional.empty());
@@ -116,7 +116,7 @@ class DeckLikeServiceTest {
         }
 
         @Test
-        void manageLike_WhenUserAlreadyLikedDeck_ShouldRemoveLike() {
+        void manageLike_When_UserAlreadyLikedDeck_Should_RemoveLike() {
             when(userService.getAuthenticatedUser()).thenReturn(testUser);
             when(deckRepository.findById(1L)).thenReturn(Optional.of(testDeck));
             when(deckLikeRepository.findByUserAndDeck(testUser, testDeck)).thenReturn(Optional.of(testDeckLike));
@@ -139,7 +139,7 @@ class DeckLikeServiceTest {
     class GetLikesByDeckId {
 
         @Test
-        void getLikesByDeckId_WhenDeckNotFound_ShouldThrowDeckIdNotFoundException() {
+        void getLikesByDeckId_When_DeckNotFound_Should_Throw_DeckIdNotFoundException() {
             when(deckRepository.findById(1L)).thenReturn(Optional.empty());
 
             assertThrows(DeckIdNotFoundException.class, () -> {
@@ -150,7 +150,7 @@ class DeckLikeServiceTest {
         }
 
         @Test
-        void getLikesByDeckId_WhenDeckExists_ShouldReturnLikeInfo() {
+        void getLikesByDeckId_When_DeckExists_Should_Return_LikeInfo() {
             when(deckRepository.findById(1L)).thenReturn(Optional.of(testDeck));
             when(userService.getAuthenticatedUser()).thenReturn(testUser);
             when(deckLikeRepository.existsByUserAndDeck(testUser, testDeck)).thenReturn(true);
@@ -170,7 +170,7 @@ class DeckLikeServiceTest {
         }
 
         @Test
-        void getLikesByDeckId_WhenUserNotLikedDeck_ShouldReturnFalse() {
+        void getLikesByDeckId_When_UserNotLikedDeck_Should_Return_False() {
             when(deckRepository.findById(1L)).thenReturn(Optional.of(testDeck));
             when(userService.getAuthenticatedUser()).thenReturn(testUser);
             when(deckLikeRepository.existsByUserAndDeck(testUser, testDeck)).thenReturn(false);
@@ -187,7 +187,7 @@ class DeckLikeServiceTest {
     class GetDeckLikedByUser {
 
         @Test
-        void getDeckLikedByUser_WhenUserHasLikedDecks_ShouldReturnList() {
+        void getDeckLikedByUser_When_UserHasLikedDecks_Should_Return_List() {
             List<DeckLike> expectedLikes = List.of(testDeckLike);
             when(deckLikeRepository.findByUser(testUser)).thenReturn(expectedLikes);
 
@@ -198,7 +198,7 @@ class DeckLikeServiceTest {
         }
 
         @Test
-        void getDeckLikedByUser_WhenUserHasNoLikedDecks_ShouldReturnEmptyList() {
+        void getDeckLikedByUser_When_UserHasNoLikedDecks_Should_Return_EmptyList() {
             when(deckLikeRepository.findByUser(testUser)).thenReturn(List.of());
 
             List<DeckLike> result = deckLikeService.getDeckLikedByUser(testUser);
@@ -212,7 +212,7 @@ class DeckLikeServiceTest {
     class DeleteLikesByDeckId {
 
         @Test
-        void deleteLikesByDeckId_ShouldCallRepository() {
+        void deleteLikesByDeckId_Should_CallRepository() {
             deckLikeService.deleteLikesByDeckId(1L);
 
             verify(deckLikeRepository).deleteByDeckId(1L);

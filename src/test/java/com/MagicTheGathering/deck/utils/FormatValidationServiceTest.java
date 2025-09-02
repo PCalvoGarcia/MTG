@@ -150,12 +150,12 @@ class FormatValidationServiceTest {
     @Nested
     class StandardFormat {
         @Test
-        void validateCardAddition_shouldAllowLegalCardInStandard() {
+        void validateCardAddition_should_AllowLegalCardInStandard() {
             assertDoesNotThrow(() -> formatValidationService.validateCardAddition(standardDeck, nonBasicCard, 4));
         }
 
         @Test
-        void validateCardAddition_shouldThrowExceptionForIllegalCardInStandard() {
+        void validateCardAddition_should_Throw_ExceptionForIllegalCardInStandard() {
             IllegalCardException exception = assertThrows(
                     IllegalCardException.class,
                     () -> formatValidationService.validateCardAddition(standardDeck, illegalCard, 1)
@@ -165,7 +165,7 @@ class FormatValidationServiceTest {
         }
 
         @Test
-        void validateCardAddition_shouldThrowExceptionForMoreThan4NonBasicCardsInStandard() {
+        void validateCardAddition_should_Throw_ExceptionForMoreThan4NonBasicCardsInStandard() {
             MaxCopiesAllowedException exception = assertThrows(
                     MaxCopiesAllowedException.class,
                     () -> formatValidationService.validateCardAddition(standardDeck, nonBasicCard, 5)
@@ -175,7 +175,7 @@ class FormatValidationServiceTest {
         }
 
         @Test
-        void validateCardAddition_shouldAllowMoreThan4BasicLandsInStandard() {
+        void validateCardAddition_should_AllowMoreThan4BasicLandsInStandard() {
             assertDoesNotThrow(() -> formatValidationService.validateCardAddition(standardDeck, basicLand, 10));
         }
     }
@@ -183,12 +183,12 @@ class FormatValidationServiceTest {
     @Nested
     class CommanderFormat {
         @Test
-        void validateCardAddition_shouldAllowSingleCopyInCommander() {
+        void validateCardAddition_should_AllowSingleCopyInCommander() {
             assertDoesNotThrow(() -> formatValidationService.validateCardAddition(commanderDeck, nonBasicCard, 1));
         }
 
         @Test
-        void validateCardAddition_shouldThrowExceptionForMultipleCopiesInCommander() {
+        void validateCardAddition_should_Throw_ExceptionForMultipleCopiesInCommander() {
             MaxCopiesAllowedFormatException exception = assertThrows(
                     MaxCopiesAllowedFormatException.class,
                     () -> formatValidationService.validateCardAddition(commanderDeck, nonBasicCard, 2)
@@ -198,12 +198,12 @@ class FormatValidationServiceTest {
         }
 
         @Test
-        void validateCardAddition_shouldAllowMultipleBasicLandsInCommander() {
+        void validateCardAddition_should_AllowMultipleBasicLandsInCommander() {
             assertDoesNotThrow(() -> formatValidationService.validateCardAddition(commanderDeck, basicLand, 5));
         }
 
         @Test
-        void validateCardAddition_shouldAllowSingleCommanderCard() {
+        void validateCardAddition_should_AllowSingleCommanderCard() {
             MaxCommanderException exception = assertThrows(MaxCommanderException.class, () -> formatValidationService.validateCardAddition(commanderDeck, commanderCard, 2));
 
             assertEquals(new MaxCommanderException().getMessage(), exception.getMessage());
@@ -212,7 +212,7 @@ class FormatValidationServiceTest {
     }
 
     @Test
-    void validateCardAddition_shouldThrowWhenIllegalCardAddedToFullStandardDeck() {
+    void validateCardAddition_should_Throw_When_IllegalCardAddedToFullStandardDeck() {
         for (int i = 0; i < 15; i++) {
             DeckCard deckCard = new DeckCard();
             deckCard.setCard(basicLand);
@@ -232,7 +232,7 @@ class FormatValidationServiceTest {
     }
 
     @Test
-    void validateCardAddition_shouldThrowWhenCardAddedToFullStandardDeck() {
+    void validateCardAddition_should_Throw_When_CardAddedToFullStandardDeck() {
             DeckCard deckCard = new DeckCard();
             deckCard.setCard(basicLand);
             deckCard.setQuantity(150);
@@ -251,7 +251,7 @@ class FormatValidationServiceTest {
 
 
     @Test
-    void validateCardAddition_shouldConsiderExistingCardsWhenValidatingLimits() {
+    void validateCardAddition_should_ConsiderExistingCardsWhenValidatingLimits() {
         DeckCard existingDeckCard = new DeckCard();
         existingDeckCard.setCard(nonBasicCard);
         existingDeckCard.setQuantity(3);

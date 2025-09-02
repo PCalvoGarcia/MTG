@@ -60,7 +60,7 @@ class DeckSearchControllerTest {
 
     @Test
     @WithMockUser(roles = "USER")
-    void getDecksByFormat_ShouldReturnDecks() throws Exception {
+    void getDecksByFormat_Should_Return_Decks() throws Exception {
         List<DeckResponse> deckPage = List.of(testDeckResponse);
         when(deckSearchService.getDecksByFormat(eq("STANDARD"))).thenReturn(deckPage);
 
@@ -75,7 +75,7 @@ class DeckSearchControllerTest {
 
     @Test
     @WithMockUser(roles = "USER")
-    void getPublicDecksByUser_ShouldReturnDecks() throws Exception {
+    void getPublicDecksByUser_Should_Return_Decks() throws Exception {
         List<DeckResponse> deckPage = List.of(testDeckResponse);
         when(deckSearchService.getPublicDecksByUser(eq(1L))).thenReturn(deckPage);
 

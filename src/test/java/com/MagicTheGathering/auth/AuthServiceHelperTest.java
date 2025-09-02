@@ -27,7 +27,7 @@ class AuthServiceHelperTest {
     }
 
     @Test
-    void generateAccessTokenTest() {
+    void when_generateAccessToken_return_accessToken() {
         Claims claims = Jwts.claims()
                 .add("username", "user")
                 .build();
@@ -39,7 +39,7 @@ class AuthServiceHelperTest {
     }
 
     @Test
-    void generateRefreshTokenTest() {
+    void when_generateRefreshToken_return_refreshToken() {
         String refreshToken = authServiceHelper.generateRefreshToken("user");
 
         assertNotNull(refreshToken);
@@ -47,7 +47,7 @@ class AuthServiceHelperTest {
     }
 
     @Test
-    void validateAccessTokenTest() {
+    void when_validateAccessToken_return_username() {
         Claims claims = Jwts.claims()
                 .add("username", "user")
                 .build();
@@ -59,7 +59,7 @@ class AuthServiceHelperTest {
     }
 
     @Test
-    void validateRefreshTokenTest() {
+    void when_validateRefreshToken_return_username() {
         String refreshToken = authServiceHelper.generateRefreshToken("user");
         Claims claimsResult = authServiceHelper.validateRefreshToken(refreshToken);
 
@@ -69,7 +69,7 @@ class AuthServiceHelperTest {
     @Nested
     class handleRefreshTokenTest {
         @Test
-        void handleRefreshTokenTest_return_valid() {
+        void when_handleRefreshTokenTest_return_valid() {
             String refreshToken = authServiceHelper.generateRefreshToken("user");
             ResponseEntity<Map<String, String>> response = authServiceHelper.handleRefreshToken(refreshToken);
 
@@ -78,7 +78,7 @@ class AuthServiceHelperTest {
         }
 
         @Test
-        void handleRefreshTokenTest_return_invalid() {
+        void when_handleRefreshTokenTest_return_invalid() {
             ResponseEntity<Map<String, String>> response = authServiceHelper.handleRefreshToken("invalid-refresh-token");
 
             assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
