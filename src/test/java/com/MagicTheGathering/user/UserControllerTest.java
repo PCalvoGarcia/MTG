@@ -2,10 +2,12 @@ package com.MagicTheGathering.user;
 
 
 import com.MagicTheGathering.auth.AuthServiceHelper;
+import com.MagicTheGathering.email.EmailService;
 import com.MagicTheGathering.role.Role;
 import com.MagicTheGathering.user.dto.ADMIN.UserRequestAdmin;
 import com.MagicTheGathering.user.dto.USER.UserRequest;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.mail.MessagingException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -47,6 +49,19 @@ public class UserControllerTest {
     @MockBean
     private AuthServiceHelper authServiceHelper;
 
+    @MockBean
+    private EmailService emailService;
+
+    @BeforeEach
+    void setUp() throws MessagingException {
+        doNothing().when(emailService).sendUserWelcomeEmail(
+                Mockito.anyString(),
+                Mockito.anyString(),
+                Mockito.anyString(),
+                Mockito.anyString()
+        );
+    }
+
     @Test
     @Transactional
     @WithMockUser(roles = {"ADMIN"})
@@ -82,6 +97,17 @@ public class UserControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.username").value("mike_wilson"))
                 .andExpect(jsonPath("$.email").value("mike@example.com"));
+    }
+
+    @Test
+    @Transactional
+    @WithMockUser(roles = {"USER"})
+    void should_getLoggedUser() throws Exception {
+        mockMvc.perform(get("/api/users/my-user")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.username").value("user"))
+                .andExpect(jsonPath("$.email").value("user@happytravel.com"));
     }
 
     @Test
@@ -146,16 +172,6 @@ public class UserControllerTest {
 
     @Test
     @Transactional
-    @WithMockUser(roles = {"ADMIN"})
-    void should_deleteUser() throws Exception {
-        Long userId = 1L;
-
-        mockMvc.perform(delete("/api/users/{id}", userId))
-                .andExpect(status().isNoContent());
-    }
-
-    @Test
-    @Transactional
     @WithMockUser(roles = {"USER"})
     void should_updateLoggedUser_fromRequest() throws Exception {
         UserRequest userRequest = new UserRequest(
@@ -171,6 +187,16 @@ public class UserControllerTest {
                 .andExpect(jsonPath("$.username").value("updatedUser"))
                 .andExpect(jsonPath("$.email").value("updateduser@test.com"))
                 .andExpect(jsonPath("$.id").exists());
+    }
+
+    @Test
+    @Transactional
+    @WithMockUser(roles = {"ADMIN"})
+    void should_deleteUser() throws Exception {
+        Long userId = 1L;
+
+        mockMvc.perform(delete("/api/users/{id}", userId))
+                .andExpect(status().isNoContent());
     }
 
 }

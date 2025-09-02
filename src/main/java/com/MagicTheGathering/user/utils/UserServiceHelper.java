@@ -1,5 +1,8 @@
 package com.MagicTheGathering.user.utils;
 
+import com.MagicTheGathering.Exceptions.EmailSendException;
+import com.MagicTheGathering.email.EmailService;
+import com.MagicTheGathering.email.UserEmailTemplates;
 import com.MagicTheGathering.role.Role;
 import com.MagicTheGathering.user.UserRepository;
 import com.MagicTheGathering.user.dto.UserMapperDto;
@@ -9,6 +12,7 @@ import com.MagicTheGathering.user.User;
 import com.MagicTheGathering.user.exceptions.EmailAlreadyExistException;
 import com.MagicTheGathering.user.exceptions.UserIdNotFoundException;
 import com.MagicTheGathering.user.exceptions.UsernameAlreadyExistException;
+import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -25,6 +29,8 @@ import java.util.stream.Collectors;
 public class UserServiceHelper {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final EmailService emailService;
+
 
 
     public void checkEmail(String request) {
@@ -88,5 +94,17 @@ public class UserServiceHelper {
         Set<Role> roles = new HashSet<>();
         roles.add(request.role());
         user.setRoles(roles);
+    }
+
+    public void sendEmailRegisterNewUser(User user) {
+        try {
+            String subject = UserEmailTemplates.getUserCreatedSubject();
+            String plainText = UserEmailTemplates.getUserWelcomeEmailPlainText(user);
+            String html = UserEmailTemplates.getUserWelcomeEmailHtml(user);
+
+            emailService.sendUserWelcomeEmail(user.getEmail(), subject, plainText, html);
+        } catch (MessagingException e){
+            throw new EmailSendException();
+        }
     }
 }
