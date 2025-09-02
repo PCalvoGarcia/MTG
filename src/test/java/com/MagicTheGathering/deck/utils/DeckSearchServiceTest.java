@@ -72,7 +72,7 @@ class DeckSearchServiceTest {
     }
 
     @Test
-    void getDecksByFormat_shouldReturnDecksForValidFormat() { 
+    void getDecksByFormat_should_Return_DecksForValidFormat() {
         List<Deck> expectedDecks = Arrays.asList(deck1);
         when(deckRepository.findByTypeAndIsPublicTrue(Legality.STANDARD))
                 .thenReturn(expectedDecks); 
@@ -87,7 +87,7 @@ class DeckSearchServiceTest {
     }
 
     @Test
-    void getDecksByFormat_shouldReturnDecksForValidFormatLowerCase() { 
+    void getDecksByFormat_should_Return_DecksForValidFormatLowerCase() {
         List<Deck> expectedDecks = Arrays.asList(deck1);
         when(deckRepository.findByTypeAndIsPublicTrue(Legality.STANDARD))
                 .thenReturn(expectedDecks); 
@@ -99,7 +99,7 @@ class DeckSearchServiceTest {
     }
 
     @Test
-    void getDecksByFormat_shouldReturnEmptyListWhenNoDecks() { 
+    void getDecksByFormat_should_Return_EmptyListWhenNoDecks() {
         when(deckRepository.findByTypeAndIsPublicTrue(Legality.COMMANDER))
                 .thenReturn(Arrays.asList()); 
 
@@ -110,7 +110,7 @@ class DeckSearchServiceTest {
     }
 
     @Test
-    void getDecksByFormat_shouldThrowExceptionForInvalidFormat() {
+    void getDecksByFormat_should_Throw_ExceptionForInvalidFormat() {
         InvalidFormatsException exception = assertThrows(
                 InvalidFormatsException.class,
                 () -> deckSearchService.getDecksByFormat("INVALID_FORMAT")
@@ -121,7 +121,7 @@ class DeckSearchServiceTest {
     }
 
     @Test
-    void getPublicDecksByUser_shouldReturnDecksForValidUser() { 
+    void getPublicDecksByUser_should_Return_DecksForValidUser() {
         Long userId = 1L;
         List<Deck> expectedDecks = Arrays.asList(deck1, deck2);
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
@@ -137,7 +137,7 @@ class DeckSearchServiceTest {
     }
 
     @Test
-    void getPublicDecksByUser_shouldReturnEmptyListWhenUserHasNoPublicDecks() { 
+    void getPublicDecksByUser_should_Return_EmptyListWhenUserHasNoPublicDecks() {
         Long userId = 1L;
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
         when(deckRepository.findByUserAndIsPublicTrue(user)).thenReturn(Arrays.asList()); 
@@ -150,7 +150,7 @@ class DeckSearchServiceTest {
     }
 
     @Test
-    void getPublicDecksByUser_shouldThrowExceptionForInvalidUserId() { 
+    void getPublicDecksByUser_should_Throw_ExceptionForInvalidUserId() {
         Long userId = 999L;
         when(userRepository.findById(userId)).thenReturn(Optional.empty()); 
 

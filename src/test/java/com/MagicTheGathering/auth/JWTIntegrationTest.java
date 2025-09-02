@@ -22,42 +22,6 @@ public class JWTIntegrationTest {
     @Autowired
     private MockMvc mockMvc;
 
-//        @Test
-//        void when_authOkPostCard_return_created() throws Exception{
-//            String login =  """
-//                {
-//                    "username": "john_doe",
-//                    "password": "password123"
-//                }
-//                """;
-//
-//            MvcResult loginResult = mockMvc.perform(post("/login")
-//                            .contentType(MediaType.APPLICATION_JSON)
-//                            .content(login))
-//                    .andExpect(status().isOk())
-//                    .andReturn();
-//
-//            String json = loginResult.getResponse().getContentAsString();
-//            String token = JsonPath.read(json, "$.token");
-//
-//            String deck = """
-//                    {
-//                      "deckName": "new deck",
-//                      "isPublic": true,
-//                      "legalityEnum": "STANDARD",
-//                      "userId": 3
-//                    }
-//                """;
-//            mockMvc.perform(post("/api/decks")
-//                            .contentType(MediaType.APPLICATION_JSON)
-//                            .content(deck)
-//                            .header(TokenJwtConfig.headerAuthorization
-//                                    , TokenJwtConfig.prefixToken
-//                                            + token))
-//                    .andExpect(status().isCreated());
-//
-//        }
-
         @Test
         void when_authFailedPostUser_return_forbidden() throws Exception {
             String login =  """

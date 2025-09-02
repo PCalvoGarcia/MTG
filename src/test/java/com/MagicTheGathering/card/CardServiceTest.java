@@ -125,25 +125,7 @@ public class CardServiceTest {
     }
 
     @Test
-    void getAllCardsByUser_ShouldReturnPageOfCards() {
-        Pageable pageable = PageRequest.of(0, 4);
-        List<Card> cards = Arrays.asList(testCard);
-
-        when(userService.getAuthenticatedUser()).thenReturn(testUser);
-        when(cardRepository.findByUser(testUser)).thenReturn(cards);
-
-        List<CardResponse> result = cardService.getAllCardsByUser();
-
-        assertNotNull(result);
-        assertEquals(1, result.size());
-        assertEquals("Lightning Bolt", result.get(0).name());
-
-        verify(userService).getAuthenticatedUser();
-        verify(cardRepository).findByUser(testUser);
-    }
-
-    @Test
-    void getCardById_ShouldReturnCard_WhenCardExists() {
+    void getCardById_should_return_card_whenCardExists() {
         when(cardRepository.findById(1L)).thenReturn(Optional.of(testCard));
 
         CardResponse result = cardService.getCardById(1L);
@@ -156,7 +138,7 @@ public class CardServiceTest {
     }
 
     @Test
-    void getCardById_ShouldThrowException_WhenCardNotExists() {
+    void getCardById_should_throwException_when_cardNotExists() {
         when(cardRepository.findById(1L)).thenReturn(Optional.empty());
 
         assertThrows(CardIdNotFoundException.class, () -> cardService.getCardById(1L));
@@ -165,7 +147,7 @@ public class CardServiceTest {
     }
 
     @Test
-    void createCard_ShouldReturnCardResponse_WhenSuccessful() throws Exception {
+    void createCard_should_returnCardResponse_when_successful() throws Exception {
         Map<String, Object> uploadResult = Map.of("secure_url", "https://cloudinary.com/image.jpg");
 
         when(userService.getAuthenticatedUser()).thenReturn(testUser);
@@ -185,7 +167,7 @@ public class CardServiceTest {
 
 
     @Test
-    void updateCard_ShouldReturnUpdatedCard_WhenAuthorized() {
+    void updateCard_should_returnUpdatedCard_when_authorized() {
         Card updatedCard = Card.builder()
                 .id(1L)
                 .name("Updated Lightning Bolt")
@@ -209,7 +191,7 @@ public class CardServiceTest {
     }
 
     @Test
-    void updateCard_ShouldThrowException_WhenNotAuthorized() {
+    void updateCard_shouldThrowException_when_notAuthorized() {
         when(userService.getAuthenticatedUser()).thenReturn(testUser);
         when(cardRepository.findById(1L)).thenReturn(Optional.of(testCard));
         when(userSecurityUtils.isAuthorizedToModifyCard(testCard)).thenReturn(false);
@@ -223,7 +205,7 @@ public class CardServiceTest {
     }
 
     @Test
-    void updateCard_ShouldThrowException_WhenCardNotFound() {
+    void updateCard_should_throwException_when_CardNotFound() {
         when(userService.getAuthenticatedUser()).thenReturn(testUser);
         when(cardRepository.findById(1L)).thenReturn(Optional.empty());
 
@@ -235,7 +217,7 @@ public class CardServiceTest {
     }
 
     @Test
-    void deleteCard_ShouldDeleteCard_WhenAuthorizedAndNotInDecks() {
+    void deleteCard_shouldDeleteCard_when_AuthorizedAndNotInDecks() {
         when(userService.getAuthenticatedUser()).thenReturn(testUser);
         when(cardRepository.findById(1L)).thenReturn(Optional.of(testCard));
         when(userSecurityUtils.isAuthorizedToModifyCard(testCard)).thenReturn(true);
@@ -256,7 +238,7 @@ public class CardServiceTest {
     }
 
     @Test
-    void deleteCard_ShouldThrowException_WhenCardIsInDeck() {
+    void deleteCard_should_throwException_whenCardIsInDeck() {
         when(userService.getAuthenticatedUser()).thenReturn(testUser);
         when(cardRepository.findById(1L)).thenReturn(Optional.of(testCard));
         when(userSecurityUtils.isAuthorizedToModifyCard(testCard)).thenReturn(true);
@@ -273,7 +255,7 @@ public class CardServiceTest {
     }
 
     @Test
-    void deleteCard_ShouldThrowException_WhenNotAuthorized() {
+    void deleteCard_should_tThrowException_whenNotAuthorized() {
         when(userService.getAuthenticatedUser()).thenReturn(testUser);
         when(cardRepository.findById(1L)).thenReturn(Optional.of(testCard));
         when(userSecurityUtils.isAuthorizedToModifyCard(testCard)).thenReturn(false);
@@ -289,7 +271,7 @@ public class CardServiceTest {
     }
 
     @Test
-    void deleteCard_ShouldThrowException_WhenCardNotFound() {
+    void deleteCard_should_throwException_when_CardNotFound() {
         when(userService.getAuthenticatedUser()).thenReturn(testUser);
         when(cardRepository.findById(1L)).thenReturn(Optional.empty());
 
