@@ -10,6 +10,7 @@ import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.util.Map;
@@ -102,4 +103,40 @@ class AuthServiceHelperTest {
             assertEquals("No refresh token provided", response.getBody().get("error"));
         }
     }
+
+    @Test
+    void when_getAuthentication_with_validToken_return_authentication() {
+        Claims claims = Jwts.claims()
+                .add("role", "USER")
+                .build();
+        String token = authServiceHelper.generateAccessToken("testuser", claims);
+
+        Authentication authentication = authServiceHelper.getAuthentication(token);
+
+        assertNotNull(authentication);
+        assertEquals("testuser", authentication.getName());
+        assertEquals("testuser", authentication.getPrincipal());
+        assertNull(authentication.getCredentials());
+        assertTrue(authentication.getAuthorities().stream()
+                .anyMatch(auth -> auth.getAuthority().equals("ROLE_USER")));
+        assertEquals(1, authentication.getAuthorities().size());
+    }
+
+    @Test
+    void when_getAuthentication_with_invalidToken_throw_runtimeException() {
+        String invalidToken = "invalid.jwt.token";
+
+        RuntimeException exception = assertThrows(RuntimeException.class,
+                () -> authServiceHelper.getAuthentication(invalidToken));
+
+        assertEquals("Invalid token", exception.getMessage());
+        assertNotNull(exception.getCause());
+    }
+
+    @Test
+    void when_getAuthentication_with_nullToken_throw_runtimeException() {
+        assertThrows(RuntimeException.class,
+                () -> authServiceHelper.getAuthentication(null));
+    }
+
 }
