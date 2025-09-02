@@ -64,7 +64,7 @@ INSERT INTO decks (created_at, is_public, type, max_cards, deck_name, user_id) V
 (NOW(), TRUE, 'STANDARD', 60, 'Balanced Deck', 2);
 
 -- Insert deck_card relationships
-INSERT INTO deck_card (id_deck, id_card, quantity) VALUES
+INSERT INTO deck_cards (id_deck, id_card, quantity) VALUES
 (1, 1, 4), (1, 7, 4), (1, 11, 20),
 (2, 2, 20), (2, 3, 4),
 (3, 3, 4), (3, 2, 10), (3, 8, 8),

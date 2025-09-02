@@ -9,7 +9,7 @@ import lombok.*;
 import java.util.Objects;
 
 @Entity
-@Table(name = "deck_card")
+@Table(name = "deck_cards")
 @Getter
 @Setter
 @NoArgsConstructor
