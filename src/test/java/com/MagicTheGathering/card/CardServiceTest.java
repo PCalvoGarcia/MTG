@@ -126,6 +126,8 @@ public class CardServiceTest {
 
     @Test
     void getCardById_should_return_card_whenCardExists() {
+        when(userService.getAuthenticatedUser()).thenReturn(testUser);
+
         when(cardRepository.findById(1L)).thenReturn(Optional.of(testCard));
 
         CardResponse result = cardService.getCardById(1L);

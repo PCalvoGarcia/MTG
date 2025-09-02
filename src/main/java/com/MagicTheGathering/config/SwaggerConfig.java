@@ -44,6 +44,7 @@ public class SwaggerConfig {
                         .addResponses("CardNotFound", apiResponse(404, "Card not found."))
                         .addResponses("DeckNotFound", apiResponse(404, "Deck not found."))
                         .addResponses("UserNotFound", apiResponse(404, "User not found."))
+                        .addResponses("Conflict", apiResponse(409, "Conflict arises when attempting this action"))
                         .addResponses("InternalServerError", apiResponse(500, "Internal server error"))
                         .addResponses("NoContent", new ApiResponse()
                                 .description("Successfully processed request with no content")));
