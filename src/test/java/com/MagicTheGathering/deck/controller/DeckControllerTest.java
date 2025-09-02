@@ -104,6 +104,23 @@ class DeckControllerTest {
 
     @Test
     @WithMockUser(roles = "USER")
+    void getLikedDecksByLoggedUser_Should_Return_LikedDecks() throws Exception {
+        List<DeckResponse> deckPublic = List.of(testDeckResponse,testDeckResponse);
+        List<DeckResponse> deckLiked = List.of(testDeckResponse);
+
+        when(deckService.getAllPublicDecks()).thenReturn(deckPublic);
+        when(deckService.getLikedDecksByUser()).thenReturn(deckLiked);
+
+        mockMvc.perform(get("/api/decks/my-liked-decks"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(1)))
+                .andExpect(jsonPath("$.[0].deckName").value("Test Deck"));
+
+        verify(deckService).getLikedDecksByUser();
+    }
+
+    @Test
+    @WithMockUser(roles = "USER")
     void getDeckById_WithValidId_Should_Return_Deck() throws Exception {
         when(deckService.getDeckById(1L)).thenReturn(testDeckResponse);
 
