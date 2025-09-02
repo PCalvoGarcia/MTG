@@ -61,7 +61,7 @@ public class DeckService {
     @Transactional(readOnly = true)
     public DeckResponse getDeckById(Long id) {
         Deck deck = deckRepository.findById(id)
-                .orElseThrow(() -> new UnauthorizedAccessException());
+                .orElseThrow(() -> new DeckIdNotFoundException(id));
 
         User currentUser = userService.getAuthenticatedUser();
 
