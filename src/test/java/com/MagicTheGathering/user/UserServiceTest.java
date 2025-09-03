@@ -1,5 +1,6 @@
 package com.MagicTheGathering.user;
 
+import com.MagicTheGathering.Exceptions.EmailSendException;
 import com.MagicTheGathering.Exceptions.EmptyListException;
 import com.MagicTheGathering.role.Role;
 import com.MagicTheGathering.user.dto.UserMapperDto;
@@ -12,6 +13,7 @@ import com.MagicTheGathering.user.exceptions.EmailAlreadyExistException;
 import com.MagicTheGathering.user.exceptions.UserIdNotFoundException;
 import com.MagicTheGathering.user.exceptions.UsernameAlreadyExistException;
 import com.MagicTheGathering.user.utils.UserServiceHelper;
+import jakarta.mail.MessagingException;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -199,6 +201,22 @@ public class UserServiceTest {
             DataIntegrityViolationException exception = assertThrows(DataIntegrityViolationException.class, () -> userService.registerUser(userRequest));
             assertEquals("Username or email already exists", exception.getMessage());
         }
+
+
+        @Test
+        void should_registerNewUser_throw_exceptionEmailSendingFails() throws IOException, MessagingException {
+            UserRequest userRequest = new UserRequest("userTest", "usertest@test.com", "password123");
+
+            doNothing().when(userServiceHelper).checkUsername(userRequest.username());
+            doNothing().when(userServiceHelper).checkEmail(userRequest.email());
+
+            doThrow(new EmailSendException())
+                    .when(userServiceHelper).sendEmailRegisterNewUser(any());
+
+            assertThatThrownBy(() -> userService.registerUser(userRequest))
+                    .isInstanceOf(EmailSendException.class)
+                    .hasMessageContaining("Error sending email. ");
+        }
     }
 
     @Nested
@@ -276,6 +294,18 @@ public class UserServiceTest {
             DataIntegrityViolationException exception = assertThrows(DataIntegrityViolationException.class, () -> userService.registerUserByAdmin(userRequest));
             assertEquals("Username or email already exists", exception.getMessage());
         }
+
+        @Test
+        void should_registerNewUserByAdmin_throw_exceptionEmailSendingFails() throws IOException, MessagingException {
+            UserRequestAdmin userRequest = new UserRequestAdmin("userTest", "usertest@test.com", "password123", Role.ADMIN);
+            doThrow(new EmailSendException())
+                    .when(userServiceHelper).sendEmailRegisterNewUser(any());
+
+            assertThatThrownBy(() -> userService.registerUserByAdmin(userRequest))
+                    .isInstanceOf(EmailSendException.class)
+                    .hasMessageContaining("Error sending email. ");
+        }
+
     }
 
     @Nested
@@ -506,7 +536,7 @@ public class UserServiceTest {
 
             user.setUsername(req.username());
             user.setEmail(req.email());
-            user.setPassword(req.password()); // aquí podrías usar el encoder si aplica
+            user.setPassword(req.password());
             user.setRoles(Set.of(Role.USER));
             return null;
         }).when(userServiceHelper).updateUserData(any(UserRequestUpdateAdmin.class), any(User.class));

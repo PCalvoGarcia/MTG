@@ -158,6 +158,13 @@ public class GlobalExceptionHandlerTestThrow {
     }
 
     @Test
+    void handleEmailSendException() {
+        ResponseEntity<String> response = globalExceptionHandler.handleEmailSendException(new EmailSendException());
+        assertThat(response.getStatusCodeValue()).isEqualTo(500);
+        assertThat(response.getBody()).isEqualTo("Error sending email. ");
+    }
+
+    @Test
     void handleMethodArgumentNotValid() {
         BindingResult bindingResult = mock(BindingResult.class);
         when(bindingResult.getFieldErrors()).thenReturn(Collections.singletonList(new FieldError("object", "field", "must not be blank")));

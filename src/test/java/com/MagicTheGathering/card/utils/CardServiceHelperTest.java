@@ -4,24 +4,30 @@ package com.MagicTheGathering.card.utils;
 import com.MagicTheGathering.Cloudinary.CloudinaryService;
 import com.MagicTheGathering.card.Card;
 import com.MagicTheGathering.card.CardRepository;
+import com.MagicTheGathering.card.dto.CardMapperDto;
 import com.MagicTheGathering.card.dto.CardRequest;
+import com.MagicTheGathering.card.dto.CardResponse;
 import com.MagicTheGathering.cardType.CardType;
 import com.MagicTheGathering.legality.Legality;
 import com.MagicTheGathering.manaColor.ManaColor;
 import com.MagicTheGathering.role.Role;
 import com.MagicTheGathering.user.User;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockMultipartFile;
 
 import java.io.IOException;
-import java.util.Map;
-import java.util.Set;
+import java.time.LocalDateTime;
+import java.util.*;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
@@ -86,7 +92,7 @@ class CardServiceHelperTest {
     }
 
     @Test
-    void getSavedCard_ShouldReturnSavedCard() {
+    void when_getSavedCard_should_ReturnSavedCard() {
         String imageUrl = "https://cloudinary.com/image.jpg";
         Card expectedCard = Card.builder().name("Lightning Bolt").build();
 
@@ -100,7 +106,24 @@ class CardServiceHelperTest {
     }
 
     @Test
-    void cloudinaryManagement_ShouldNotProcess_WhenImageIsNull() {
+    void when_getCardResponseList_then_return_list() {
+        testCard.setUser(testUser);
+        List<Card> cardResponseList = new ArrayList<>();
+        cardResponseList.add(testCard);
+        cardResponseList.add(testCard);
+
+        when(cardRepository.findByUser(testUser)).thenReturn(cardResponseList);
+
+        List<CardResponse> responses = cardServiceHelper.getCardResponseList(testUser);
+
+        assertEquals(1L, responses.getFirst().id());
+        assertEquals(2, responses.size());
+
+        verify(cardRepository).findByUser(testUser);
+    }
+
+    @Test
+    void when_cloudinaryManagement_shouldNotProcess_WhenImageIsNull() {
         CardRequest requestWithNullImage = new CardRequest(
                 "Test", CardType.INSTANT, "Test", 1, Set.of(ManaColor.RED), "Test",
                 0, 0, 0, "Test", 1, "Test", "Test", null, Set.of(Legality.STANDARD), 1
@@ -112,20 +135,17 @@ class CardServiceHelperTest {
     }
 
     @Test
-    void cloudinaryManagement_ShouldNotProcess_WhenImageIsEmpty() {
-        MockMultipartFile emptyFile = new MockMultipartFile("image", "", "image/jpeg", new byte[0]);
-        CardRequest requestWithEmptyImage = new CardRequest(
-                "Test", CardType.INSTANT, "Test", 1, Set.of(ManaColor.RED), "Test",
-                0, 0, 0, "Test", 1, "Test", "Test", emptyFile, Set.of(Legality.STANDARD), 1
-        );
+    void when_cloudinaryManagement_shouldProcess_WhenImageIsNotEmpty() throws IOException {
+        String imageUrl = "https://cloudinary.com/test/image.jpg";
 
-        cardServiceHelper.cloudinaryManagement(requestWithEmptyImage, testCard);
+        cardServiceHelper.cloudinaryManagement(cardRequest, testCard);
 
-        verifyNoInteractions(cloudinaryService);
+        verify(cloudinaryService).deleteFile(imageUrl);
+        verify(cloudinaryService).uploadFile(cardRequest.image());
     }
 
     @Test
-    void getPublicIdCloudinary_ShouldExtractPublicId() {
+    void when_getPublicIdCloudinary_should_ExtractPublicId() {
         String imageUrl = "https://res.cloudinary.com/demo/image/upload/v1234567890/sample.jpg";
 
         String result = CardServiceHelper.getPublicIdCloudinary(imageUrl);
@@ -134,7 +154,7 @@ class CardServiceHelperTest {
     }
 
     @Test
-    void getPublicIdCloudinary_ShouldHandleUrlWithoutVersion() {
+    void when_getPublicIdCloudinary_should_handleUrlWithoutVersion() {
         String imageUrl = "https://res.cloudinary.com/demo/image/upload/sample.jpg";
 
         String result = CardServiceHelper.getPublicIdCloudinary(imageUrl);
@@ -143,7 +163,7 @@ class CardServiceHelperTest {
     }
 
     @Test
-    void postImageCloudinary_ShouldUpdateImageUrl_WhenSuccessful() throws Exception {
+    void when_postImageCloudinary_shouldUpdateImageUrl_whenSuccessful() throws Exception {
         Map<String, Object> uploadResult = Map.of("secure_url", "https://cloudinary.com/new-image.jpg");
         when(cloudinaryService.uploadFile(cardRequest.image())).thenReturn(uploadResult);
 
@@ -154,7 +174,7 @@ class CardServiceHelperTest {
     }
 
     @Test
-    void postImageCloudinary_ShouldUseDefaultImage_WhenCloudinaryFails() throws Exception {
+    void when_postImageCloudinary_shouldUseDefaultImage_whenCloudinaryFails() throws Exception {
         when(cloudinaryService.uploadFile(cardRequest.image())).thenThrow(new RuntimeException("Cloudinary error"));
 
         cardServiceHelper.postImageCloudinary(cardRequest, testCard);
@@ -164,7 +184,7 @@ class CardServiceHelperTest {
     }
 
     @Test
-    void deleteImageCloudinary_ShouldCallCloudinaryService() throws IOException {
+    void when_deleteImageCloudinary_should_callCloudinaryService() throws IOException {
         String publicId = "test_public_id";
         doNothing().when(cloudinaryService).deleteFile(publicId);
 
@@ -174,7 +194,7 @@ class CardServiceHelperTest {
     }
 
     @Test
-    void deleteImageCloudinary_ShouldThrowException_WhenCloudinaryFails() throws IOException {
+    void when_deleteImageCloudinary_shouldThrowException_whenCloudinaryFails() throws IOException {
         String publicId = "test_public_id";
         doThrow(new IOException("Delete failed")).when(cloudinaryService).deleteFile(publicId);
 
@@ -186,7 +206,92 @@ class CardServiceHelperTest {
     }
 
     @Test
-    void updatePartOfCard_ShouldUpdateCardFields() {
+    void when_getCardWithCloudinary_Success() throws IOException {
+        Map<String, Object> uploadResult = new HashMap<>();
+        String expectedImageUrl = "https://cloudinary.com/secure/uploaded-image.jpg";
+        uploadResult.put("secure_url", expectedImageUrl);
+
+        Card savedCard = Card.builder()
+                .id(1L)
+                .name("Lightning Bolt")
+                .imageUrl(expectedImageUrl)
+                .user(testUser)
+                .build();
+
+        Card responseCard = Card.builder()
+                .id(1L)
+                .name("Lightning Bolt")
+                .imageUrl(expectedImageUrl)
+                .user(testUser)
+                .build();
+
+        CardResponse expectedResponse = CardMapperDto.fromEntity(responseCard);
+
+        when(cloudinaryService.uploadFile(cardRequest.image())).thenReturn(uploadResult);
+        when(cardRepository.save(any(Card.class))).thenReturn(savedCard);
+
+        try (MockedStatic<CardMapperDto> mockedMapper = mockStatic(CardMapperDto.class)) {
+            mockedMapper.when(() -> CardMapperDto.toEntity(eq(cardRequest), eq(expectedImageUrl)))
+                    .thenReturn(testCard);
+            mockedMapper.when(() -> CardMapperDto.fromEntity(savedCard))
+                    .thenReturn(expectedResponse);
+
+            CardResponse result = cardServiceHelper.getCardWithCloudinary(cardRequest, testUser);
+
+            assertThat(result).isNotNull();
+            assertThat(result.name()).isEqualTo("Lightning Bolt");
+            assertThat(result.imageUrl()).isEqualTo(expectedImageUrl);
+
+            verify(cloudinaryService, times(1)).uploadFile(cardRequest.image());
+            verify(cardRepository, times(1)).save(any(Card.class));
+            mockedMapper.verify(() -> CardMapperDto.toEntity(eq(cardRequest), eq(expectedImageUrl)), times(1));
+            mockedMapper.verify(() -> CardMapperDto.fromEntity(savedCard), times(1));
+        }
+    }
+
+    @Test
+    void when_gwtCardWithCloudinary_CloudinaryFailure() throws IOException {
+        String defaultImageUrl = "http://localhost:8080/images/dream-logo.png";
+
+        Card savedCard = Card.builder()
+                .id(1L)
+                .name("Lightning Bolt")
+                .imageUrl(defaultImageUrl)
+                .user(testUser)
+                .build();
+        Card responseCard = Card.builder()
+                .id(1L)
+                .name("Lightning Bolt")
+                .imageUrl(defaultImageUrl)
+                .user(testUser)
+                .build();
+        CardResponse expectedResponse = CardMapperDto.fromEntity(responseCard);
+
+
+        when(cloudinaryService.uploadFile(cardRequest.image())).thenThrow(new IOException("Upload failed"));
+        when(cardRepository.save(any(Card.class))).thenReturn(savedCard);
+
+        try (MockedStatic<CardMapperDto> mockedMapper = mockStatic(CardMapperDto.class)) {
+            mockedMapper.when(() -> CardMapperDto.toEntity(eq(cardRequest), eq(defaultImageUrl)))
+                    .thenReturn(testCard);
+            mockedMapper.when(() -> CardMapperDto.fromEntity(savedCard))
+                    .thenReturn(expectedResponse);
+
+            CardResponse result = cardServiceHelper.getCardWithCloudinary(cardRequest, testUser);
+
+            assertThat(result).isNotNull();
+            assertThat(result.name()).isEqualTo("Lightning Bolt");
+            assertThat(result.imageUrl()).isEqualTo(defaultImageUrl);
+
+            verify(cloudinaryService, times(1)).uploadFile(cardRequest.image());
+            verify(cardRepository, times(1)).save(any(Card.class));
+            mockedMapper.verify(() -> CardMapperDto.toEntity(eq(cardRequest), eq(defaultImageUrl)), times(1));
+            mockedMapper.verify(() -> CardMapperDto.fromEntity(savedCard), times(1));
+        }
+    }
+
+    @Test
+    void when_updatePartOfCard_should_updateCardFields() {
         Card newCard = new Card();
         Card existingCard = Card.builder()
                 .id(1L)
@@ -202,7 +307,7 @@ class CardServiceHelperTest {
     }
 
     @Test
-    void updatePartOfCard_ShouldSetQuantityToOne_WhenNegative() {
+    void when_updatePartOfCard_shouldSetQuantityToOne_whenNegative() {
         Card newCard = new Card();
         Card existingCard = Card.builder().id(1L).build();
 

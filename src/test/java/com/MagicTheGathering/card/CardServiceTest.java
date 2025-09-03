@@ -1,7 +1,9 @@
 package com.MagicTheGathering.card;
 
 import com.MagicTheGathering.Cloudinary.CloudinaryService;
+import com.MagicTheGathering.Exceptions.EmptyListException;
 import com.MagicTheGathering.Exceptions.UnauthorizedModificationsException;
+import com.MagicTheGathering.card.dto.CardMapperDto;
 import com.MagicTheGathering.card.dto.CardRequest;
 import com.MagicTheGathering.card.dto.CardResponse;
 import com.MagicTheGathering.card.exceptions.CardIdNotFoundException;
@@ -16,6 +18,7 @@ import com.MagicTheGathering.user.User;
 import com.MagicTheGathering.user.UserService;
 import com.MagicTheGathering.user.utils.UserSecurityUtils;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -124,54 +127,67 @@ public class CardServiceTest {
         );
     }
 
-    @Test
-    void getAllCardsByUser_ShouldReturnPageOfCards() {
-        Pageable pageable = PageRequest.of(0, 4);
-        List<Card> cards = Arrays.asList(testCard);
+    @Nested
+    class GetAllCardsByUser {
+        @Test
+        void getAllCardsByUser_should_return_card_whenListCardsExists() {
+            List<CardResponse> cardResponseList = new ArrayList<>();
+            cardResponseList.add(CardMapperDto.fromEntity(testCard));
+            cardResponseList.add(CardMapperDto.fromEntity(testCard));
 
-        when(userService.getAuthenticatedUser()).thenReturn(testUser);
-        when(cardRepository.findByUser(testUser)).thenReturn(cards);
+            when(userService.getAuthenticatedUser()).thenReturn(testUser);
+            when(cardServiceHelper.getCardResponseList(testUser)).thenReturn(cardResponseList);
 
-        List<CardResponse> result = cardService.getAllCardsByUser();
+            List<CardResponse> result = cardService.getAllCardsByUser();
 
-        assertNotNull(result);
-        assertEquals(1, result.size());
-        assertEquals("Lightning Bolt", result.get(0).name());
+            assertNotNull(result);
+            assertEquals("Lightning Bolt", result.getFirst().name());
+            assertEquals(1L, result.getFirst().id());
+        }
 
-        verify(userService).getAuthenticatedUser();
-        verify(cardRepository).findByUser(testUser);
+        @Test
+        void getAllCardsByUser_should_throwEmptyListException_whenListCardIsEmpty() {
+            when(userService.getAuthenticatedUser()).thenReturn(testUser);
+
+            RuntimeException exception = assertThrows(EmptyListException.class,
+                    () -> cardService.getAllCardsByUser());
+
+        }
+    }
+
+    @Nested
+    class GetCardById {
+        @Test
+        void getCardById_should_return_card_whenCardExists() {
+            when(userService.getAuthenticatedUser()).thenReturn(testUser);
+
+            when(cardRepository.findById(1L)).thenReturn(Optional.of(testCard));
+
+            CardResponse result = cardService.getCardById(1L);
+
+            assertNotNull(result);
+            assertEquals("Lightning Bolt", result.name());
+            assertEquals(1L, result.id());
+
+            verify(cardRepository).findById(1L);
+        }
+
+        @Test
+        void getCardById_should_throwException_when_cardNotExists() {
+            when(cardRepository.findById(1L)).thenReturn(Optional.empty());
+
+            assertThrows(CardIdNotFoundException.class, () -> cardService.getCardById(1L));
+
+            verify(cardRepository).findById(1L);
+        }
     }
 
     @Test
-    void getCardById_ShouldReturnCard_WhenCardExists() {
-        when(cardRepository.findById(1L)).thenReturn(Optional.of(testCard));
-
-        CardResponse result = cardService.getCardById(1L);
-
-        assertNotNull(result);
-        assertEquals("Lightning Bolt", result.name());
-        assertEquals(1L, result.id());
-
-        verify(cardRepository).findById(1L);
-    }
-
-    @Test
-    void getCardById_ShouldThrowException_WhenCardNotExists() {
-        when(cardRepository.findById(1L)).thenReturn(Optional.empty());
-
-        assertThrows(CardIdNotFoundException.class, () -> cardService.getCardById(1L));
-
-        verify(cardRepository).findById(1L);
-    }
-
-    @Test
-    void createCard_ShouldReturnCardResponse_WhenSuccessful() throws Exception {
+    void createCard_should_returnCardResponse_when_successful() throws Exception {
         Map<String, Object> uploadResult = Map.of("secure_url", "https://cloudinary.com/image.jpg");
 
+        when(cardServiceHelper.getCardWithCloudinary(cardRequest, testUser)).thenReturn(CardMapperDto.fromEntity(testCard));
         when(userService.getAuthenticatedUser()).thenReturn(testUser);
-        when(cloudinaryService.uploadFile(any())).thenReturn(uploadResult);
-        when(cardServiceHelper.getSavedCard(eq(cardRequest), eq("https://cloudinary.com/image.jpg"), eq(testUser)))
-                .thenReturn(testCard);
 
         CardResponse result = cardService.createCard(cardRequest);
 
@@ -179,125 +195,130 @@ public class CardServiceTest {
         assertEquals("Lightning Bolt", result.name());
 
         verify(userService).getAuthenticatedUser();
-        verify(cloudinaryService).uploadFile(cardRequest.image());
-        verify(cardServiceHelper).getSavedCard(cardRequest, "https://cloudinary.com/image.jpg", testUser);
     }
 
+    @Nested
+    class UpdateCard {
+        @Test
+        void updateCard_should_returnUpdatedCard_when_authorized() {
+            Card updatedCard = Card.builder()
+                    .id(1L)
+                    .name("Updated Lightning Bolt")
+                    .imageUrl("https://example.com/updated.jpg")
+                    .user(testUser)
+                    .createdAt(testCard.getCreatedAt())
+                    .build();
 
-    @Test
-    void updateCard_ShouldReturnUpdatedCard_WhenAuthorized() {
-        Card updatedCard = Card.builder()
-                .id(1L)
-                .name("Updated Lightning Bolt")
-                .imageUrl("https://example.com/updated.jpg")
-                .user(testUser)
-                .createdAt(testCard.getCreatedAt())
-                .build();
+            when(userService.getAuthenticatedUser()).thenReturn(testUser);
+            when(cardRepository.findById(1L)).thenReturn(Optional.of(testCard));
+            when(userSecurityUtils.isAuthorizedToModifyCard(testCard)).thenReturn(true);
 
-        when(userService.getAuthenticatedUser()).thenReturn(testUser);
-        when(cardRepository.findById(1L)).thenReturn(Optional.of(testCard));
-        when(userSecurityUtils.isAuthorizedToModifyCard(testCard)).thenReturn(true);
+            CardResponse result = cardService.updateCard(1L, cardRequest);
 
-        CardResponse result = cardService.updateCard(1L, cardRequest);
+            assertNotNull(result);
 
-        assertNotNull(result);
+            verify(userService).getAuthenticatedUser();
+            verify(cardRepository).findById(1L);
+            verify(userSecurityUtils).isAuthorizedToModifyCard(testCard);
+        }
 
-        verify(userService).getAuthenticatedUser();
-        verify(cardRepository).findById(1L);
-        verify(userSecurityUtils).isAuthorizedToModifyCard(testCard);
-        verify(cardServiceHelper).cloudinaryManagement(cardRequest, testCard);
+        @Test
+        void updateCard_shouldThrowException_when_notAuthorized() {
+            when(userService.getAuthenticatedUser()).thenReturn(testUser);
+            when(cardRepository.findById(1L)).thenReturn(Optional.of(testCard));
+            when(userSecurityUtils.isAuthorizedToModifyCard(testCard)).thenReturn(false);
+
+            assertThrows(UnauthorizedModificationsException.class,
+                    () -> cardService.updateCard(1L, cardRequest));
+
+            verify(userService).getAuthenticatedUser();
+            verify(cardRepository).findById(1L);
+            verify(userSecurityUtils).isAuthorizedToModifyCard(testCard);
+        }
+
+        @Test
+        void updateCard_should_throwException_when_CardNotFound() {
+            when(userService.getAuthenticatedUser()).thenReturn(testUser);
+            when(cardRepository.findById(1L)).thenReturn(Optional.empty());
+
+            assertThrows(CardIdNotFoundException.class,
+                    () -> cardService.updateCard(1L, cardRequest));
+
+            verify(userService).getAuthenticatedUser();
+            verify(cardRepository).findById(1L);
+        }
+
     }
 
-    @Test
-    void updateCard_ShouldThrowException_WhenNotAuthorized() {
-        when(userService.getAuthenticatedUser()).thenReturn(testUser);
-        when(cardRepository.findById(1L)).thenReturn(Optional.of(testCard));
-        when(userSecurityUtils.isAuthorizedToModifyCard(testCard)).thenReturn(false);
+    @Nested
+    class DeleteCard {
+        @Test
+        void deleteCard_shouldDeleteCard_when_AuthorizedAndNotInDecks() {
+            when(userService.getAuthenticatedUser()).thenReturn(testUser);
+            when(cardRepository.findById(1L)).thenReturn(Optional.of(testCard));
+            when(userSecurityUtils.isAuthorizedToModifyCard(testCard)).thenReturn(true);
+            when(deckCardRepository.existsByCard(testCard)).thenReturn(false);
+            try (MockedStatic<CardServiceHelper> mocked = Mockito.mockStatic(CardServiceHelper.class)) {
+                mocked.when(() -> CardServiceHelper.getPublicIdCloudinary(testCard.getImageUrl()))
+                        .thenReturn("public_id");
 
-        assertThrows(UnauthorizedModificationsException.class,
-                () -> cardService.updateCard(1L, cardRequest));
+                assertDoesNotThrow(() -> cardService.deleteCard(1L));
 
-        verify(userService).getAuthenticatedUser();
-        verify(cardRepository).findById(1L);
-        verify(userSecurityUtils).isAuthorizedToModifyCard(testCard);
-    }
+                verify(userService).getAuthenticatedUser();
+                verify(cardRepository).findById(1L);
+                verify(userSecurityUtils).isAuthorizedToModifyCard(testCard);
+                verify(deckCardRepository).existsByCard(testCard);
+                verify(cardServiceHelper).deleteImageCloudinary("public_id");
+                verify(cardRepository).delete(testCard);
+            }
+        }
 
-    @Test
-    void updateCard_ShouldThrowException_WhenCardNotFound() {
-        when(userService.getAuthenticatedUser()).thenReturn(testUser);
-        when(cardRepository.findById(1L)).thenReturn(Optional.empty());
+        @Test
+        void deleteCard_should_throwException_whenCardIsInDeck() {
+            when(userService.getAuthenticatedUser()).thenReturn(testUser);
+            when(cardRepository.findById(1L)).thenReturn(Optional.of(testCard));
+            when(userSecurityUtils.isAuthorizedToModifyCard(testCard)).thenReturn(true);
+            when(deckCardRepository.existsByCard(testCard)).thenReturn(true);
 
-        assertThrows(CardIdNotFoundException.class,
-                () -> cardService.updateCard(1L, cardRequest));
+            assertThrows(DeleteCardNotAllowedException.class,
+                    () -> cardService.deleteCard(1L));
 
-        verify(userService).getAuthenticatedUser();
-        verify(cardRepository).findById(1L);
-    }
+            verify(userService).getAuthenticatedUser();
+            verify(cardRepository).findById(1L);
+            verify(userSecurityUtils).isAuthorizedToModifyCard(testCard);
+            verify(deckCardRepository).existsByCard(testCard);
+            verify(cardRepository, never()).delete(any());
+        }
 
-    @Test
-    void deleteCard_ShouldDeleteCard_WhenAuthorizedAndNotInDecks() {
-        when(userService.getAuthenticatedUser()).thenReturn(testUser);
-        when(cardRepository.findById(1L)).thenReturn(Optional.of(testCard));
-        when(userSecurityUtils.isAuthorizedToModifyCard(testCard)).thenReturn(true);
-        when(deckCardRepository.existsByCard(testCard)).thenReturn(false);
-        try (MockedStatic<CardServiceHelper> mocked = Mockito.mockStatic(CardServiceHelper.class)) {
-            mocked.when(() -> CardServiceHelper.getPublicIdCloudinary(testCard.getImageUrl()))
-                    .thenReturn("public_id");
+        @Test
+        void deleteCard_should_tThrowException_whenNotAuthorized() {
+            when(userService.getAuthenticatedUser()).thenReturn(testUser);
+            when(cardRepository.findById(1L)).thenReturn(Optional.of(testCard));
+            when(userSecurityUtils.isAuthorizedToModifyCard(testCard)).thenReturn(false);
 
-        assertDoesNotThrow(() -> cardService.deleteCard(1L));
+            assertThrows(UnauthorizedModificationsException.class,
+                    () -> cardService.deleteCard(1L));
 
-        verify(userService).getAuthenticatedUser();
-        verify(cardRepository).findById(1L);
-        verify(userSecurityUtils).isAuthorizedToModifyCard(testCard);
-        verify(deckCardRepository).existsByCard(testCard);
-        verify(cardServiceHelper).deleteImageCloudinary("public_id");
-        verify(cardRepository).delete(testCard);
+            verify(userService).getAuthenticatedUser();
+            verify(cardRepository).findById(1L);
+            verify(userSecurityUtils).isAuthorizedToModifyCard(testCard);
+            verify(deckCardRepository, never()).existsByCard(any());
+            verify(cardRepository, never()).delete(any());
+        }
+
+        @Test
+        void deleteCard_should_throwException_when_CardNotFound() {
+            when(userService.getAuthenticatedUser()).thenReturn(testUser);
+            when(cardRepository.findById(1L)).thenReturn(Optional.empty());
+
+            assertThrows(CardIdNotFoundException.class,
+                    () -> cardService.deleteCard(1L));
+
+            verify(userService).getAuthenticatedUser();
+            verify(cardRepository).findById(1L);
+            verify(cardRepository, never()).delete(any());
         }
     }
 
-    @Test
-    void deleteCard_ShouldThrowException_WhenCardIsInDeck() {
-        when(userService.getAuthenticatedUser()).thenReturn(testUser);
-        when(cardRepository.findById(1L)).thenReturn(Optional.of(testCard));
-        when(userSecurityUtils.isAuthorizedToModifyCard(testCard)).thenReturn(true);
-        when(deckCardRepository.existsByCard(testCard)).thenReturn(true);
 
-        assertThrows(DeleteCardNotAllowedException.class,
-                () -> cardService.deleteCard(1L));
-
-        verify(userService).getAuthenticatedUser();
-        verify(cardRepository).findById(1L);
-        verify(userSecurityUtils).isAuthorizedToModifyCard(testCard);
-        verify(deckCardRepository).existsByCard(testCard);
-        verify(cardRepository, never()).delete(any());
-    }
-
-    @Test
-    void deleteCard_ShouldThrowException_WhenNotAuthorized() {
-        when(userService.getAuthenticatedUser()).thenReturn(testUser);
-        when(cardRepository.findById(1L)).thenReturn(Optional.of(testCard));
-        when(userSecurityUtils.isAuthorizedToModifyCard(testCard)).thenReturn(false);
-
-        assertThrows(UnauthorizedModificationsException.class,
-                () -> cardService.deleteCard(1L));
-
-        verify(userService).getAuthenticatedUser();
-        verify(cardRepository).findById(1L);
-        verify(userSecurityUtils).isAuthorizedToModifyCard(testCard);
-        verify(deckCardRepository, never()).existsByCard(any());
-        verify(cardRepository, never()).delete(any());
-    }
-
-    @Test
-    void deleteCard_ShouldThrowException_WhenCardNotFound() {
-        when(userService.getAuthenticatedUser()).thenReturn(testUser);
-        when(cardRepository.findById(1L)).thenReturn(Optional.empty());
-
-        assertThrows(CardIdNotFoundException.class,
-                () -> cardService.deleteCard(1L));
-
-        verify(userService).getAuthenticatedUser();
-        verify(cardRepository).findById(1L);
-        verify(cardRepository, never()).delete(any());
-    }
 }

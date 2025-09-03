@@ -10,6 +10,7 @@ import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.util.Map;
@@ -27,7 +28,7 @@ class AuthServiceHelperTest {
     }
 
     @Test
-    void generateAccessTokenTest() {
+    void when_generateAccessToken_return_accessToken() {
         Claims claims = Jwts.claims()
                 .add("username", "user")
                 .build();
@@ -39,7 +40,7 @@ class AuthServiceHelperTest {
     }
 
     @Test
-    void generateRefreshTokenTest() {
+    void when_generateRefreshToken_return_refreshToken() {
         String refreshToken = authServiceHelper.generateRefreshToken("user");
 
         assertNotNull(refreshToken);
@@ -47,7 +48,7 @@ class AuthServiceHelperTest {
     }
 
     @Test
-    void validateAccessTokenTest() {
+    void when_validateAccessToken_return_username() {
         Claims claims = Jwts.claims()
                 .add("username", "user")
                 .build();
@@ -59,7 +60,7 @@ class AuthServiceHelperTest {
     }
 
     @Test
-    void validateRefreshTokenTest() {
+    void when_validateRefreshToken_return_username() {
         String refreshToken = authServiceHelper.generateRefreshToken("user");
         Claims claimsResult = authServiceHelper.validateRefreshToken(refreshToken);
 
@@ -69,7 +70,7 @@ class AuthServiceHelperTest {
     @Nested
     class handleRefreshTokenTest {
         @Test
-        void handleRefreshTokenTest_return_valid() {
+        void when_handleRefreshTokenTest_return_valid() {
             String refreshToken = authServiceHelper.generateRefreshToken("user");
             ResponseEntity<Map<String, String>> response = authServiceHelper.handleRefreshToken(refreshToken);
 
@@ -78,7 +79,7 @@ class AuthServiceHelperTest {
         }
 
         @Test
-        void handleRefreshTokenTest_return_invalid() {
+        void when_handleRefreshTokenTest_return_invalid() {
             ResponseEntity<Map<String, String>> response = authServiceHelper.handleRefreshToken("invalid-refresh-token");
 
             assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
@@ -102,4 +103,40 @@ class AuthServiceHelperTest {
             assertEquals("No refresh token provided", response.getBody().get("error"));
         }
     }
+
+    @Test
+    void when_getAuthentication_with_validToken_return_authentication() {
+        Claims claims = Jwts.claims()
+                .add("role", "USER")
+                .build();
+        String token = authServiceHelper.generateAccessToken("testuser", claims);
+
+        Authentication authentication = authServiceHelper.getAuthentication(token);
+
+        assertNotNull(authentication);
+        assertEquals("testuser", authentication.getName());
+        assertEquals("testuser", authentication.getPrincipal());
+        assertNull(authentication.getCredentials());
+        assertTrue(authentication.getAuthorities().stream()
+                .anyMatch(auth -> auth.getAuthority().equals("ROLE_USER")));
+        assertEquals(1, authentication.getAuthorities().size());
+    }
+
+    @Test
+    void when_getAuthentication_with_invalidToken_throw_runtimeException() {
+        String invalidToken = "invalid.jwt.token";
+
+        RuntimeException exception = assertThrows(RuntimeException.class,
+                () -> authServiceHelper.getAuthentication(invalidToken));
+
+        assertEquals("Invalid token", exception.getMessage());
+        assertNotNull(exception.getCause());
+    }
+
+    @Test
+    void when_getAuthentication_with_nullToken_throw_runtimeException() {
+        assertThrows(RuntimeException.class,
+                () -> authServiceHelper.getAuthentication(null));
+    }
+
 }

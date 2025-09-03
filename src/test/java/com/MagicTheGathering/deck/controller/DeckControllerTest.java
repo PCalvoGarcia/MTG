@@ -75,7 +75,7 @@ class DeckControllerTest {
 
     @Test
     @WithMockUser(roles = "USER")
-    void getMyDecks_WithValidUser_ShouldReturnDecks() throws Exception {
+    void getMyDecks_WithValidUser_Should_Return_Decks() throws Exception {
         List<DeckResponse> deckPage = List.of(testDeckResponse);
         when(deckService.getAllDeckByUser()).thenReturn(deckPage);
 
@@ -90,7 +90,7 @@ class DeckControllerTest {
 
     @Test
     @WithMockUser(roles = "USER")
-    void getPublicDecks_WithoutAuthentication_ShouldReturnDecks() throws Exception {
+    void getPublicDecks_WithoutAuthentication_Should_Return_Decks() throws Exception {
         List<DeckResponse> deckPage = List.of(testDeckResponse);
         when(deckService.getAllPublicDecks()).thenReturn(deckPage);
 
@@ -104,7 +104,24 @@ class DeckControllerTest {
 
     @Test
     @WithMockUser(roles = "USER")
-    void getDeckById_WithValidId_ShouldReturnDeck() throws Exception {
+    void getLikedDecksByLoggedUser_Should_Return_LikedDecks() throws Exception {
+        List<DeckResponse> deckPublic = List.of(testDeckResponse,testDeckResponse);
+        List<DeckResponse> deckLiked = List.of(testDeckResponse);
+
+        when(deckService.getAllPublicDecks()).thenReturn(deckPublic);
+        when(deckService.getLikedDecksByUser()).thenReturn(deckLiked);
+
+        mockMvc.perform(get("/api/decks/my-liked-decks"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(1)))
+                .andExpect(jsonPath("$.[0].deckName").value("Test Deck"));
+
+        verify(deckService).getLikedDecksByUser();
+    }
+
+    @Test
+    @WithMockUser(roles = "USER")
+    void getDeckById_WithValidId_Should_Return_Deck() throws Exception {
         when(deckService.getDeckById(1L)).thenReturn(testDeckResponse);
 
         mockMvc.perform(get("/api/decks/1"))
@@ -118,7 +135,7 @@ class DeckControllerTest {
 
     @Test
     @WithMockUser(roles = "USER")
-    void createNewDeck_WithValidRequest_ShouldCreateDeck() throws Exception {
+    void createNewDeck_WithValidRequest_Should_CreateDeck() throws Exception {
         when(deckService.createDeck(any(DeckRequest.class))).thenReturn(testDeckResponse);
 
         mockMvc.perform(post("/api/decks")
@@ -134,7 +151,7 @@ class DeckControllerTest {
 
     @Test
     @WithMockUser(roles = "USER")
-    void createNewDeck_WithInvalidRequest_ShouldReturnBadRequest() throws Exception {
+    void createNewDeck_WithInvalidRequest_Should_Return_BadRequest() throws Exception {
         DeckRequest invalidRequest = new DeckRequest(
                 "", // Invalid: empty name
                 true,
@@ -152,7 +169,7 @@ class DeckControllerTest {
 
     @Test
     @WithMockUser(roles = "USER")
-    void updateDeckById_WithValidRequest_ShouldUpdateDeck() throws Exception {
+    void updateDeckById_WithValidRequest_Should_UpdateDeck() throws Exception {
         DeckResponse updatedDeck = new DeckResponse(
                 1L, "Updated Deck", false, "MODERN", 60, 20, 1L, Collections.emptyList()
         );
@@ -171,7 +188,7 @@ class DeckControllerTest {
 
     @Test
     @WithMockUser(roles = "USER")
-    void deleteDeckById_WithValidId_ShouldDeleteDeck() throws Exception {
+    void deleteDeckById_WithValidId_Should_DeleteDeck() throws Exception {
         doNothing().when(deckService).deleteDeck(1L);
 
         mockMvc.perform(delete("/api/decks/1")
@@ -183,7 +200,7 @@ class DeckControllerTest {
 
     @Test
     @WithMockUser(roles = "USER")
-    void addCardToDeck_WithValidRequest_ShouldAddCard() throws Exception {
+    void addCardToDeck_WithValidRequest_Should_AddCard() throws Exception {
         when(deckService.addCardToDeck(eq(1L), any(AddCardDeckRequest.class)))
                 .thenReturn(testDeckResponse);
 
@@ -200,7 +217,7 @@ class DeckControllerTest {
 
     @Test
     @WithMockUser(roles = "USER")
-    void addCardToDeck_WithInvalidRequest_ShouldReturnBadRequest() throws Exception {
+    void addCardToDeck_WithInvalidRequest_Should_ReturnBadRequest() throws Exception {
         AddCardDeckRequest invalidRequest = new AddCardDeckRequest(null, 0); // Invalid: null cardId, zero quantity
 
         mockMvc.perform(post("/api/decks/1/cards")
@@ -214,7 +231,7 @@ class DeckControllerTest {
 
     @Test
     @WithMockUser(roles = "USER")
-    void removeCardFromDeck_WithValidRequest_ShouldRemoveCard() throws Exception {
+    void removeCardFromDeck_WithValidRequest_Should_RemoveCard() throws Exception {
         when(deckService.removeCardFromDeck(1L, 1L, 2)).thenReturn(testDeckResponse);
 
         mockMvc.perform(delete("/api/decks/1/cards/1")

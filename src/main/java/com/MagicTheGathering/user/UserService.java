@@ -52,6 +52,7 @@ public class UserService implements UserDetailsService {
             user.setRoles(Set.of(Role.USER));
 
             User savedUser = userRepository.save(user);
+            userServiceHelper.sendEmailRegisterNewUser(user);
 
             return UserMapperDto.fromEntity(savedUser);
         } catch (DataIntegrityViolationException e) {
@@ -84,6 +85,7 @@ public class UserService implements UserDetailsService {
             user.setRoles(Set.of(request.role()));
 
             User savedUser = userRepository.save(user);
+            userServiceHelper.sendEmailRegisterNewUser(user);
 
 
             return UserMapperDto.fromEntity(savedUser);

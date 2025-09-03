@@ -74,7 +74,7 @@ class DeckCardControllerTest {
 
     @Test
     @WithMockUser(roles = "USER")
-    void getCardsByDeckId_ShouldReturnCards() throws Exception {
+    void getCardsByDeckId_Should_Return_Cards() throws Exception {
         when(deckCardService.getCardsByDeckId(1L)).thenReturn(List.of(testDeckCard));
 
         mockMvc.perform(get("/api/deck-cards/deck/1"))
@@ -88,7 +88,7 @@ class DeckCardControllerTest {
 
     @Test
     @WithMockUser(roles = "USER")
-    void getDeckCard_ShouldReturnCard() throws Exception {
+    void getDeckCard_Should_Return_Card() throws Exception {
         when(deckCardService.getDeckCard(1L, 1L)).thenReturn(testDeckCard);
 
         mockMvc.perform(get("/api/deck-cards/deck/1/card/1"))
@@ -101,7 +101,7 @@ class DeckCardControllerTest {
 
     @Test
     @WithMockUser(roles = "USER")
-    void updateCardQuantity_ShouldUpdateSuccessfully() throws Exception {
+    void updateCardQuantity_Should_UpdateSuccessfully() throws Exception {
         DeckCardResponse testDeckCard2 = new DeckCardResponse(card, 5);
         when(deckCardService.updateDeckCardQuantity(1L, 1L, 5)).thenReturn(
                 testDeckCard2
@@ -118,7 +118,7 @@ class DeckCardControllerTest {
 
     @Test
     @WithMockUser(roles = "USER")
-    void updateCardQuantity_WhenNull_ShouldReturnNoContent() throws Exception {
+    void updateCardQuantity_WhenNull_Should_Return_NoContent() throws Exception {
         when(deckCardService.updateDeckCardQuantity(1L, 1L, 0)).thenReturn(null);
 
         mockMvc.perform(put("/api/deck-cards/deck/1/card/1/quantity")
@@ -131,7 +131,7 @@ class DeckCardControllerTest {
 
     @Test
     @WithMockUser(roles = "USER")
-    void removeDeckCard_ShouldDeleteSuccessfully() throws Exception {
+    void removeDeckCard_Should_DeleteSuccessfully() throws Exception {
         doNothing().when(deckCardService).removeDeckCard(1L, 1L);
 
         mockMvc.perform(delete("/api/deck-cards/deck/1/card/1")

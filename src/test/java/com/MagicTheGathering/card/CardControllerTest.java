@@ -62,28 +62,6 @@ public class CardControllerTest {
 
     @BeforeEach
     void setUp() {
-        mockCardResponse = new CardResponse(
-                1L,
-                LocalDateTime.now(),
-                "Lightning Bolt",
-                Set.of("INSTANT"),
-                "Instant",
-                1,
-                Set.of("RED"),
-                "Lightning Bolt deals 3 damage to any target.",
-                0,
-                0,
-                0,
-                "Core Set 2021",
-                137,
-                "Christopher Rush",
-                "M21",
-                "https://example.com/lightning_bolt.jpg",
-                Set.of("STANDARD"),
-                4,
-                1L
-        );
-
         imageFile = new MockMultipartFile(
                 "image",
                 "test.jpg",
@@ -126,7 +104,7 @@ public class CardControllerTest {
 
     @Test
     @WithMockUser(roles = {"USER"})
-    void should_deleteCard_whenAuthorized() throws Exception {
+    void should_deleteCard_when_Authorized() throws Exception {
         Long cardId = 1L;
 
         doNothing().when(cardService).deleteCard(cardId);
@@ -155,7 +133,7 @@ public class CardControllerTest {
 
     @Test
     @WithMockUser(roles = {"USER"})
-    void should_getCardById_whenCardExists() throws Exception {
+    void should_getCardById_when_cardExists() throws Exception {
         Long cardId = 1L;
 
         when(cardService.getCardById(cardId)).thenReturn(mockCardResponse);
@@ -214,7 +192,7 @@ public class CardControllerTest {
 
     @Test
     @WithMockUser(roles = {"USER"}, username = "")
-    void should_updateCard_whenAuthorized() throws Exception {
+    void should_updateCard_when_authorized() throws Exception {
         Long cardId = 1L;
         MockMultipartFile mockFile = new MockMultipartFile(
                 "image",
@@ -257,7 +235,7 @@ public class CardControllerTest {
 
     @Test
     @WithMockUser(roles = "USER")
-    void deleteCardById_ShouldReturnNoContent() throws Exception {
+    void deleteCardById_should_returnNoContent() throws Exception {
         doNothing().when(cardService).deleteCard(1L);
 
         mockMvc.perform(delete("/api/cards/1")
@@ -269,7 +247,7 @@ public class CardControllerTest {
 
     @Test
     @WithMockUser(roles = "USER")
-    void getMyCardById_ShouldReturnCard() throws Exception {
+    void getMyCardById_should_returnCard() throws Exception {
         when(cardService.getCardById(1L)).thenReturn(mockCardResponse);
 
         mockMvc.perform(get("/api/cards/1"))
@@ -281,7 +259,7 @@ public class CardControllerTest {
     }
 
     @Test
-    void should_returnUnauthorized_whenNoAuthentication() throws Exception {
+    void should_return_unauthorized_when_noAuthentication() throws Exception {
         mockMvc.perform(get("/api/cards/my-cards")
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isForbidden());

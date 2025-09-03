@@ -68,7 +68,7 @@ class DeckCardServiceTest {
     @Nested
     class GetCardByDeckId{
         @Test
-        void getCardsByDeckId_shouldReturnDeckCards_whenDeckIsPublic() {
+        void getCardsByDeckId_should_Return_DeckCards_when_DeckIsPublic() {
             deck.setDeckCards(Set.of(deckCard));
             when(deckRepository.findById(deck.getId())).thenReturn(Optional.of(deck));
             when(userService.getAuthenticatedUser()).thenReturn(user);
@@ -79,7 +79,7 @@ class DeckCardServiceTest {
         }
 
         @Test
-        void getCardsByDeckId_shouldThrow_whenDeckIsPrivateAndUnauthorized() {
+        void getCardsByDeckId_should_Throw_when_DeckIsPrivateAndUnauthorized() {
             deck.setIsPublic(false);
             when(deckRepository.findById(deck.getId())).thenReturn(Optional.of(deck));
             when(userService.getAuthenticatedUser()).thenReturn(user);
@@ -94,7 +94,7 @@ class DeckCardServiceTest {
     @Nested
     class GetDeckCard{
         @Test
-        void getDeckCard_shouldReturnDeckCard_whenAuthorized() {
+        void getDeckCard_should_Return_DeckCard_when_Authorized() {
             when(deckCardRepository.findById(deckCardId)).thenReturn(Optional.of(deckCard));
             when(userService.getAuthenticatedUser()).thenReturn(user);
             when(userSecurityUtils.isAuthorizedToModifyDeck(deck)).thenReturn(true);
@@ -105,7 +105,7 @@ class DeckCardServiceTest {
         }
 
         @Test
-        void getDeckCard_shouldThrowUnauthorizedAccess_whenNotAuthorizedAndPrivate() {
+        void getDeckCard_should_Throw_UnauthorizedAccess_when_NotAuthorizedAndPrivate() {
             deck.setIsPublic(false);
             when(deckCardRepository.findById(deckCardId)).thenReturn(Optional.of(deckCard));
             when(userService.getAuthenticatedUser()).thenReturn(user);
@@ -121,7 +121,7 @@ class DeckCardServiceTest {
     @Nested
     class UpdateDeckCardQuantity{
         @Test
-        void updateDeckCardQuantity_shouldUpdateQuantity() {
+        void updateDeckCardQuantity_should_UpdateQuantity() {
             when(deckCardRepository.findById(deckCardId)).thenReturn(Optional.of(deckCard));
             when(userService.getAuthenticatedUser()).thenReturn(user);
             when(userSecurityUtils.isAuthorizedToModifyDeck(deck)).thenReturn(true);
@@ -135,7 +135,7 @@ class DeckCardServiceTest {
         }
 
         @Test
-        void updateDeckCardQuantity_shouldDeleteCard_whenQuantityIsZeroOrLess() {
+        void updateDeckCardQuantity_should_DeleteCard_when_QuantityIsZeroOrLess() {
             when(deckCardRepository.findById(deckCardId)).thenReturn(Optional.of(deckCard));
             when(userService.getAuthenticatedUser()).thenReturn(user);
             when(userSecurityUtils.isAuthorizedToModifyDeck(deck)).thenReturn(true);
@@ -147,7 +147,7 @@ class DeckCardServiceTest {
         }
 
         @Test
-        void updateDeckCardQuantity_shouldUpdateQuantity_whenTypeISBasicLand() {
+        void updateDeckCardQuantity_should_UpdateQuantity_when_TypeISBasicLand() {
             when(deckCardRepository.findById(deckCardId)).thenReturn(Optional.of(deckCard));
             when(userService.getAuthenticatedUser()).thenReturn(user);
             when(userSecurityUtils.isAuthorizedToModifyDeck(deck)).thenReturn(true);
@@ -159,7 +159,7 @@ class DeckCardServiceTest {
         }
 
         @Test
-        void updateDeckCardQuantity_shouldThrow_whenQuantityExceedsLimit() {
+        void updateDeckCardQuantity_should_Throw_when_QuantityExceedsLimit() {
             card = Card.builder().id(1L).user(user).types(new HashSet<>(Set.of(CardType.BASIC_LAND))).legalityFormat(Set.of(Legality.STANDARD)).types(Set.of(CardType.INSTANT)).build();
             when(deckCardRepository.findById(deckCardId)).thenReturn(Optional.of(deckCard));
             when(userService.getAuthenticatedUser()).thenReturn(user);
@@ -176,7 +176,7 @@ class DeckCardServiceTest {
     @Nested
     class RemoveDeckCard{
         @Test
-        void removeDeckCard_shouldDelete_whenAuthorized() {
+        void removeDeckCard_should_Delete_when_Authorized() {
             when(deckCardRepository.findById(deckCardId)).thenReturn(Optional.of(deckCard));
             when(userService.getAuthenticatedUser()).thenReturn(user);
             when(userSecurityUtils.isAuthorizedToModifyDeck(deck)).thenReturn(true);
@@ -187,7 +187,7 @@ class DeckCardServiceTest {
         }
 
         @Test
-        void removeDeckCard_shouldThrow_whenUnauthorized() {
+        void removeDeckCard_should_Throw_when_Unauthorized() {
             when(deckCardRepository.findById(deckCardId)).thenReturn(Optional.of(deckCard));
             when(userService.getAuthenticatedUser()).thenReturn(user);
             when(userSecurityUtils.isAuthorizedToModifyDeck(deck)).thenReturn(false);
@@ -200,7 +200,7 @@ class DeckCardServiceTest {
     }
 
     @Test
-    void getExistingDeckCard_shouldReturnNullIfNotExists() {
+    void getExistingDeckCard_should_ReturnNullI_fNotExists() {
         when(deckCardRepository.findById(deckCardId)).thenReturn(Optional.empty());
 
         DeckCard result = deckCardService.getExistingDeckCard(deckCardId);
