@@ -73,6 +73,7 @@ src/main/java/com/MagicTheGathering
 ├─ deck/                     # Deck domain + search controllers
 ├─ deckCard/                 # Card-deck relationship
 ├─ deckCartId/               # Composite ID for deck-card
+├─ email/                    # Send emails service
 ├─ Exceptions/               # Global handler and common exceptions
 ├─ legality/                 # Legalities entities/enums
 ├─ manaColor/                # Mana color enums
@@ -115,10 +116,7 @@ Key points:
 DB_URL=
 SERVER_PORT=
 
-#  ONLY BACKEND
-DB_USERNAME=
-DB_PASSWORD=
-
+# CLOUDINARY
 CLOUDINARY_CLOUD_NAME=
 CLOUDINARY_API_KEY=
 CLOUDINARY_API_SECRET=
@@ -128,6 +126,10 @@ MYSQL_ROOT_PASSWORD=
 MYSQL_DATABASE=
 MYSQL_USER=
 MYSQL_PASSWORD=
+
+# EMAIL NOTIFICATIONS
+EMAIL=
+EMAIL_PASSWORD=
 ```
 
 - **application.properties (example)**
@@ -161,6 +163,22 @@ spring.sql.init.mode=always
 spring.jpa.defer-datasource-initialization=true
 spring.sql.init.data-locations=classpath:data.sql
 spring.sql.init.continue-on-error=false
+
+# Email (SMTP) configuration 
+spring.mail.host=smtp.gmail.com
+spring.mail.port=587
+spring.mail.username=${EMAIL}
+spring.mail.password=${EMAIL_PASSWORD}
+spring.mail.properties.mail.smtp.auth=true
+spring.mail.properties.mail.smtp.starttls.enable=true
+spring.mail.properties.mail.smtp.starttls.required=true
+spring.mail.properties.mail.smtp.ssl.trust=smtp.gmail.com
+spring.mail.properties.mail.smtp.connectiontimeout=5000
+spring.mail.properties.mail.smtp.timeout=5000
+spring.mail.properties.mail.smtp.writetimeout=5000
+spring.mail.properties.mail.debug=false
+spring.mail.from=${EMAIL}
+spring.mail.test-connection=false
 ```
 
 - **Install and run (Maven)**
@@ -316,6 +334,7 @@ MTG/
 │  │  │  ├─ deck/
 │  │  │  ├─ deckCard/
 │  │  │  ├─ deckCartId/
+│  │  │  ├─ email/
 │  │  │  ├─ Exceptions/
 │  │  │  ├─ legality/
 │  │  │  ├─ manaColor/
