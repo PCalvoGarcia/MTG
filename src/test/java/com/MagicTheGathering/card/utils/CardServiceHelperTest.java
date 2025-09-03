@@ -4,24 +4,30 @@ package com.MagicTheGathering.card.utils;
 import com.MagicTheGathering.Cloudinary.CloudinaryService;
 import com.MagicTheGathering.card.Card;
 import com.MagicTheGathering.card.CardRepository;
+import com.MagicTheGathering.card.dto.CardMapperDto;
 import com.MagicTheGathering.card.dto.CardRequest;
+import com.MagicTheGathering.card.dto.CardResponse;
 import com.MagicTheGathering.cardType.CardType;
 import com.MagicTheGathering.legality.Legality;
 import com.MagicTheGathering.manaColor.ManaColor;
 import com.MagicTheGathering.role.Role;
 import com.MagicTheGathering.user.User;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockMultipartFile;
 
 import java.io.IOException;
-import java.util.Map;
-import java.util.Set;
+import java.time.LocalDateTime;
+import java.util.*;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
@@ -97,6 +103,23 @@ class CardServiceHelperTest {
         assertNotNull(result);
         assertEquals(expectedCard, result);
         verify(cardRepository).save(any(Card.class));
+    }
+
+    @Test
+    void when_getCardResponseList_then_return_list() {
+        testCard.setUser(testUser);
+        List<Card> cardResponseList = new ArrayList<>();
+        cardResponseList.add(testCard);
+        cardResponseList.add(testCard);
+
+        when(cardRepository.findByUser(testUser)).thenReturn(cardResponseList);
+
+        List<CardResponse> responses = cardServiceHelper.getCardResponseList(testUser);
+
+        assertEquals(1L, responses.getFirst().id());
+        assertEquals(2, responses.size());
+
+        verify(cardRepository).findByUser(testUser);
     }
 
     @Test
@@ -180,6 +203,91 @@ class CardServiceHelperTest {
 
         assertTrue(exception.getMessage().contains("Error deleting image from Cloudinary"));
         verify(cloudinaryService).deleteFile(publicId);
+    }
+
+    @Test
+    void when_getCardWithCloudinary_Success() throws IOException {
+        Map<String, Object> uploadResult = new HashMap<>();
+        String expectedImageUrl = "https://cloudinary.com/secure/uploaded-image.jpg";
+        uploadResult.put("secure_url", expectedImageUrl);
+
+        Card savedCard = Card.builder()
+                .id(1L)
+                .name("Lightning Bolt")
+                .imageUrl(expectedImageUrl)
+                .user(testUser)
+                .build();
+
+        Card responseCard = Card.builder()
+                .id(1L)
+                .name("Lightning Bolt")
+                .imageUrl(expectedImageUrl)
+                .user(testUser)
+                .build();
+
+        CardResponse expectedResponse = CardMapperDto.fromEntity(responseCard);
+
+        when(cloudinaryService.uploadFile(cardRequest.image())).thenReturn(uploadResult);
+        when(cardRepository.save(any(Card.class))).thenReturn(savedCard);
+
+        try (MockedStatic<CardMapperDto> mockedMapper = mockStatic(CardMapperDto.class)) {
+            mockedMapper.when(() -> CardMapperDto.toEntity(eq(cardRequest), eq(expectedImageUrl)))
+                    .thenReturn(testCard);
+            mockedMapper.when(() -> CardMapperDto.fromEntity(savedCard))
+                    .thenReturn(expectedResponse);
+
+            CardResponse result = cardServiceHelper.getCardWithCloudinary(cardRequest, testUser);
+
+            assertThat(result).isNotNull();
+            assertThat(result.name()).isEqualTo("Lightning Bolt");
+            assertThat(result.imageUrl()).isEqualTo(expectedImageUrl);
+
+            verify(cloudinaryService, times(1)).uploadFile(cardRequest.image());
+            verify(cardRepository, times(1)).save(any(Card.class));
+            mockedMapper.verify(() -> CardMapperDto.toEntity(eq(cardRequest), eq(expectedImageUrl)), times(1));
+            mockedMapper.verify(() -> CardMapperDto.fromEntity(savedCard), times(1));
+        }
+    }
+
+    @Test
+    void when_gwtCardWithCloudinary_CloudinaryFailure() throws IOException {
+        String defaultImageUrl = "http://localhost:8080/images/dream-logo.png";
+
+        Card savedCard = Card.builder()
+                .id(1L)
+                .name("Lightning Bolt")
+                .imageUrl(defaultImageUrl)
+                .user(testUser)
+                .build();
+        Card responseCard = Card.builder()
+                .id(1L)
+                .name("Lightning Bolt")
+                .imageUrl(defaultImageUrl)
+                .user(testUser)
+                .build();
+        CardResponse expectedResponse = CardMapperDto.fromEntity(responseCard);
+
+
+        when(cloudinaryService.uploadFile(cardRequest.image())).thenThrow(new IOException("Upload failed"));
+        when(cardRepository.save(any(Card.class))).thenReturn(savedCard);
+
+        try (MockedStatic<CardMapperDto> mockedMapper = mockStatic(CardMapperDto.class)) {
+            mockedMapper.when(() -> CardMapperDto.toEntity(eq(cardRequest), eq(defaultImageUrl)))
+                    .thenReturn(testCard);
+            mockedMapper.when(() -> CardMapperDto.fromEntity(savedCard))
+                    .thenReturn(expectedResponse);
+
+            CardResponse result = cardServiceHelper.getCardWithCloudinary(cardRequest, testUser);
+
+            assertThat(result).isNotNull();
+            assertThat(result.name()).isEqualTo("Lightning Bolt");
+            assertThat(result.imageUrl()).isEqualTo(defaultImageUrl);
+
+            verify(cloudinaryService, times(1)).uploadFile(cardRequest.image());
+            verify(cardRepository, times(1)).save(any(Card.class));
+            mockedMapper.verify(() -> CardMapperDto.toEntity(eq(cardRequest), eq(defaultImageUrl)), times(1));
+            mockedMapper.verify(() -> CardMapperDto.fromEntity(savedCard), times(1));
+        }
     }
 
     @Test

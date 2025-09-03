@@ -3,6 +3,7 @@ package com.MagicTheGathering.card;
 import com.MagicTheGathering.Cloudinary.CloudinaryService;
 import com.MagicTheGathering.Exceptions.EmptyListException;
 import com.MagicTheGathering.Exceptions.UnauthorizedModificationsException;
+import com.MagicTheGathering.card.dto.CardMapperDto;
 import com.MagicTheGathering.card.dto.CardRequest;
 import com.MagicTheGathering.card.dto.CardResponse;
 import com.MagicTheGathering.card.exceptions.CardIdNotFoundException;
@@ -130,28 +131,27 @@ public class CardServiceTest {
     class GetAllCardsByUser {
         @Test
         void getAllCardsByUser_should_return_card_whenListCardsExists() {
-            when(userService.getAuthenticatedUser()).thenReturn(testUser);
+            List<CardResponse> cardResponseList = new ArrayList<>();
+            cardResponseList.add(CardMapperDto.fromEntity(testCard));
+            cardResponseList.add(CardMapperDto.fromEntity(testCard));
 
-            when(cardRepository.findByUser(testUser)).thenReturn(List.of(testCard, testCard));
+            when(userService.getAuthenticatedUser()).thenReturn(testUser);
+            when(cardServiceHelper.getCardResponseList(testUser)).thenReturn(cardResponseList);
 
             List<CardResponse> result = cardService.getAllCardsByUser();
 
             assertNotNull(result);
             assertEquals("Lightning Bolt", result.getFirst().name());
             assertEquals(1L, result.getFirst().id());
-
-            verify(cardRepository).findByUser(testUser);
         }
 
         @Test
         void getAllCardsByUser_should_throwEmptyListException_whenListCardIsEmpty() {
             when(userService.getAuthenticatedUser()).thenReturn(testUser);
-            when(cardRepository.findByUser(testUser)).thenReturn(List.of());
 
             RuntimeException exception = assertThrows(EmptyListException.class,
                     () -> cardService.getAllCardsByUser());
 
-            verify(cardRepository).findByUser(testUser);
         }
     }
 
@@ -186,10 +186,8 @@ public class CardServiceTest {
     void createCard_should_returnCardResponse_when_successful() throws Exception {
         Map<String, Object> uploadResult = Map.of("secure_url", "https://cloudinary.com/image.jpg");
 
+        when(cardServiceHelper.getCardWithCloudinary(cardRequest, testUser)).thenReturn(CardMapperDto.fromEntity(testCard));
         when(userService.getAuthenticatedUser()).thenReturn(testUser);
-        when(cloudinaryService.uploadFile(any())).thenReturn(uploadResult);
-        when(cardServiceHelper.getSavedCard(eq(cardRequest), eq("https://cloudinary.com/image.jpg"), eq(testUser)))
-                .thenReturn(testCard);
 
         CardResponse result = cardService.createCard(cardRequest);
 
@@ -197,8 +195,6 @@ public class CardServiceTest {
         assertEquals("Lightning Bolt", result.name());
 
         verify(userService).getAuthenticatedUser();
-        verify(cloudinaryService).uploadFile(cardRequest.image());
-        verify(cardServiceHelper).getSavedCard(cardRequest, "https://cloudinary.com/image.jpg", testUser);
     }
 
     @Nested
@@ -224,7 +220,6 @@ public class CardServiceTest {
             verify(userService).getAuthenticatedUser();
             verify(cardRepository).findById(1L);
             verify(userSecurityUtils).isAuthorizedToModifyCard(testCard);
-            verify(cardServiceHelper).cloudinaryManagement(cardRequest, testCard);
         }
 
         @Test
