@@ -19,14 +19,14 @@ The MTG application is a web-based system designed to help Magic: The Gathering 
 ## 📑 Table of Contents
 - [📸 Project Screenshots](#-project-screenshots)
 - [✨ Features](#-features)
-- [🏗️ Architecture](#%EF%B8%8F-architecture)
+- [🏗️ Architecture](#-architecture)
 - [🧰 Technologies Used](#-technologies-used)
 - [🚀 How to Run](#-how-to-run)
-- [🕹️ Usage](#%EF%B8%8F-usage)
+- [🕹️ Usage](#-usage)
 - [🧪 Tests](#-tests)
 - [🖥️ Security 🔐](#security-)
-- [🗂️ Project Structure](#%EF%B8%8F-project-structure)
-- [🛡️ Error Handling](#%EF%B8%8F-error-handling)
+- [🗂️ Project Structure](#-project-structure)
+- [🛡️ Error Handling](#-error-handling)
 - [🔭 Future Enhancements](#-future-enhancements)
 - [🙏 Acknowledgments](#-acknowledgments)
 - [🆘 Support](#-support)
@@ -88,6 +88,14 @@ Key points:
 - Security implemented via JWT filters and Spring Security config.
 
 ---
+
+## 📈 Diagrams
+
+### Entity-relationship diagram
+![Entity-relationship diagram](src/main/resources/static/images/diagramaEntidad-relacion.jpg)
+
+### Flowchart
+![Flowchart](src/main/resources/static/images/flowchart2.jpg)
 
 ## 🧰 Technologies Used
 - **Java 17+**
@@ -197,7 +205,7 @@ docker compose up -d
 ```
 
 Main endpoints:
-- Swagger: `http://localhost:8080/swagger-ui/index.html`
+- Swagger: [http://localhost:8080/swagger-ui/index.html](http://localhost:8080/swagger-ui/index.html)
 
 ---
 
