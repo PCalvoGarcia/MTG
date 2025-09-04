@@ -9,25 +9,56 @@ services:
       MYSQL_USER: ${MYSQL_USER}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     ports:
-      - "3306:3306"
+      - "3307:3306"
     volumes:
       - mysql_data:/var/lib/mysql
     networks:
       - springboot_network
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
+      timeout: 20s
+      retries: 10
+
   app:
-    build: .
+    image: pcalvo/springboot-mtg-app:latest
+#    build: .
     container_name: springboot_mtg_app
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     environment:
+      MYSQL_DATABASE: mtgbackend
       DB_URL: jdbc:mysql://db:3306/${MYSQL_DATABASE}?createDatabaseIfNotExist=true
       DB_USERNAME: ${MYSQL_USER}
       DB_PASSWORD: ${MYSQL_PASSWORD}
       SERVER_PORT: ${SERVER_PORT}
+      CLOUDINARY_CLOUD_NAME: ${CLOUDINARY_CLOUD_NAME}
+      CLOUDINARY_API_KEY: ${CLOUDINARY_API_KEY}
+      CLOUDINARY_API_SECRET: ${CLOUDINARY_API_SECRET}
+      EMAIL: ${EMAIL}
+      EMAIL_PASSWORD: ${EMAIL_PASSWORD}
     ports:
       - "${SERVER_PORT}:${SERVER_PORT}"
     networks:
     - springboot_network
+
+  tests:
+    build:
+      context: .
+      target: test
+    container_name: springboot_mtg_tests
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DB_URL: jdbc:mysql://db:3306/${MYSQL_DATABASE}_test?createDatabaseIfNotExist=true
+      DB_USERNAME: ${MYSQL_USER}
+      DB_PASSWORD: ${MYSQL_PASSWORD}
+      SPRING_PROFILES_ACTIVE: test
+    networks:
+      - springboot_network
+    command: ["mvn", "test", "-Dspring.profiles.active=test"]
+    profiles: [ "test" ]
 
 volumes:
   mysql_data:

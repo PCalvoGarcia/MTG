@@ -1,8 +1,9 @@
-package com.MagicTheGathering.user.dto;
+package com.MagicTheGathering.user;
 
-import com.MagicTheGathering.user.User;
 import com.MagicTheGathering.user.dto.ADMIN.UserRequestAdmin;
 import com.MagicTheGathering.user.dto.USER.UserRequest;
+import com.MagicTheGathering.user.dto.UserMapperDto;
+import com.MagicTheGathering.user.dto.UserResponse;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.context.ActiveProfiles;
 

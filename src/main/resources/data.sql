@@ -60,7 +60,7 @@ INSERT INTO decks (created_at, is_public, type, max_cards, deck_name, user_id) V
 (NOW(), FALSE, 'STANDARD', 60, 'Swamp Lords', 6),
 (NOW(), TRUE, 'STANDARD', 60, 'Goblin Rush', 7),
 (NOW(), FALSE, 'COMMANDER', 100, 'Mountain Fury', 7),
-(NOW(), TRUE, 'STANDARD', 60, 'Control Deck', 1),
+(NOW(), TRUE, 'STANDARD', 60, 'Control Deck', 3),
 (NOW(), TRUE, 'STANDARD', 60, 'Balanced Deck', 2);
 
 -- Insert deck_card relationships
