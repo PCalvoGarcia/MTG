@@ -267,9 +267,4 @@ class FormatValidationServiceTest {
 
         assertNotNull(exception);
     }
-
-    @Test
-    void isCommander_return_false(){
-
-    }
 }

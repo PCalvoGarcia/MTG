@@ -3,6 +3,7 @@ package com.MagicTheGathering.role;
 import com.MagicTheGathering.role.validations.RoleValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.test.context.ActiveProfiles;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -34,5 +35,12 @@ public class RoleValidatorTest {
     @Test
     void testInvalidRole_USRE() {
         assertThrows(IllegalArgumentException.class, () -> Role.valueOf("USRE"));
+    }
+
+    @Test
+    void testInvalidRole_MockedEnum() {
+        Role mockedRole = Mockito.mock(Role.class);
+
+        assertFalse(roleValidator.isValid(mockedRole, null));
     }
 }

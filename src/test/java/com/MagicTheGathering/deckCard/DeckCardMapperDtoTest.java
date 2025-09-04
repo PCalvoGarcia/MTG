@@ -89,6 +89,9 @@ public class DeckCardMapperDtoTest {
 
         assertEquals(expected.getCard(), response.getCard());
         assertEquals(expected.getDeck(), response.getDeck());
+        assertEquals(testDeck.getId(), deckCardRequest.deckId());
+        assertEquals(testCard.getId(), deckCardRequest.cardId());
+        assertEquals(1, deckCardRequest.quantity());
 
     }
 }
