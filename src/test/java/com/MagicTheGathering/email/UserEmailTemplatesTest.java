@@ -134,7 +134,7 @@ public class UserEmailTemplatesTest {
         void htmlEmail_Should_ContainWelcomeContent() {
             String htmlEmail = UserEmailTemplates.getUserWelcomeEmailHtml(mockUser);
 
-            assertTrue(htmlEmail.contains("Welcome to MagicDecks"));
+            assertTrue(htmlEmail.contains("Welcome to Cards&Decks"));
             assertTrue(htmlEmail.contains("Magic: The Gathering"));
             assertTrue(htmlEmail.contains("adventure in the world"));
         }
