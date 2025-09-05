@@ -133,7 +133,7 @@ public class UserController {
 
 
     @DeleteMapping("/api/users/{id}")
-    @Operation(summary = "Get all reviews by user.",
+    @Operation(summary = "Delete user by id.",
             responses = {
                     @ApiResponse(responseCode = "204", description = "User deleted successfully"),
                     @ApiResponse(responseCode = "401", ref = "#/components/responses/Unauthorized"),
