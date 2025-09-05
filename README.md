@@ -21,6 +21,7 @@ The MTG application is a web-based system designed to help Magic: The Gathering 
 - [✨ Features](#-features)
 - [🏗️ Architecture](#-architecture)
 - [🧰 Technologies Used](#-technologies-used)
+- [📈 Diagrams](#-diagrams)
 - [🚀 How to Run](#-how-to-run)
 - [🕹️ Usage](#-usage)
 - [🧪 Tests](#-tests)
@@ -97,7 +98,7 @@ Key points:
 ### Flowchart
 ![Flowchart](src/main/resources/static/images/flowchart2.jpg)
 
-## 🧰 Technologies Used
+## Technologies Used
 - **Java 17+**
 - **Spring Boot** (Web, Security, Data JPA, Validation)
 - **JWT** (authentication/validation filters)
