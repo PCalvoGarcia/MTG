@@ -50,12 +50,12 @@ public class UserEmailTemplates {
                         "<body>" +
                         "    <div class=\"container\">" +
                         "        <div class=\"header\">" +
-                        "            <h1><span class=\"emoji\">⚔️</span> Welcome to MagicDecks!</h1>" +
+                        "            <h1><span class=\"emoji\">⚔️</span> Welcome to Cards&Decks!</h1>" +
                         "        </div>" +
                         "        <div class=\"content\">" +
                         "            <p>Hello <strong>%s</strong>! <span class=\"emoji\">👋</span></p>" +
                         "            <p>Your adventure in the world of <strong>Magic: The Gathering</strong> begins here.</p>" +
-                        "            <p>With <strong>MagicDecks</strong> you can:</p>" +
+                        "            <p>With <strong>Cards&Decks</strong> you can:</p>" +
                         "            <ul>" +
                         "                <li>Explore cards and discover new strategies</li>" +
                         "                <li>Build and manage your own decks</li>" +
