@@ -1,0 +1,6 @@
+# BUILD
+FROM maven:3.9.11-eclipse-temurin-21
+WORKDIR /src
+COPY . .
+RUN mvn dependency:go-offline
+ENTRYPOINT [ "mvn", "clean", "verify" ]

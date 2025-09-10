@@ -1,0 +1,46 @@
+services:
+  tests:
+    build:
+      context: .
+      dockerfile: Dockerfile-test
+
+    container_name: springboot_mtg_tests
+
+    environment:
+      SPRING_PROFILES_ACTIVE: test
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+
+    restart: no
+
+    depends_on:
+      springboot-mtg-test-db:
+        condition: service_healthy
+    command: ["mvn", "test"]
+
+
+    networks:
+      - springboot-network
+
+  springboot-mtg-test-db:
+    image: mysql:8.0
+    container_name: springboot-mtg-test-db
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    restart: no
+    healthcheck:
+      test: ["CMD","mysqladmin","ping", "-h","localhost",]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - springboot-network
+networks:
+  springboot-network:
+    driver: bridge

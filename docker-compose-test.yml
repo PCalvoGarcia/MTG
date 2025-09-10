@@ -1,0 +1,49 @@
+services:
+  db:
+    image: mysql:8.0
+    container_name: springboot_mtg_db-test
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - springboot_network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+      interval: 10s
+      start_period: 30s
+
+  tests:
+    image: maven:3.9.11-eclipse-temurin-21
+    working_dir: /src
+    volumes:
+      - type: bind
+        source: .
+        target: /src
+    container_name: springboot_mtg_tests-test
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - springboot_network
+    environment:
+      DB_URL: jdbc:mysql://db:3306/${MYSQL_DATABASE}_test?createDatabaseIfNotExist=true
+      DB_USERNAME: ${MYSQL_USER}
+      DB_PASSWORD: ${MYSQL_PASSWORD}
+    restart: no
+    command: ["mvn", "clean", "test", "--no-transfer-progress"]
+
+volumes:
+  mysql_data:
+  maven_cache:
+
+networks:
+  springboot_network:
+    driver: bridge
