@@ -25,13 +25,24 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      # Step 3: Run full test suite before creating release
-      # Ensures the tagged version passes all tests
+      # Step 3: Verify .env file exists (it should be committed to repo)
+      - name: Verify environment file
+        run: |
+          if [ ! -f .env ]; then
+            echo "Error: .env file not found!"
+            exit 1
+          fi
+          echo "✅ .env file found"
+          # Optionally show non-sensitive variables for debugging
+          grep -E "^(CLOUDINARY_CLOUD_NAME|MYSQL_DATABASE)" .env || true
+
+      # Step 4: Run full test suite before creating release
+      # Ensures the tagged version passes all tests using H2
       - name: Run tests with docker-compose
         run: docker compose -f docker-compose-test.yml up --quiet-pull --abort-on-container-exit --exit-code-from tests
         # This step will fail the release if any tests fail
 
-      # Step 4: Authenticate with Docker Hub for image publishing
+      # Step 5: Authenticate with Docker Hub for image publishing
       # Uses secrets stored in GitHub repository settings
       - name: Log in to Docker Hub
         uses: docker/login-action@v3
@@ -39,7 +50,7 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      # Step 5: Generate Docker image metadata and release tags
+      # Step 6: Generate Docker image metadata and release tags
       # Creates version-specific tags and updates 'latest' tag
       - name: Extract metadata
         id: meta
@@ -50,40 +61,18 @@ jobs:
             type=ref,event=tag      # Tag with version number (e.g., v1.0.0)
             type=raw,value=latest   # Also tag as 'latest' for easy access
 
-      # Step 6: Build and push production Docker image
+      # Step 7: Build and push production Docker image
       # Creates the official release image with version tags
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
           context: .                                    # Build context is the repository root
-          file: ./Dockerfile-v2                           # Dockerfile location
+          file: ./Dockerfile-v2                        # Dockerfile location
           push: true                                    # Push to Docker Hub after building
           tags: ${{ steps.meta.outputs.tags }}         # Use version and latest tags
           labels: ${{ steps.meta.outputs.labels }}     # Add metadata labels
           cache-from: type=gha                         # Use GitHub Actions cache for layers
           cache-to: type=gha,mode=max                  # Save all layers to cache
-
-      # Step 7: Create GitHub Release (Currently disabled)
-      # Uncomment the section below to automatically create GitHub releases
-      # - name: Create GitHub Release Draft
-      #   uses: actions/create-release@v1
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      #   with:
-      #     tag_name: ${{ github.ref_name }}           # Use the pushed tag name
-      #     release_name: Release ${{ github.ref_name }} # Release title
-      #     draft: true                                 # Create as draft for manual review
-      #     prerelease: false                          # Mark as stable release
-      #     body: |
-      #       ## Changes
-      #
-      #       Docker image: `${{ secrets.DOCKER_USERNAME }}/ff5-dreamroute:${{ github.ref_name }}`
-      #
-      #       ## Installation
-      #
-      #       ```bash
-      #       docker pull ${{ secrets.DOCKER_USERNAME }}/ff5-dreamroute:${{ github.ref_name }}
-      #       ```
 
       # Step 8: Clean up Docker resources
       # Always runs to prevent resource leaks, even if previous steps fail
