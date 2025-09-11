@@ -31,7 +31,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ secrets.DOCKER_USERNAME }}/SleepUp
+          images: ${{ secrets.DOCKER_USERNAME }}/MTG
           tags: |
             type=ref,event=branch    # Tag with branch name (e.g., main)
             type=sha,prefix=sha-     # Tag with commit SHA (e.g., sha-abc123)
