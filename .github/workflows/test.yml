@@ -24,18 +24,33 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      # Step 3: Verify .env file exists (it should be committed to repo)
-      # The existing .env file contains all necessary environment variables
-      - name: Verify environment file
+      # Step 3: Create .env file
+      - name: Create .env file from secrets
         run: |
-          if [ ! -f .env ]; then
-            echo "Error: .env file not found!"
-            exit 1
-          fi
-          echo "✅ .env file found"
-          # Optionally show non-sensitive variables for debugging
-          echo "Environment variables loaded from .env:"
-          grep -E "^(CLOUDINARY_CLOUD_NAME|MYSQL_DATABASE)" .env || true
+          cat > .env << 'EOF'
+          # Database Configuration
+          DB_URL=jdbc:mysql://db:3306/mtgbackend?createDatabaseIfNotExist=true
+          SERVER_PORT=8080
+
+        # Backend Database Credentials
+          DB_USERNAME=${{ secrets.DB_USERNAME || 'root' }}
+          DB_PASSWORD=${{ secrets.DB_PASSWORD || 'root' }}
+          
+        # Docker MySQL Configuration  
+          MYSQL_ROOT_PASSWORD=${{ secrets.MYSQL_ROOT_PASSWORD || 'root' }}
+          MYSQL_DATABASE=${{ secrets.MYSQL_DATABASE || 'mtgbackend' }}
+          MYSQL_USER=${{ secrets.MYSQL_USER || 'mtguser' }}
+          MYSQL_PASSWORD=${{ secrets.MYSQL_PASSWORD || 'mtgpass' }}
+          
+        # Cloudinary Configuration
+          CLOUDINARY_CLOUD_NAME=${{ secrets.CLOUDINARY_CLOUD_NAME || 'mtgbackend' }}
+          CLOUDINARY_API_KEY=${{ secrets.CLOUDINARY_API_KEY || 'root' }}
+          CLOUDINARY_API_SECRET=${{ secrets.CLOUDINARY_API_SECRET || 'root-root' }}
+          
+        # Email Notifications
+          EMAIL=${{ secrets.EMAIL || 'mtg.backend@gmail.com' }}
+          EMAIL_PASSWORD=${{ secrets.EMAIL_PASSWORD || 'root' }}
+          EOF
 
       # Step 4: Execute the test suite using docker-compose
       # Runs tests in isolated H2 environment (no MySQL needed)
