@@ -6,9 +6,6 @@ name: Test
 on:
   pull_request:
     branches: [main]
-  push:
-    branches:
-      - feature/devops-rael
 
 jobs:
   test-docker:
