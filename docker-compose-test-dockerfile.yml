@@ -24,7 +24,7 @@ services:
     networks:
       - springboot-network
 
-  springboot-mtg-test-db:
+  db:
     image: mysql:8.0
     container_name: springboot-mtg-test-db
     environment:
