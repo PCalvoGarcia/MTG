@@ -37,5 +37,4 @@ jobs:
       - name: Clean up
         if: always()  # Run even if previous steps fail
         run: docker compose -f docker-compose-test.yml down -v
-        # down: Stop and remove containers
         # -v: Remove associated volumes
