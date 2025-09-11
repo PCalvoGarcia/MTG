@@ -29,26 +29,21 @@ jobs:
       - name: Create .env file from secrets
         run: |
             cat > .env << 'EOF'
-            # Database Configuration
             DB_URL=jdbc:mysql://db:3306/mtgbackend?createDatabaseIfNotExist=true
             SERVER_PORT=8080
 
-        # Backend Database Credentials
             DB_USERNAME=${{ secrets.DB_USERNAME || 'root' }}
             DB_PASSWORD=${{ secrets.DB_PASSWORD || 'root' }}
       
-        # Docker MySQL Configuration  
             MYSQL_ROOT_PASSWORD=${{ secrets.MYSQL_ROOT_PASSWORD || 'root' }}
             MYSQL_DATABASE=${{ secrets.MYSQL_DATABASE || 'mtgbackend' }}
             MYSQL_USER=${{ secrets.MYSQL_USER || 'mtguser' }}
             MYSQL_PASSWORD=${{ secrets.MYSQL_PASSWORD || 'mtgpass' }}
       
-        # Claudinary Configuration
             CLOUDINARY_CLOUD_NAME=${{ secrets.CLOUDINARY_CLOUD_NAME || 'mtgbackend' }}
             CLOUDINARY_API_KEY=${{ secrets.CLOUDINARY_API_KEY || 'root' }}
             CLOUDINARY_API_SECRET=${{ secrets.CLOUDINARY_API_SECRET || 'root-root' }}
       
-        # Email Notifications
             EMAIL=${{ secrets.EMAIL || 'mtg.backend@gmail.com' }}
             EMAIL_PASSWORD=${{ secrets.EMAIL_PASSWORD || 'root' }}
             EOF
