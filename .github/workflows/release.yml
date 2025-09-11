@@ -28,7 +28,7 @@ jobs:
       # Step 3: Run full test suite before creating release
       # Ensures the tagged version passes all tests
       - name: Run tests with docker-compose
-        run: docker compose -f docker-compose-test.yml up --quiet-pull --abort-on-container-exit --exit-code-from tests
+        run: docker compose -f docker-compose-test.yml up --quiet-pull --abort-on-container-exit --exit-code-from springboot_mtg_tests-test
         # This step will fail the release if any tests fail
 
       # Step 4: Authenticate with Docker Hub for image publishing
