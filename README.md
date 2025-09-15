@@ -1,3 +1,10 @@
+
+[![Release](https://github.com/PCalvoGarcia/MTG/actions/workflows/release.yml/badge.svg)](https://github.com/PCalvoGarcia/MTG/actions/workflows/release.yml)
+[![Test](https://github.com/PCalvoGarcia/MTG/actions/workflows/test.yml/badge.svg)](https://github.com/PCalvoGarcia/MTG/actions/workflows/test.yml)
+[![Build](https://github.com/PCalvoGarcia/MTG/actions/workflows/build.yml/badge.svg)](https://github.com/PCalvoGarcia/MTG/actions/workflows/build.yml)
+[![Docker Hub](https://img.shields.io/docker/v/pcalvo/mtg)](https://hub.docker.com/r/pcalvo/mtg)
+[![Java](https://img.shields.io/badge/Java-21-orange)](https://openjdk.java.net/projects/jdk/21/)
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.x-green)](https://spring.io/projects/spring-boot)
 # 🧙‍♂️ Magic The Gathering API — Deck & Card Manager
 
 REST API to manage Magic: The Gathering cards, decks, legalities, and users. Includes JWT authentication, deck-format validations, Cloudinary image uploads, and Swagger documentation
@@ -200,10 +207,7 @@ mvn spring-boot:run
 
 - **Run with Docker**
 
-```bash
-
-docker compose up -d
-```
+  Docker documentation: [Readme Workflows](.github/workflows/README.md)
 
 Main endpoints:
 - Swagger: [http://localhost:8080/swagger-ui/index.html](http://localhost:8080/swagger-ui/index.html)
@@ -390,7 +394,6 @@ Generic error response structure:
 
 ## 🔭 Future Enhancements
 - [ ] Pagination and sorting support across listings
-- [ ] Continuous delivery (CI/CD) and minimum Jacoco coverage
 - [ ] Reinforce advanced Commander/Modern/Pioneer rules
 - [ ] Implement new TCG games (Pokémon, Yu-Gi-Oh!...)
 
